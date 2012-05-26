@@ -1,0 +1,127 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:d="Scripts/Photon.xsd">
+
+<head>
+    <script src="../Scripts/underscore.js" type="text/javascript"></script>
+    <script src="../Scripts/jquery-1.7.2.js" type="text/javascript"></script>
+    <script src="../Output/Photon-debug.js" type="text/javascript"></script>
+    <script type="text/html" id="template">
+        <!-- Template:people -->
+        <div>
+            <table id="dataTable">
+                <thead>
+                <tr>
+                    <th>Forename</th>
+                    <th>Surname</th>
+                    <th>Date or Birth</th>
+                    <th>Full name:</th>
+                </tr>
+                </thead>
+                <tbody>
+                <% _.each(persons, function(person) { %>
+                <tr data-context="templateSource:person" data-action="$dataContext(1).selectPerson($data)">
+                    <td>
+                        <input data-bind="value:forename"/>
+                    </td>
+                    <td>
+                        <input type="checkbox" data-bind="checked:isSelected"/>
+                    </td>
+                </tr>
+                <% }) %>
+                </tbody>
+            </table>
+        </div>
+    </script>
+
+    <script type="text/javascript">
+        Person = photon.observable.model.define({
+            forename:"",
+            surname:"",
+            isSelected:null,
+            dateOfBirth:null
+        });
+
+        var templates = photon.templating.getCache();
+        templates.addResourceHtml('template', $('#template').html());
+
+        var PeopleViewModel = function() {
+            this.persons = [];
+            for (var i = 0; i < 100; i++) {
+                var person = new Person(
+                        {
+                            forename:i % 2 == 0 ?
+                                    "Jason" :
+                                    "Xander",
+                            surname:"Young"
+
+                        });
+                this.persons.push(person);
+            }
+
+            this.selectPerson = function(person) {
+                alert("Selected " + person.forename());
+            }
+        };
+
+        var viewModel = new PeopleViewModel();
+
+        var removeAll = function () {
+            photon.collect(jQuery("#templatePlaceHolder")[0]);
+
+            // todo: automate following two lines (seems to release memory better, although not convinced its leaking)
+            jQuery("#templatePlaceHolder").children().unbind();
+            jQuery("#templatePlaceHolder").children().removeData();
+
+            // 
+            jQuery("#templatePlaceHolder").children().remove();
+        };
+
+        var initialize = function () {
+            var bindingContext = new photon.binding.BindingContext();
+            var template = templates.getHtml("template.people");
+            var rewrittenTemplate = photon.rewriteTemplate(template);
+            var _template = _ .template(rewrittenTemplate, {
+                persons:viewModel.persons,
+                context:bindingContext
+            });
+            $("#templatePlaceHolder").html(_template);
+
+            // as long as we work in a depth first manor, and binding attributes are not
+            // added or removed dynamically we should be ok.
+            var fixUps = [];
+            $("#templatePlaceHolder *[data-context-id]").each(function(i, node) {
+                var dataContext = photon.binding.NodeBindingInfo.getOrCreateForElement(node)
+                        .getOrCreateDataContext();
+                dataContext.setValue(bindingContext.lookup(
+                        node.getAttribute("data-context-id")
+                ));
+                node.removeAttribute("data-context-id");
+                fixUps.push({dataContext:dataContext, node:node});
+
+            });
+
+            photon.binding.applyBindings(viewModel, $("#templatePlaceHolder")[0]);
+
+            photon.array.forEach(fixUps, function(item)
+            {
+                if (item.node.parentNode) {
+                    item.dataContext.setParent(photon.binding.DataContext.getForElement(item.node.parentNode))
+                }
+            });
+
+            photon.binding.applyBindings(viewModel, $("#templatePlaceHolder")[0]);
+
+        };
+    </script>
+    <title>Test</title>
+</head>
+<body id="root">
+<div id="content">
+    <button onclick="removeAll();">Clear</button>
+    <button onclick="initialize();">Initialize</button>
+    <div id="templatePlaceHolder"/>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,133 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title></title>
+    <script src="../Scripts/jquery-1.7.2.js" type="text/javascript"></script>
+    <script src="../Output/Photon-debug.js" type="text/javascript"></script>
+
+    <script type="text/javascript">
+        var Company = photon.observable.model.define(
+                {
+                    name:null
+                }
+        );
+        var Person = photon.observable.model.define(
+                {
+                    firstName:null,
+                    lastName:null,
+                    address:null,
+                    company:null
+                });
+        var Address = photon.observable.model.define(
+                {
+                    road:null,
+                    area:null,
+                    town:null,
+                    county:null
+                });
+
+        var address1 = new Address(
+                {
+                    road:"A Road",
+                    area:"A Area",
+                    town:"A Town",
+                    county:"A County"
+                });
+
+        var address2 = new Address(
+                {
+                    road:"A Different Road",
+                    area:"A Different Area",
+                    town:"A Different Town",
+                    county:"A Different County"
+                });
+        var company1 = new Company({name:"JDML Consulting"});
+        var company2 = new Company({name:"ACME Ltd."});
+        var person = new Person({
+            firstName:"jason",
+            lastName:"young",
+            company:null,
+            company:company1,
+            address:address1
+        });
+
+        var operation = new (photon.observable.model.define({
+            lastOperation:{
+                initialValue:{
+                    name:"",
+                    time:0
+                }
+            },
+            timeIt:function(name, fn) {
+                var t = (new Date()).getTime();
+                fn();
+                this.lastOperation({name:name, time:(new Date()).getTime() - t});
+            }
+        }))();
+
+        function bind() {
+            operation.timeIt("Bind: ", function() {
+                photon.binding.applyBindings(person, $("#table")[0]);
+                photon.binding.applyBindings(operation, $("#timer")[0]);
+            });
+        }
+
+        function switchAddress() {
+            operation.timeIt("Switch Address: ", function() {
+                person.address(person.address() == address1 ? address2 : address1);
+            });
+        }
+
+        function switchCompany() {
+            operation.timeIt("Switch Company: ", function() {
+                person.company(person.company() == company1 ? company2 : company1);
+            });
+        }
+
+    </script>
+</head>
+<body>
+<table id=table width="100%">
+    <tr>
+        <td width="50%">
+            <div>
+                <input data-bind="value:firstName"/></p>
+                <input data-bind="value:lastName"/></p>
+                <div data-bind="data-context:company">
+                    <input data-bind="value:name"/></p>
+                </div>
+                <div data-bind="data-context:address">
+                    <input data-bind="value:road"></p>
+                    <input data-bind="value:area"></p>
+                    <input data-bind="value:town"></p>
+                    <input data-bind="value:county"></p>
+                </div>
+            </div>
+
+        </td>
+        <td  width="50%">
+            <div>
+                <span data-bind="innerText:firstName"></span></p>
+                <span data-bind="innerText:lastName"></span></p>
+                <div data-bind="data-context:company">
+                    <span data-bind="innerText:$dataContext(1).firstName() + ' ' + $dataContext(1).lastName()  + ' works for ' + $data.name()"></span></p>
+                </div>
+                <div data-bind="data-context:address">
+                    <span data-bind="innerText:road"></span></p>
+                    <span data-bind="innerText:area"></span></p>
+                    <span data-bind="innerText:town"></span></p>
+                    <span data-bind="innerText:county"></span></p>
+                </div>
+            </div>
+        </td>
+    </tr>
+</table>
+<div id="timer">
+    <span data-bind="innerText:lastOperation().name + ' took ' + lastOperation().time + 'ms to complete.'"  ></span>
+</div>
+<button onclick="bind()">Bind</button>
+<button onclick="switchAddress()">Switch Address</button>
+<button onclick="switchCompany()">Switch Company</button>
+</body>
+</html>

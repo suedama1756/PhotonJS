@@ -1,0 +1,105 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <script type="text/javascript" src="../../../Scripts/jquery-1.7.2.js"></script>
+    <script type="text/javascript" src="../../../Scripts/jQueryUI/development-bundle/ui/jquery.ui.core.js"></script>
+    <script type="text/javascript" src="../../../Scripts/jQueryUI/development-bundle/ui/jquery.ui.widget.js"></script>
+    <script type="text/javascript" src="../../../Scripts/jQueryUI/development-bundle/ui/jquery.ui.position.js"></script>
+    <script type="text/javascript"
+            src="../../../Scripts/jQueryUI/development-bundle/ui/jquery.ui.autocomplete.js"></script>
+    <script type="text/javascript" src="../../../Output/photon-debug.js"></script>
+    <script type="text/javascript" src="Photon.jQueryUI.js"></script>
+    <title></title>
+    <script type="text/html" id="templates">
+        <!-- Template: menu -->
+        <span data-bind="innerText:results.group1ResultCount() + ' results in group 1'"></span>-->
+
+        <p></p>
+        <h4>Heading 1</h4><p></p>
+        <span data-flow="each:results.results(), applyTo:NextSibling">
+            <div data-flow="if:group === 0, applyTo:NextSibling">
+            <li role="menuitem" data-bind="autoComplete-item:{item:$data, label:$data.name, value:$data.name}">
+                <a class="ui-corner-all" data-bind="{innerText:name}">
+
+                </a>
+            </li>
+            </div>
+        </span>
+        <!--<h4>Heading 2</h4><p></p>-->
+        <!--<flow-if data-bind="flow-each:{expression:results.results(), applyTo:'sibling'}">-->
+            <!--<div data-bind="flow-if:{expression:group === 1, applyTo:'sibling'}">-->
+                <!--<li role="menuitem" data-bind="autoComplete-item:{item:$data, label:$data.name, value:$data.name}">-->
+                    <!--<a class="ui-corner-all" data-bind="{innerText:name}">-->
+
+                    <!--</a>-->
+                <!--</li>-->
+            <!--</div>-->
+        <!--</flow-if>-->
+    </script>
+    <script type="text/javascript">
+        var GroupedResultsModel = photon.observable.model.define(
+            {
+                group1ResultCount:0,
+                group2ResultCount:0,
+                results :[]
+            }
+        );
+
+        var templates = new photon.templating.getCache();
+        templates.addResourceHtml("templates", $("#templates").html());
+
+        var groupedResults1 = {
+            group1ResultCount:100,
+            group2ResultCount:20,
+            results:[
+                {
+                    group:0,
+                    id:"0-0",
+                    name:"Group 0 - Item 0"
+                },
+                {
+                    group:0,
+                    id:"0-1",
+                    name:"Group 0 - Item 1"
+                },
+                {
+                    group:1,
+                    id:"1-0",
+                    name:"Group 1 - Item 0"
+                },
+                {
+                    group:1,
+                    id:"1-1",
+                    name:"Group 1 - Item 1"
+                }
+            ]
+        };
+
+        var SearchViewModel = function() {
+            var self = this;
+
+            this.results = new GroupedResultsModel();
+            this.search = function(request, response) {
+                setTimeout(function() {
+                    self.results.group1ResultCount(groupedResults1.group1ResultCount);
+                    self.results.group2ResultCount(groupedResults1.group2ResultCount);
+                    self.results.results(groupedResults1.results);
+                    response([{label:0, value:0, results:self.results}]);
+                }, 50)
+           }
+        };
+
+        $(function () {
+            photon.binding.applyBindings(new SearchViewModel());
+        })
+    </script>
+</head>
+<body>
+    <input id="autoComplete" data-bind="autoComplete-options:{
+            minLength:0,
+            source:search,
+            menuTemplate: templates.getHtml('templates.menu')
+        }" />
+</body>
+</html>

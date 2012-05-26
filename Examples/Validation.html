@@ -1,0 +1,72 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title></title>
+    <script src="../Scripts/jquery-1.7.2.js" type="text/javascript"></script>
+    <script src="../Output/Photon-debug.js" type="text/javascript"></script>
+    <script src="../photon/plugins/validation/validation.js" type="text/javascript"></script>
+    <script>
+        var Person = photon.observable.model.define({
+            firstName:{
+                type:'String',
+                coerce: ['trim', 'initCaps'],
+                metaData:{
+                    displayName:"Forename"
+                },
+                validationRules:{
+                    length:{
+                        minLength:5,
+                        maxLength:10,
+                        message:"'{property.displayName}' must be between {rule.minLength} and {rule.maxLength} characters in length."
+                    }
+                }
+            },
+            numericValue:{
+                type:'String',
+                metaData:{
+                    displayName:"Numeric Value"
+                },
+                validationRules:{
+                    number:{}
+                }
+            },
+            inValue:{
+                type:'String',
+                metaData:{
+                    displayName:"In Value"
+                },
+                validationRules:{
+                    in:{
+                        values:['One', 'Two', 'Three']
+                    }
+                }
+            }
+        });
+        $(function() {
+            photon.binding.applyBindings(new Person());
+        });
+    </script>
+</head>
+<body>
+    <div>
+        <button data-action="validate()">Validate</button>
+    </div>
+    <div>
+        Forename: <input data-bind="value:firstName" /><p></p>
+        Numeric Value:<input data-bind="value:numericValue" /><p></p>
+        In Value:<input data-bind="value:inValue" /><p></p>
+        <div data-flow="each:errors()">
+            <span data-bind="innerText:getMessage()"></span><br>
+        </div>
+        <p></p>
+
+        The following fields do not match the length rule
+        <div data-flow="each:errors()">
+            <div data-flow="if:getRule() instanceof photon.validation.rules.length ">
+                <span data-bind="innerText:getProperty().metaData.displayName()"></span><br>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

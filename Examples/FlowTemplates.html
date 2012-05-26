@@ -1,0 +1,92 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title></title>
+    <script src="../Scripts/jquery-1.7.2.js" type="text/javascript"></script>
+    <script src="../Output/Photon-debug.js" type="text/javascript"></script>
+    <style type="text/css">
+        div.null = {
+            display: block;
+            line-height:0;
+            height: 0;
+            overflow: hidden;}
+    </style>
+    <script type="text/javascript">
+        var ViewModel = photon.observable.model.define({
+            items:{type:'ObservableArray'}
+        });
+
+        var Employee = photon.observable.model.define({type:1, firstName:null, lastName:null});
+        var Manager = photon.observable.model.define({
+            type:2,
+            firstName:null,
+            lastName:null,
+            isExpanded:{type:'Boolean'},
+            manages:{
+                type:'ObservableArray'
+            }
+        });
+
+        var viewModel = new ViewModel();
+        var employee1 = new Employee({firstName:"John", lastName:"Smith"});
+        var employee2 = new Employee({firstName:"James", lastName:"Jones"});
+        var employee3 = new Employee({firstName:"Jason", lastName:"Young"});
+        viewModel.items([
+            employee1,
+            new Manager({
+                firstName:"Denise",
+                lastName:"Tilbury",
+                isExpanded:false,
+                manages:[
+                    employee1,
+                    employee3
+                ]}),
+            employee2,
+            new Manager({
+                        firstName:"Harry",
+                        isExpanded:false,
+                        manages:[
+                            employee1,
+                            employee2
+                        ]}
+            )
+        ]);
+
+        function apply() {
+            photon.templating.registerAfterRender(function(nodes) {
+             //   console.log(nodes)
+            });
+
+            photon.binding.applyBindings(viewModel);
+        }
+
+
+    </script>
+</head>
+<body>
+<button onclick="apply()">Apply</button>
+<div data-flow="each:items()">
+    <div data-flow="if:type() === 1">
+        Employee: <span data-bind="innerText:firstName() + ' ' + lastName()"></span>
+
+        <p></p>
+    </div>
+    <div data-flow="if:type() === 2">
+        <span style="background: #528CE0">Manager: <span
+                data-bind="innerText:firstName() + ' ' + lastName()"></span></span>
+
+        <p></p>
+        <button style="width:22px;height:22px" data-bind="innerText:isExpanded() ? '-' : '+'"
+                data-action="isExpanded(!isExpanded())"></button>
+        manages<p>
+        <div data-flow="if:isExpanded" class="null">
+            <div data-flow="each:manages" class="null">
+                <span style="margin-left: 15px" data-bind="innerText:firstName() + ' ' + lastName()"></span>
+                <p></p>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

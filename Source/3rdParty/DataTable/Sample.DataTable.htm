@@ -1,0 +1,154 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:d="Scripts/Photon.xsd">
+
+<head>
+    <script src="../../../Scripts/jquery-1.7.2.js" type="text/javascript"></script>
+    <script src="../../../Scripts/DataTables-1.9.0/media/js/jquery.dataTables.js" type="text/javascript"></script>
+    <script src="../../../Scripts/Scroller-1.0.1/Media/js/Scroller.js" type="text/javascript"></script>
+    <script src="../../../Output/Photon-debug.js" type="text/javascript"></script>
+    <script src="Photon.DataTable.js" type="text/javascript"></script>
+    <script type="text/html" id="templates">
+        <!-- Template: cell.a-->
+        <input data-bind='value:a'/>
+        <!-- Template: cell.b-->
+        <input data-bind='value:b'/>
+        <!-- Template: cell.c-->
+        <span data-bind='innerText:c'/>
+
+        <!-- Template: cell.sum -->
+        <table width="300px">
+            <tr>
+                <td data-bind="innerText:a() + ' + ' + b() + ' + ' + c() + ' = '"></td>
+            </tr>
+            <tr>
+                <!-- indicate that this binding is the primary binding, so sort etc. will continue to work -->
+                <td data-bind="innerText:a() + b() + c(),isPrimary:true"></td>
+            </tr>
+        </table>
+        <!-- Template: cell.itemCount-->
+        <span data-bind='{innerText:$dataContext(1).items().length()}{width:100}'/>
+    </script>
+    <script type="text/javascript">
+        Row = photon.observable.model.define({
+            a:{type:'Number'},
+            b:{type:'Number'},
+            c:{type:'Number'}
+        });
+
+        rows = new photon.observable.Array();
+        for (var i = 0; i < 5000; i++) {
+            addRow();
+        }
+
+        function addRow() {
+            rows.push(new Row({
+                a:Math.floor(Math.random() * 10000),
+                b:Math.floor(Math.random() * 10000),
+                c:Math.floor(Math.random() * 10000)
+            }));
+        }
+
+        var templates = new photon.templating.getCache();
+        templates.addResourceHtml("grid", $("#templates").html());
+
+        var ViewModel = photon.observable.model.define({
+            items:null,
+            selectedItem:null,
+            hiddenColumns:{ type:'ObservableArray' },
+            flipColumnVisibility:function (columnName) {
+                var existingIndex = this.hiddenColumns().findIndex(function (item) {
+                    return item == columnName;
+                });
+
+                if (existingIndex < 0) {
+                    this.hiddenColumns().push(columnName);
+                }
+                else {
+                    this.hiddenColumns().remove(columnName);
+                }
+            }
+        });
+
+        var initialize = function () {
+            var viewModel = new ViewModel(
+                    {
+                        items:rows,
+                        hiddenColumns:[]
+                    });
+            photon.binding.applyBindings(viewModel);
+        }
+    </script>
+    <title>Sample.DataTable</title>
+</head>
+<body id="root">
+<span data-bind="innerText:selectedItem() ? selectedItem().a() : null"></span>
+<button onclick="initialize();">Initialize</button>
+<button onclick="addRow();">Add Row</button>
+<table cellpadding="0" cellspacing="0" border="0" class="display" id="example" data-bind="
+        {dataTable-options:{
+                'aaData':rows,
+                aaSorting:[],
+                'sDom':'Rrtpi',
+                bStateSave: true,
+                'bDeferRender': true,
+                'aoColumns':[
+                    {
+                        sName: 'a',
+                        'sTitle':'A',
+                        'bindingTemplate':templates.getHtml('grid.cell.a'),
+                        sDefaultContent:''
+                    },
+                    {
+                        sName: 'b',
+                        'sTitle':'B',
+                        'bindingTemplate':templates.getHtml('grid.cell.b'),
+                        sDefaultContent:''
+                    },
+                    {
+                        sName: 'c',
+                        'sTitle':'C',
+                        'bindingTemplate':templates.getHtml('grid.cell.c'),
+                        sDefaultContent:''
+                    },
+                    {
+                        sName: 'd',
+                        'sTitle':'A + B + C',
+                        'bindingTemplate':templates.getHtml('grid.cell.sum'),
+                        sDefaultContent:'',
+                        'sWidth':'300px'
+                    },
+                    {
+                        sName: 'e',
+                        'sTitle':'Total Items',
+                        'bindingTemplate':templates.getHtml('grid.cell.itemCount'),
+                        sDefaultContent:''
+                    }
+                ]
+            }
+        }
+        {dataTable-data:items},
+        {dataTable-selectedItem:selectedItem}
+        {dataTable-hiddenColumns:hiddenColumns}"/>
+
+<ul style="list-style-type: none">
+    <li>
+        <div>
+            <input type="checkbox"
+                   data-bind="checked: hiddenColumns().indexOf('a') < 0"
+                   data-action="flipColumnVisibility('a'), events:change"/>
+            <a>A</a>
+        </div>
+    </li>
+    <li>
+        <div>
+            <input type="checkbox"
+                   data-bind="checked: hiddenColumns().indexOf('b') < 0"
+                   data-action="flipColumnVisibility('b'), events:change"/>
+            <a>B</a>
+        </div>
+    </li>
+</ul>
+
+</body>
+</html>

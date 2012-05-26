@@ -1,0 +1,168 @@
+﻿Next steps:
+
+*.	Nested property binding. DONE
+*.	Converters DONE
+*.  Strong property types DONE
+*.	Improve performance on tokenizer DONE
+*.	Action bindings DONE
+*.  Changing data context. DONE
+*.  Multiple expressions, each expression has text that matches the whole set of expressions, rather than the expression it related to. DONE
+*.  Make calling base constructor easier: DONE
+*.  Remove source parameter from binding constructor, its not used. DONE
+*.  Observable Collections DONE
+*.  Support default properties for bindings. DONE (see next)
+*.  Add support for imports in context. (DONE, for photon, other imports need to be considered still)
+*.  If DONE
+*.  Each DONE
+*.  Refactor template, if and each to share cleanup code. DONE
+*.  Fix issues with multiple binding, e.g. actions getting bound twice DONE
+*.  Get rid of BindingContext for operations DONE
+
+*.  When loading named templates they should be prepared for flow statements before they are added to the cache,
+    we then need to think about how we clean named templates.
+
+*.  Computed Model Properties
+*.  Ability to call update passing in explicit parent data context, for detached nodes
+*.  Propagate data context in templates when no explicit context is specified, e.g. template.data
+*.  Support post binding, so we can process flow statements being processed in detached DOMs
+    without forcing in a data context where one is not required.
+*.  Support some form of BeginInitialize, EndInitialize so selector can complete its configuration in a single go.
+*.  Show which expressions have errors when an error occurs
+*.  Support default targets for tags, if possible
+*.  Support fallback values
+
+*.  Move data context to attribute (may be, we can consider it a custom property, e.g. data-context, data-action, data-template)
+*.	Prevent multiple re-evaluations dependencies during getter evaluation
+*.	Can execute.
+*.  Validation in models?
+*.  Better minification.
+*.  Support model inheritance
+*.  Update source triggers
+*.  Abstract template engine and rewriting
+*.  Support observables in bindings to selector
+*.  Refactor selector for individual property support
+*.  Property name without obj for this isn't working on model subscriptions
+*.  When using an if, a new data context is pushed
+*.  Computer observable properties
+
+We need to seperate the binding tree creation from the actual initialization. Ideally there should be 3 phases.
+
+1.  Parse Expressions
+
+2.  Create bindings for expressions specifying the targets
+
+    A data context will either use a different handler, or a different binding. A handler will should support
+    the different stages of creation.
+
+    So when a data context binding is created we will need create a DataContext object, and associate it with the node,
+    we will also need to attach it to any parent data context that may be available.
+
+    We should be able to find the first
+
+    There will be no need to implement a getter for the binding as we will only ever be setting as the result of the
+    source changing.
+
+    Pros:
+        Re-use existing code
+    Cons:
+        Can't use seperate expression options for DataContext (almost a pro too for consistency)
+        Doesn't easily fit in with the model of having different context specifications:
+            e.g. data-context="script:", data-context="source:", data-context="id:"
+
+        How would these work anyway? A script binding can always be rewritten,
+
+        data-bind="data-context:expression"
+        data-template-context="script:"
+
+        So, in silverlight we would treat data context as a property. If we set the data context of a node it wll be
+        set to that value. We cannot have a binding on the same node.
+
+        So, we should replace the data context, with the one we are setting,
+
+        So we could do this
+
+        //
+        BindingOperations.bind(node, "data-bind", "value:firstName");
+        BindingOperations.bind(node, "data-context", "source:address");
+
+        // Although setting by expression is cool, we should probably support a more rich API, e.g.
+        BindingOperations.bind(node, "data-bind", {type:'value':source:'firstName'});
+
+        // Should we clear any data-context attribute?
+        BindingOperations.setDataContext(node, data, "name");
+
+        // Setting a data context is a special operation, that sets a data context explicitly.
+        BindingOperations.setDataContext(data);
+
+        BindingOperations.clearDataContext(data);
+
+        // when binding nodes we can clear "data-" attributes, e.g. they are just there as instructions.
+        This means that when we set the data context for a set of nodes we
+
+        An alternative way to look at data contexts is that is is a value associated with a node, it can be
+        get, set, or cleared (just like any other property, attribute, etc.). If there is something bound to
+        the data context property in a two way fashion, then when the data context is changed the model property
+        it is bound to is also changed.
+
+        How should we handle setting the value for one way bindings?
+
+        e.g. data-bind="data-context:context, mode=TwoWay"
+
+        When the data-context is set explicitly, e.g. setDataContext(node, value) the binding will update the context
+        property (mad).
+
+        This would mean we have exactly what we currently have in terms of data context, however, with
+        one small change, it will always just have a value, it will not track changes.
+        The value is either set explicitly, or set as the result of a binding changing.
+
+        So setting a data context explicitly for a node will set the data context value, it will also create a
+        DataContext object that will be used to propagate changes. If there is a binding for a data context on the node
+        it will be updated with the value of the context, if the binding is a one way expression then the binding
+        will be cleared as it can no longer be honoured.
+
+        The same mechanism can be used for other properties, e.g. if you update a value for a one way binding directly,
+        then it will clear the data context.
+
+        data-context="value:context";
+
+        So it seems that in fact a data context is just another type of binding expression. A binding will need to link to a data context,
+        so a data context for a data context binding will be its own data context?
+
+        they have a value, or an inherited value, we should be able
+        set a data context value and if that data context has a two way binding for the underlying object to get
+        updated.
+
+
+
+
+
+1.  Should protect against having multiple flow bindings on a single element!
+2.  Nested flow bindings will cause fragments to be created and BOUND within fragments, at the point of binding the
+    parent root data context is not available so binding fails. To over come this at the moment we copy the data
+    context down, this is the wrong solution as it creates too many data contexts, it also means we have to keep those
+    contexts in sync as changes are made (see if binding hack for details).
+3.  Each item in a flow binding may be made up from multiple nodes, in this case we currently create multiple data
+    contexts and rebind whenever the data changes. There should be no need for this, we should share a single data
+    context, and simply update it via a call to setValue.
+4.  Templates that use each do not currently share the optimized diff algorithm.
+5.  Should investigate performance of diff algorithm when working with sorted data. One optimization could be to supply
+    sorting and grouping options on the binding itself? Another option would be to create the concept of an items
+    control with extended properties? For observable arrays we could perhaps notify that we have sorted, in this case
+    we can then just re-org the existing nodes (this may NOT be faster).
+6.  For observable collections we can make further optimizations as we generally know what the outcome of an operation
+    is.
+7.  Simplify attaching/detaching to an observable collection for collection sources, perhaps just an object, like
+    collection source?, e.g. ItemsSource.setItems();
+8.  Make it easier to support disposables on properties.
+9.  Make disposable work all the way up to BindingBase (not just specific descendants)
+10. Make properties descendants of binding, we could still support the old style via a specific type of descendant
+    (for migration).
+11. Add support for expression triggers, expression triggers fire when an expression changes, you could argue that
+    this should be handled in the view model layer, especially for tracking purposes (and perhaps this is true)...
+12. Add support for background rebinding on any pojo.
+13. Move each rendering code into a separate namespace/type so it can be shared and tested in isolation.
+
+
+
+
+

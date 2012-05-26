@@ -1,0 +1,14 @@
+<!--suppress HtmlFormInputWithoutLabel -->
+<script type="text/html" id="person" >
+    <!-- Template: edit -->
+    First name: <input data-bind='value:firstName' /></p>
+    Last name: <input data-bind='value:lastName' /></p>
+    <!-- Template: view -->
+    <div>
+        <span data-bind='innerText:"Welcome: " + (firstName() || "") + " " + (lastName() || "")' ></span>
+        <span data-bind="innerText:(firstName() || '').length > 0" ></span>
+        <ul data-bind="innerText:(firstName() || '').length > 0" >
+
+        </ul>
+    </div>
+</script>

@@ -1,0 +1,16 @@
+<script type="text/html" id="autoComplete">
+    <!-- Template: menu -->
+    <span data-bind="innerText:results.group1ResultCount() + ' results in group 1'"></span>
+
+    <p></p>
+
+    <flow-if data-bind="flow-each:{expression:results.results(), applyTo:'sibling'}">
+        <div data-bind="flow-if:{expression:group === 0, applyTo:'sibling'}">
+            <li role="menuitem" data-bind="autoComplete-item:{item:$data, label:$data.name, value:$data.name}">
+                <a class="ui-corner-all" data-bind="{innerText:name}">
+
+                </a>
+            </li>
+        </div>
+    </flow-if>
+</script>

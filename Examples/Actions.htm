@@ -1,0 +1,115 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:d="Scripts/Photon.xsd">
+
+<head>
+    <script src="../Scripts/jquery-1.7.2.js" type="text/javascript"></script>
+    <script src="../Output/Photon-debug.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        ViewModel = photon.observable.model.define({
+            firstName:"Jason",
+            lastName:"Young",
+            keysPressed:"",
+            uiElement:"*",
+            addresses:null,
+            sayHello:function () {
+                alert("Hello:" + this.firstName() + " " + this.lastName());
+            },
+            sayHelloWithArguments:function (arg1, arg2) {
+                alert("Hello:" + arg1 + " " + arg2);
+            },
+            showInputValue:function (input) {
+                alert("Hello:" + input.value);
+            },
+            logKeyPress:function (key) {
+                this.keysPressed(key);
+            },
+            selectAddress:function (value) {
+                alert("Selected " + value.road());
+            }
+        });
+
+        Address = photon.observable.model.define({
+            road:null
+        });
+
+        $(function () {
+            photon.binding.applyBindings(new ViewModel({
+                addresses:[
+                    new Address({ road:"Address 1" }),
+                    new Address({road:"Address 2" }),
+                    new Address({road:"Address 3" }),
+                    new Address({road:"Address 4" })
+                ]
+            }));
+
+        })
+    </script>
+    <title>Actions</title>
+</head>
+<body id="root">
+<h4>Setup:</h4>
+</p>
+First name: <input data-bind="value:firstName" id="firstName"/>
+</p>
+Last name: <input data-bind="value:lastName" id="lastName"/>
+</p>
+Full name: <span data-bind="innerText:firstName() + ' ' + lastName()" id="fullName"></span>
+</p>
+<h4>Simple binding:</h4>
+</p>
+<span style="font-size: small;">&lt;button data-action=&quot;sayHello()&quot; data-bind=&quot;disabled: firstName() &amp;&amp; lastName() ? false: true&quot; &gt;</span>
+</p>
+<button data-action="sayHello()" data-bind="disabled: firstName() && lastName() ? false: true">Say Hello</button>
+</p>
+<h4>Binding with arguments:</h4>
+</p>
+<span style="font-size: small;">&lt;button data-action=&quot;sayHelloWithArguments(firstName(), lastName())&quot;&gt;</span>
+</p>
+<button data-action="sayHelloWithArguments(firstName(), lastName())">Say Hello with Arguments</button>
+<p/>
+<h4>Binding to keydown:</h4>
+</p>
+<span style="font-size: small;">&lt;input data-action=&quot;logKeyPress(String.fromCharCode($event.charCode? $event.charCode : $event.keyCode)), events:keydown&quot; /&gt;</span>
+</br>
+<span style="font-size: small;">&lt;span data-bind=&quot;innerText:keysPressed()&quot;&gt;</span>
+
+<p/>
+Press Keys<input
+        data-action="logKeyPress(String.fromCharCode($event.charCode? $event.charCode : $event.keyCode)), events:keydown"
+        id="pressKeys"/>
+Last Key Pressed:<span data-bind="innerText:keysPressed()"></span>
+
+<p/>
+<h4>Access content of UI element directly:</h4>
+</p>
+<span style="font-size: small;">&lt;button data-action=&quot;showInputValue($(&#39;#&#39; + $(&#39;#select&#39;).val())[0])&quot;&gt;Show Alert&lt;/button&gt;</span>
+</p>
+Element to Access:<select id="select" selectedIndex="0">
+    <option>firstName</option>
+    <option>lastName</option>
+    <option>pressKeys</option>
+</select>
+<button data-action="showInputValue($('#' + $('#select').val())[0])">Show Alert</button>
+</p>
+<h4>Invoking on Parent Context:</h4>
+Each item is wrapped in its own data context:
+</p>
+<div data-bind="data-context:addresses()[0]">
+    <span style="font-size: small;">&lt;div data-bind=&quot;data-context:addresses()[0]&quot;&gt&lt;span data-action=&quot;$dataContext(1).selectAddress($data)&quot; &gt;&lt;/span&gt;</span></br>
+    <span style="background: #add8e6" data-action="$dataContext(1).selectAddress($data)" >Select Address 1</span>
+</div></p>
+<div data-bind="data-context:addresses()[1]">
+    <span style="font-size: small;">&lt;div data-bind=&quot;data-context:addresses()[1]&quot;&gt&lt;span data-action=&quot;$dataContext(1).selectAddress($data)&quot; &gt;&lt;/span&gt;</span></br>
+    <span style="background: #add8e6" data-action="$dataContext(1).selectAddress($data)" >Select Address 2</span>
+</div></p>
+
+<a data-action="alert('Should not fire')">
+    <span data-action="alert('Should fire'), stopPropagation:true">
+        Click me
+    </span>
+</a>
+
+</body>
+
+</html>
