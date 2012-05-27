@@ -2,14 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="12b894be-7c6b-4b2d-aae8-2c4fccad1ed9" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/Photon.Web.iml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/.name" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/encodings.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/misc.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/modules.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/scopes/scope_settings.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/vcs.xml" />
-      <change type="DELETED" beforePath="D:\Photon.Web\Build\TestFile.js" afterPath="" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/misc.xml" afterPath="$PROJECT_DIR$/.idea/misc.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="Photon.Web.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -30,89 +24,7 @@
     <favorites_list name="Photon.Web" />
   </component>
   <component name="FileEditorManager">
-    <leaf>
-      <file leaf-file-name="ObservableProperty.html" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Examples/ObservableProperty.html">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="7" column="26" selection-start="250" selection-end="250" vertical-scroll-proportion="-4.3461537">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="OptionsBinding.htm" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Examples/OptionsBinding.htm">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="6" column="26" selection-start="249" selection-end="249" vertical-scroll-proportion="-3.9230769">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Test.html" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Examples/Test.html">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="6" column="26" selection-start="249" selection-end="249" vertical-scroll-proportion="-3.9230769">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="UnderscoreTemplating.htm" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Examples/UnderscoreTemplating.htm">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="7" column="26" selection-start="391" selection-end="391" vertical-scroll-proportion="-4.1923075">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Validation.html" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Examples/Validation.html">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="7" column="19" selection-start="319" selection-end="319" vertical-scroll-proportion="-4.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Sample.DataTable.htm" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Source/3rdParty/DataTable/Sample.DataTable.htm">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="8" column="32" selection-start="546" selection-end="546" vertical-scroll-proportion="-4.1923075">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="AutoComplete.htm" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Source/3rdParty/jQueryUI/AutoComplete.htm">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="10" column="55" selection-start="758" selection-end="758" vertical-scroll-proportion="-4.5">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Sample.SlickGrid.htm" pinned="false" current="true" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/Source/3rdParty/SlickGrid/Sample.SlickGrid.htm">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="17" column="21" selection-start="991" selection-end="991" vertical-scroll-proportion="0.4617737">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name=".name" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/.idea/.name">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-    </leaf>
+    <leaf />
   </component>
   <component name="FindManager">
     <FindUsagesManager>
@@ -194,20 +106,22 @@
   <component name="PropertiesComponent">
     <property name="options.splitter.main.proportions" value="0.3" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="options.lastSelected" value="settings.github" />
-    <property name="options.searchVisible" value="true" />
+    <property name="options.lastSelected" value="preferences.pluginManager" />
     <property name="options.splitter.details.proportions" value="0.2" />
+    <property name="options.searchVisible" value="true" />
   </component>
   <component name="RunManager">
     <configuration default="true" type="JSTestDriver:ConfigurationType" factoryName="JsTestDriver">
       <setting name="configLocationType" value="CONFIG_FILE" />
       <setting name="settingsFile" value="" />
       <setting name="serverType" value="INTERNAL" />
-      <method />
+      <method>
+        <option name="PhingTarget" enabled="false" />
+      </method>
     </configuration>
     <configuration default="true" type="JavascriptDebugSession" factoryName="Local">
       <JSDebuggerConfigurationSettings>
-        <option name="engineId" />
+        <option name="engineId" value="embedded" />
         <option name="fileUrl" />
       </JSDebuggerConfigurationSettings>
       <method />
@@ -215,8 +129,27 @@
     <list size="0" />
   </component>
   <component name="ShelveChangesManager" show_recycled="false" />
+  <component name="SvnConfiguration" maxAnnotateRevisions="500" myUseAcceleration="nothing" myAutoUpdateAfterCommit="false" cleanupOnStartRun="false">
+    <option name="USER" value="" />
+    <option name="PASSWORD" value="" />
+    <option name="mySSHConnectionTimeout" value="30000" />
+    <option name="mySSHReadTimeout" value="30000" />
+    <option name="LAST_MERGED_REVISION" />
+    <option name="MERGE_DRY_RUN" value="false" />
+    <option name="MERGE_DIFF_USE_ANCESTRY" value="true" />
+    <option name="UPDATE_LOCK_ON_DEMAND" value="false" />
+    <option name="IGNORE_SPACES_IN_MERGE" value="false" />
+    <option name="DETECT_NESTED_COPIES" value="true" />
+    <option name="CHECK_NESTED_FOR_QUICK_MERGE" value="false" />
+    <option name="IGNORE_SPACES_IN_ANNOTATE" value="true" />
+    <option name="SHOW_MERGE_SOURCES_IN_ANNOTATE" value="true" />
+    <option name="FORCE_UPDATE" value="false" />
+    <configuration useDefault="true">C:\Users\Jason Young\AppData\Roaming\Subversion</configuration>
+    <myIsUseDefaultProxy>false</myIsUseDefaultProxy>
+  </component>
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
+      <changelist id="12b894be-7c6b-4b2d-aae8-2c4fccad1ed9" name="Default" comment="" />
       <created>1338066395282</created>
       <updated>1338066395282</updated>
     </task>
@@ -226,23 +159,24 @@
     <frame x="-8" y="-8" width="1382" height="754" extended-state="6" />
     <editor active="false" />
     <layout>
-      <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32996634" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
+      <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32996634" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Regex Tester" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32996634" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="true" content_ui="tabs" />
       <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.24944155" sideWeight="0.6700337" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="-1" side_tool="true" content_ui="tabs" />
-      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="-1" side_tool="true" content_ui="tabs" />
+      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="JsTestDriver Server" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
-      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
+      <window_info id="JsTestDriver Server" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32996634" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
+      <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
     </layout>
   </component>
   <component name="VcsContentAnnotationSettings">
@@ -302,107 +236,82 @@
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/Examples/CssBinding.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="6" column="26" selection-start="249" selection-end="249" vertical-scroll-proportion="-3.9230769">
-          <folding />
-        </state>
+        <state line="6" column="26" selection-start="249" selection-end="249" vertical-scroll-proportion="-3.9230769" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/Examples/DataContexts.htm">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="6" column="26" selection-start="249" selection-end="249" vertical-scroll-proportion="-3.9230769">
-          <folding />
-        </state>
+        <state line="6" column="26" selection-start="249" selection-end="249" vertical-scroll-proportion="-3.9230769" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/Examples/ExternalTemplates.htm">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="6" column="26" selection-start="267" selection-end="267" vertical-scroll-proportion="-3.9230769">
-          <folding />
-        </state>
+        <state line="6" column="26" selection-start="267" selection-end="267" vertical-scroll-proportion="-3.9230769" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/Examples/FlowTemplates.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="6" column="26" selection-start="249" selection-end="249" vertical-scroll-proportion="-3.9230769">
-          <folding />
-        </state>
+        <state line="6" column="26" selection-start="249" selection-end="249" vertical-scroll-proportion="-3.9230769" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/Examples/MetaData.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="7" column="19" selection-start="319" selection-end="319" vertical-scroll-proportion="-4.423077">
-          <folding />
-        </state>
+        <state line="7" column="19" selection-start="319" selection-end="319" vertical-scroll-proportion="-4.423077" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/Examples/ObservableArray.htm">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="6" column="26" selection-start="249" selection-end="249" vertical-scroll-proportion="-3.9230769">
-          <folding />
-        </state>
+        <state line="6" column="26" selection-start="249" selection-end="249" vertical-scroll-proportion="-3.9230769" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/Examples/ObservableProperty.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="7" column="26" selection-start="250" selection-end="250" vertical-scroll-proportion="-4.3461537">
-          <folding />
-        </state>
+        <state line="7" column="26" selection-start="250" selection-end="250" vertical-scroll-proportion="-4.3461537" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/Examples/OptionsBinding.htm">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="6" column="26" selection-start="249" selection-end="249" vertical-scroll-proportion="-3.9230769">
-          <folding />
-        </state>
+        <state line="6" column="26" selection-start="249" selection-end="249" vertical-scroll-proportion="-3.9230769" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/Examples/Test.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="6" column="26" selection-start="249" selection-end="249" vertical-scroll-proportion="-3.9230769">
-          <folding />
-        </state>
+        <state line="6" column="26" selection-start="249" selection-end="249" vertical-scroll-proportion="-3.9230769" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/Examples/UnderscoreTemplating.htm">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="7" column="26" selection-start="391" selection-end="391" vertical-scroll-proportion="-4.1923075">
-          <folding />
-        </state>
+        <state line="7" column="26" selection-start="391" selection-end="391" vertical-scroll-proportion="-4.1923075" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/Examples/Validation.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="7" column="19" selection-start="319" selection-end="319" vertical-scroll-proportion="-4.0">
-          <folding />
-        </state>
+        <state line="7" column="19" selection-start="319" selection-end="319" vertical-scroll-proportion="-4.0" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/Source/3rdParty/DataTable/Sample.DataTable.htm">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="8" column="32" selection-start="546" selection-end="546" vertical-scroll-proportion="-4.1923075">
-          <folding />
-        </state>
+        <state line="8" column="32" selection-start="546" selection-end="546" vertical-scroll-proportion="-4.1923075" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/Source/3rdParty/jQueryUI/AutoComplete.htm">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="10" column="55" selection-start="758" selection-end="758" vertical-scroll-proportion="-4.5">
-          <folding />
-        </state>
+        <state line="10" column="55" selection-start="758" selection-end="758" vertical-scroll-proportion="-4.5" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/.idea/.name">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
+        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/Source/3rdParty/SlickGrid/Sample.SlickGrid.htm">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="17" column="21" selection-start="991" selection-end="991" vertical-scroll-proportion="0.4617737">
-          <folding />
-        </state>
+        <state line="17" column="21" selection-start="991" selection-end="991" vertical-scroll-proportion="-5.8076925" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Build/Build.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0" />
       </provider>
     </entry>
   </component>
