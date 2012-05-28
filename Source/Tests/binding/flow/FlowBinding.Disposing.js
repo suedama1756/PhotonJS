@@ -1,4 +1,4 @@
-DefineTestSuite("FlowBindingTests", {
+DefineTestSuite("FlowBinding.Disposing", {
     "When disposing":{
         becauseOf:function () {
             var dataContext = new photon.binding.DataContext();

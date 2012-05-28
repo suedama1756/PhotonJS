@@ -11,10 +11,10 @@ function setupMutatorTest(arrayMutator, nodeMutator) {
                 this.extractItemValues());
         },
         "Should re-use nodes":function () {
-            actual = this.extractItemNodes();
+            var actual = this.extractItemNodes();
 
             // mutate current nodes
-            expected = this.itemNodes_.slice(0);
+            var expected = this.itemNodes_.slice(0);
             (nodeMutator || arrayMutator).call(this, expected);
 
             // assert lengths
@@ -26,7 +26,7 @@ function setupMutatorTest(arrayMutator, nodeMutator) {
     };
 }
 
-DefineTestSuite("FlowEachBindingTests",
+DefineTestSuite("FlowBinding.Each.Rendering",
     {
         "When binding for first time":{
             requiredHtmlResources:"eachChild",
@@ -225,100 +225,6 @@ DefineTestSuite("FlowEachBindingTests",
             eachChild:function () {
                 /*:DOC +=
                  <div id="flow" data-flow="each:$data"><span class="item" data-bind="innerText:$data" ></span></div>
-                 */
-            }
-        }
-    });
-
-
-DefineTestSuite("FlowIfBindingTests.DetachedDom", {
-        "When nested levels of flow":{
-            requiredHtmlResources:"IfInIf",
-            "Should attach data contexts correctly:":function () {
-                photon.binding.applyBindings({
-                    condition1:true,
-                    condition2:true,
-                    value:'test'
-                });
-                var elements = this.getIfInIfElements();
-                assertSame(
-                    photon.binding.DataContext.getForElement(elements.if1),
-                    photon.binding.DataContext.getForElement(elements.if2));
-                assertEquals(
-                    "test", elements.value.innerText);
-            }
-        },
-        "When nested levels of flow 2":{
-            requiredHtmlResources:"IfInEach",
-            "Should attach data contexts correctly:":function () {
-                photon.binding.applyBindings({
-                    items:[
-                        {
-                            condition:true,
-                            value:1
-                        },
-                        {
-                            condition:false,
-                            value:2
-                        },
-                        {
-                            condition:true,
-                            value:3
-                        }
-                    ]
-                });
-                var elements = this.getIfInIfElements();
-                assertSame(
-                    photon.binding.DataContext.getForElement(elements.if1),
-                    photon.binding.DataContext.getForElement(elements.if2));
-                assertEquals(
-                    "test", elements.value.innerText);
-            }
-        }
-    },
-    {
-        /**
-         * @return {*}
-         */
-        getIfInIfElements:function () {
-            return bindNodeObject({
-                if1:null,
-                if2:null,
-                value:null
-            });
-        },
-        getEachInIfElements:function () {
-            var result = bindNodeObject({
-                each1:null
-            });
-            result.items = $(".if1").map(function (x) {
-                return {
-                    if1:x,
-                    if2:$("div", x)[0] || null,
-                    itemValue:$("span", x)[0] || null
-                };
-            });
-
-        },
-        htmlResources:{
-            IfInIf:function () {
-                /*:DOC +=
-                 <div id="if1" data-flow="if:condition1">
-                    <div id="if2" data-flow="if:condition2">
-                        <span id="value" data-bind="innerText:value" ></span>
-                    </div>
-                 </div>
-                 */
-            },
-            IfInEach:function () {
-                /*:DOC +=
-                 <div id="each1" data-flow="if:items">
-                    <div class="if1" data-flow="if:condition1">
-                        <div class="if2" data-flow="if:condition2">
-                            <span class="value" data-bind="innerText:value" ></span>
-                        </div>
-                    </div>
-                 </div>
                  */
             }
         }
