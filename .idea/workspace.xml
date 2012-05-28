@@ -2,16 +2,14 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="12b894be-7c6b-4b2d-aae8-2c4fccad1ed9" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/phing.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/dictionaries/Jason_Young.xml" afterPath="$PROJECT_DIR$/.idea/dictionaries/Jason_Young.xml" />
+      <change type="DELETED" beforePath="D:\Photon.Web\Examples\DataTableBinding.htm" afterPath="" />
+      <change type="DELETED" beforePath="D:\Photon.Web\Examples\Test.html" afterPath="" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Build/Build.msbuild" afterPath="$PROJECT_DIR$/Build/Build.msbuild" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Build/Temp/photon.temp" afterPath="$PROJECT_DIR$/Build/Temp/photon.temp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Examples/ExternalTemplates.Template.htm" afterPath="$PROJECT_DIR$/Examples/ExternalTemplates.Template.htm" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Examples/Validation.html" afterPath="$PROJECT_DIR$/Examples/Validation.html" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Output/Photon-debug.js" afterPath="$PROJECT_DIR$/Output/Photon-debug.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Output/Photon-min.js" afterPath="$PROJECT_DIR$/Output/Photon-min.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Source/Tests/jsTestDriver.conf" afterPath="$PROJECT_DIR$/Source/Tests/jsTestDriver.conf" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Source/binding/flow/FlowBinding.js" afterPath="$PROJECT_DIR$/Source/binding/flow/FlowBinding.js" />
-      <change type="MOVED" beforePath="D:\Photon.Web\Source\Tests\binding\flow\FlowIfBindingTests.js" afterPath="$PROJECT_DIR$/Source/Tests/binding/flow/FlowBinding.If.ExpressionChanged.js" />
     </list>
     <ignored path="Photon.Web.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -33,14 +31,41 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="FlowBinding.If.ExpressionChanged.js" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="FlowBinding.If.ExpressionChanged.js" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Source/Tests/binding/flow/FlowBinding.If.ExpressionChanged.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="32" column="20" selection-start="1495" selection-end="1495" vertical-scroll-proportion="0.68125">
+            <state line="32" column="20" selection-start="1495" selection-end="1495" vertical-scroll-proportion="0.0">
               <folding>
                 <marker date="1338238873668" expanded="true" signature="1748:1936" placeholder="..." />
                 <marker date="1338238873668" expanded="true" signature="1809:1912" placeholder="..." />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="ExternalTemplates.Template.htm" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Examples/ExternalTemplates.Template.htm">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="7" column="8" selection-start="270" selection-end="270" vertical-scroll-proportion="-4.576923">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="ObservableProperty.html" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Examples/ObservableProperty.html">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="-0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Validation.html" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Examples/Validation.html">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="7" column="4" selection-start="304" selection-end="304" vertical-scroll-proportion="-4.576923">
+              <folding />
             </state>
           </provider>
         </entry>
@@ -54,10 +79,10 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Build.xml" pinned="false" current="false" current-in-tab="false">
+      <file leaf-file-name="Build.xml" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/Build/Build.xml">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="1" column="18" selection-start="58" selection-end="58" vertical-scroll-proportion="0.0">
+            <state line="7" column="18" selection-start="357" selection-end="357" vertical-scroll-proportion="0.33125">
               <folding />
             </state>
           </provider>
@@ -67,15 +92,6 @@
         <entry file="jar://$APPLICATION_HOME_DIR$/lib/webide.jar!/standardSchemas/xhtml1-transitional.xsd">
           <provider selected="true" editor-type-id="text-editor">
             <state line="1014" column="2" selection-start="29961" selection-end="29961" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="jsTestDriver.conf" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Source/Tests/jsTestDriver.conf">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="15" column="32" selection-start="507" selection-end="507" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -114,15 +130,6 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="FlowBinding.Disposing.js" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Source/Tests/binding/flow/FlowBinding.Disposing.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="0" column="38" selection-start="38" selection-end="38" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
     </leaf>
   </component>
   <component name="FindManager">
@@ -152,6 +159,8 @@
         <option value="$PROJECT_DIR$/Build/Build.msbuild" />
         <option value="$PROJECT_DIR$/Source/binding/flow/FlowBinding.js" />
         <option value="$PROJECT_DIR$/Source/Tests/binding/flow/FlowBinding.If.ExpressionChanged.js" />
+        <option value="$PROJECT_DIR$/Examples/ExternalTemplates.Template.htm" />
+        <option value="$PROJECT_DIR$/Examples/Validation.html" />
       </list>
     </option>
   </component>
@@ -212,6 +221,20 @@
             </PATH_ELEMENT>
             <PATH_ELEMENT>
               <option name="myItemId" value="Photon.Web" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="Photon.Web" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="Photon.Web" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="Examples" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -396,12 +419,12 @@
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32996634" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32996634" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32996634" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Regex Tester" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="true" content_ui="tabs" />
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.17121212" sideWeight="0.6700337" order="0" side_tool="false" content_ui="combo" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32996634" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32996634" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.17651515" sideWeight="0.6700337" order="2" side_tool="false" content_ui="combo" />
       <window_info id="JsTestDriver Server" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32996634" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
@@ -468,16 +491,6 @@
     <breakpoint-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/Source/3rdParty/jQueryUI/AutoComplete.htm">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="10" column="55" selection-start="758" selection-end="758" vertical-scroll-proportion="-4.5" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/.idea/.name">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/Source/3rdParty/SlickGrid/Sample.SlickGrid.htm">
       <provider selected="true" editor-type-id="text-editor">
         <state line="17" column="21" selection-start="991" selection-end="991" vertical-scroll-proportion="-5.8076925" />
@@ -545,13 +558,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Build/Build.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="1" column="18" selection-start="58" selection-end="58" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/Build/Build.msbuild">
       <provider selected="true" editor-type-id="text-editor">
         <state line="11" column="33" selection-start="436" selection-end="436" vertical-scroll-proportion="0.0">
@@ -568,11 +574,39 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/Source/Tests/binding/flow/FlowBinding.If.ExpressionChanged.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="32" column="20" selection-start="1495" selection-end="1495" vertical-scroll-proportion="0.68125">
+        <state line="32" column="20" selection-start="1495" selection-end="1495" vertical-scroll-proportion="0.0">
           <folding>
             <marker date="1338238873668" expanded="true" signature="1748:1936" placeholder="..." />
             <marker date="1338238873668" expanded="true" signature="1809:1912" placeholder="..." />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Examples/ExternalTemplates.Template.htm">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="7" column="8" selection-start="270" selection-end="270" vertical-scroll-proportion="-4.576923">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Examples/ObservableProperty.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Examples/Validation.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="7" column="4" selection-start="304" selection-end="304" vertical-scroll-proportion="-4.576923">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Build/Build.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="7" column="18" selection-start="357" selection-end="357" vertical-scroll-proportion="0.33125">
+          <folding />
         </state>
       </provider>
     </entry>
