@@ -3705,17 +3705,9 @@
 	            if (this.flowData_ !== flowData) {
 	                this.flowData_ = flowData;
 	                this.flowDataChanged();
-	            } else if (this.getExpression().getFlowType() === "if" && this.nodeSets_) {
-	                var nodeSet = this.nodeSets_[0];
-	                if (nodeSet) {
-	                    photon.array.forEach(nodeSet, function (node) {
-	                        photon.binding.DataContext.getForElement(node).setValue(this.getDataSource());
-	                    }, this);
-	                }
 	            }
 	        },
 	        flowDataChanged:function () {
-	            //this.clearNodeSets();
 	            if (this.getExpression().getFlowType() === "if") {
 	                this.applyIf();
 	            } else {
@@ -3741,6 +3733,10 @@
 	                applyTo = this.getExpression().getApplyTo();
 	
 	            if (sourceValue) {
+	                if (this.nodeSets_) {
+	                    return;
+	                }
+	
 	                var fragment = photon.templating.FlowTemplateCacheEntry.
 	                    getForElement(target).getFragment();
 	                if (applyTo === photon.binding.flow.FlowRenderTarget.Child) {
@@ -4125,6 +4121,20 @@
 	
 	var afterRenderSubscribers = [];
 	
+	var escapedFromXmlMap = {
+	    '&amp;': '&',
+	    '&quot;': '"',
+	    '&lt;': '<',
+	    '&gt;': '>'
+	};
+	
+	function decodeXml(string) {
+	    return string.replace(/(&quot;|&lt;|&gt;|&amp;)/g,
+	        function(str, item) {
+	            return escapedFromXmlMap[item];
+	        });
+	}
+	
 	/** @namespace photon.templating */
 	provide("photon.templating",
 	    /**
@@ -4132,6 +4142,8 @@
 	     */
 	    {
 	        getBindingExpressionsFromHtml:function (html, bindingType) {
+	            html = decodeXml(html);
+	
 	            // default to data-bind
 	            bindingType = bindingType || "data-bind";
 	

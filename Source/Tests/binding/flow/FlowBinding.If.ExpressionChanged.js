@@ -1,7 +1,7 @@
-DefineTestSuite("FlowIfBindingTests",
+DefineTestSuite("FlowBinding.If.ExpressionChanged",
     {
-        "When data context changes but condition does not":{
-            requiredHtmlResources:"simpleIfFlowBinding",
+        "When data context changes but condition remains true":{
+            requiredHtmlResources:"singleIfFlowBinding",
             becauseOf:function () {
                 var rootElement = $("#root")[0];
                 var flowElement = $("#flow")[0];
@@ -15,27 +15,34 @@ DefineTestSuite("FlowIfBindingTests",
                 assertEquals('Test', $("#test")[0].innerText);
 
                 // switch data source on the binding without changing the condition
-                var binding = photon.binding.NodeBindingInfo.getOrCreateForElement(flowElement)
+                var binding = photon.binding.NodeBindingInfo.getForElement(flowElement)
                     .getBindingByExpression(flowElement.getAttribute("data-flow"));
                 binding.getDataContext()
                     .setValue({
-                        condition:true,
+                        condition:1, // use another different truthy value to verify correct handling
                         value:'Test Changed'
                     });
             },
+            /*
+             * BUG: There was a bug here due to the way data contexts used to get added for each node in an if,
+             * they are no longer handled in this way, but lets stay vigilant.
+             */
             "Should propagate data source change to child bindings":function () {
                 assertEquals('Test Changed', $("#test")[0].innerText);
+            },
+            "Should not re-apply template" : function() {
+                assertEquals(1, $("span").length);
             }
         }
     },
     {
         htmlResources:{
-            simpleIfFlowBinding:function () {
+            singleIfFlowBinding:function () {
                 /*:DOC +=
                  <div id="root">
-                 <div id="flow" data-flow="if:condition">
-                 <span id='test' data-bind='innerText:value'></span>
-                 </div>
+                    <div id="flow" data-flow="if:condition">
+                        <span id='test' data-bind='innerText:value'></span>
+                    </div>
                  </div>
                  */
             }

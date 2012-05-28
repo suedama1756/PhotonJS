@@ -2,15 +2,16 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="12b894be-7c6b-4b2d-aae8-2c4fccad1ed9" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/dictionaries/Jason_Young.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/jsLibraryMappings.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Source/Tests/binding/flow/FlowBinding.DataContext.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/Photon.Web.iml" afterPath="$PROJECT_DIR$/.idea/Photon.Web.iml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/phing.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/dictionaries/Jason_Young.xml" afterPath="$PROJECT_DIR$/.idea/dictionaries/Jason_Young.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Build/Build.msbuild" afterPath="$PROJECT_DIR$/Build/Build.msbuild" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Build/Temp/photon.temp" afterPath="$PROJECT_DIR$/Build/Temp/photon.temp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Output/Photon-debug.js" afterPath="$PROJECT_DIR$/Output/Photon-debug.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Output/Photon-min.js" afterPath="$PROJECT_DIR$/Output/Photon-min.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Source/Tests/jsTestDriver.conf" afterPath="$PROJECT_DIR$/Source/Tests/jsTestDriver.conf" />
-      <change type="MOVED" beforePath="D:\Photon.Web\Source\Tests\binding\flow\FlowBindingExpression.ParsingTests.js" afterPath="$PROJECT_DIR$/Source/Tests/binding/flow/FlowBindingExpression.Parsing.js" />
-      <change type="MOVED" beforePath="D:\Photon.Web\Source\Tests\binding\flow\FlowBindingTests.js" afterPath="$PROJECT_DIR$/Source/Tests/binding/flow/FlowBinding.Disposing.js" />
-      <change type="MOVED" beforePath="D:\Photon.Web\Source\Tests\binding\flow\FlowEachBindingTests.js" afterPath="$PROJECT_DIR$/Source/Tests/binding/flow/FlowBinding.Each.Rending.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Source/binding/flow/FlowBinding.js" afterPath="$PROJECT_DIR$/Source/binding/flow/FlowBinding.js" />
+      <change type="MOVED" beforePath="D:\Photon.Web\Source\Tests\binding\flow\FlowIfBindingTests.js" afterPath="$PROJECT_DIR$/Source/Tests/binding/flow/FlowBinding.If.ExpressionChanged.js" />
     </list>
     <ignored path="Photon.Web.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -32,23 +33,41 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="Photon-debug.js" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Output/Photon-debug.js">
+      <file leaf-file-name="FlowBinding.If.ExpressionChanged.js" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/Source/Tests/binding/flow/FlowBinding.If.ExpressionChanged.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
+            <state line="32" column="20" selection-start="1495" selection-end="1495" vertical-scroll-proportion="0.68125">
+              <folding>
+                <marker date="1338238873668" expanded="true" signature="1748:1936" placeholder="..." />
+                <marker date="1338238873668" expanded="true" signature="1809:1912" placeholder="..." />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Build.msbuild" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Build/Build.msbuild">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="11" column="33" selection-start="436" selection-end="436" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="FlowIfBindingTests.js" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Source/Tests/binding/flow/FlowIfBindingTests.js">
+      <file leaf-file-name="Build.xml" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Build/Build.xml">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
-              <folding>
-                <marker date="1336991668831" expanded="true" signature="1330:1505" placeholder="..." />
-                <marker date="1336991668831" expanded="true" signature="1388:1481" placeholder="..." />
-              </folding>
+            <state line="1" column="18" selection-start="58" selection-end="58" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="xhtml1-transitional.xsd" pinned="false" current="false" current-in-tab="false">
+        <entry file="jar://$APPLICATION_HOME_DIR$/lib/webide.jar!/standardSchemas/xhtml1-transitional.xsd">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="1014" column="2" selection-start="29961" selection-end="29961" vertical-scroll-proportion="0.0">
+              <folding />
             </state>
           </provider>
         </entry>
@@ -62,19 +81,10 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="FlowBinding.Each.Rending.js" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Source/Tests/binding/flow/FlowBinding.Each.Rending.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="28" column="0" selection-start="1122" selection-end="1122" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="FlowBinding.DataContext.js" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="FlowBinding.DataContext.js" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Source/Tests/binding/flow/FlowBinding.DataContext.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="64" column="14" selection-start="2370" selection-end="2370" vertical-scroll-proportion="0.4822695">
+            <state line="64" column="14" selection-start="2370" selection-end="2370" vertical-scroll-proportion="0.0">
               <folding>
                 <marker date="1338236427151" expanded="true" signature="3183:3360" placeholder="..." />
                 <marker date="1338236427151" expanded="true" signature="3241:3336" placeholder="..." />
@@ -86,19 +96,19 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="array.js" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Source/array/array.js">
+      <file leaf-file-name="FlowRenderTarget.js" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Source/binding/flow/FlowRenderTarget.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="245" column="8" selection-start="8359" selection-end="8359" vertical-scroll-proportion="0.0">
+            <state line="3" column="30" selection-start="56" selection-end="56" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="FlowBindingExpression.Parsing.js" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Source/Tests/binding/flow/FlowBindingExpression.Parsing.js">
+      <file leaf-file-name="FlowBinding.js" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Source/binding/flow/FlowBinding.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
+            <state line="121" column="38" selection-start="3699" selection-end="3699" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -138,6 +148,10 @@
         <option value="$PROJECT_DIR$/Source/Tests/binding/flow/FlowBinding.js" />
         <option value="$PROJECT_DIR$/Source/Tests/jsTestDriver.conf" />
         <option value="$PROJECT_DIR$/Source/Tests/binding/flow/FlowBinding.DataContext.js" />
+        <option value="$PROJECT_DIR$/Source/Tests/binding/flow/FlowIfBindingTests.js" />
+        <option value="$PROJECT_DIR$/Build/Build.msbuild" />
+        <option value="$PROJECT_DIR$/Source/binding/flow/FlowBinding.js" />
+        <option value="$PROJECT_DIR$/Source/Tests/binding/flow/FlowBinding.If.ExpressionChanged.js" />
       </list>
     </option>
   </component>
@@ -211,99 +225,7 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="Source" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Photon.Web" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Photon.Web" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Source" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Tests" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Photon.Web" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Photon.Web" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Source" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Tests" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="binding" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Photon.Web" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Photon.Web" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Source" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Tests" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="binding" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="flow" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Photon.Web" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Photon.Web" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Source" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Tests" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="binding" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="data" />
+              <option name="myItemId" value="Build" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -321,7 +243,7 @@
     <property name="FileHistory.git4idea.history.GitHistoryProvider_treeOrder2" value="2" />
     <property name="recentsLimit" value="5" />
     <property name="FileHistory.git4idea.history.GitHistoryProvider_treeWidth0" value="157" />
-    <property name="options.lastSelected" value="project.propVCSSupport.Mappings" />
+    <property name="options.lastSelected" value="preferences.keymap" />
     <property name="FileHistory.git4idea.history.GitHistoryProvider_flatOrder1" value="1" />
     <property name="FileHistory.git4idea.history.GitHistoryProvider_flatOrder0" value="0" />
     <property name="FileHistory.git4idea.history.GitHistoryProvider_flatWidth2" value="162" />
@@ -345,13 +267,59 @@
       <ConfigurationWrapper RunnerId="JsTestDriverClientRunner" />
       <method />
     </configuration>
+    <configuration default="true" type="NodeJSConfigurationType" factoryName="Node JS" working-dir="$PROJECT_DIR$">
+      <method>
+        <option name="PhingTarget" enabled="false" />
+      </method>
+    </configuration>
+    <configuration default="true" type="NodeJSRemoteDebug" factoryName="Node JS Remote Debug">
+      <node-js-remote-debug />
+      <method>
+        <option name="PhingTarget" enabled="false" />
+      </method>
+    </configuration>
     <configuration default="true" type="JSTestDriver:ConfigurationType" factoryName="JsTestDriver">
       <setting name="configLocationType" value="CONFIG_FILE" />
       <setting name="settingsFile" value="" />
       <setting name="serverType" value="INTERNAL" />
       <method>
+        <option name="PhingTarget" enabled="true" phingFile="file://$PROJECT_DIR$/Build/Build.xml" target="build" />
+      </method>
+    </configuration>
+    <configuration default="true" type="NodeunitConfigurationType" factoryName="Nodeunit">
+      <setting name="nodePath" value="" />
+      <setting name="nodeunitModuleDir" value="" />
+      <setting name="workingDirectory" value="$PROJECT_DIR$" />
+      <setting name="testType" value="JS_FILE" />
+      <setting name="jsFile" value="" />
+      <method>
         <option name="PhingTarget" enabled="false" />
       </method>
+    </configuration>
+    <configuration default="true" type="XSLT" factoryName="XSLT">
+      <option name="myOutputFile" />
+      <option name="myOpenOutputFile" value="false" />
+      <option name="myOpenInBrowser" value="false" />
+      <option name="mySmartErrorHandling" value="true" />
+      <option name="myRunnerPort" value="34873" />
+      <option name="myVmArguments" />
+      <option name="myWorkingDirectory" />
+      <option name="myModule" />
+      <option name="myJdk" />
+      <parameters />
+      <OutputType value="CONSOLE" save-to-file="false" />
+      <FileType name="XML" />
+      <JdkChoice value="FROM_MODULE" />
+      <method>
+        <option name="PhingTarget" enabled="false" />
+      </method>
+    </configuration>
+    <configuration default="true" type="JavascriptDebugSession" factoryName="Remote">
+      <JSRemoteDebuggerConfigurationSettings>
+        <option name="engineId" />
+        <option name="fileUrl" />
+      </JSRemoteDebuggerConfigurationSettings>
+      <method />
     </configuration>
     <configuration default="true" type="JavascriptDebugSession" factoryName="Local">
       <JSDebuggerConfigurationSettings>
@@ -365,8 +333,8 @@
       <setting name="configType" value="FILE_PATH" />
       <setting name="settingsFile" value="D:\Photon.Web\Source\Tests\jsTestDriver.conf" />
       <setting name="jsFile" value="D:\Photon.Web\Source\Tests\binding\flow\FlowBinding.DataContext.js" />
-      <setting name="testCase" value="FlowBinding.DataContext: *" />
-      <setting name="testMethod" value="*" />
+      <setting name="testCase" value="FlowBinding.If.ExpressionChanged:*" />
+      <setting name="testMethod" value="*Should only add*" />
       <setting name="serverType" value="INTERNAL" />
       <RunnerSettings RunnerId="JsTestDriverClientRunner" />
       <ConfigurationWrapper RunnerId="JsTestDriverClientRunner" />
@@ -420,26 +388,27 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1382" height="754" extended-state="6" />
-    <editor active="false" />
+    <editor active="true" />
     <layout>
-      <window_info id="Changes" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.44949496" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.14983165" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Phing Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32954547" sideWeight="0.6700337" order="-1" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
+      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32996634" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32996634" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Regex Tester" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="true" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.3172003" sideWeight="0.55050504" order="0" side_tool="false" content_ui="combo" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
-      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32996634" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.17121212" sideWeight="0.6700337" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32996634" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.17651515" sideWeight="0.6700337" order="2" side_tool="false" content_ui="combo" />
       <window_info id="JsTestDriver Server" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32996634" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32996634" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32996634" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
     </layout>
   </component>
@@ -499,26 +468,6 @@
     <breakpoint-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/Examples/Test.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="6" column="26" selection-start="249" selection-end="249" vertical-scroll-proportion="-3.9230769" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Examples/UnderscoreTemplating.htm">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="7" column="26" selection-start="391" selection-end="391" vertical-scroll-proportion="-4.1923075" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Examples/Validation.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="7" column="19" selection-start="319" selection-end="319" vertical-scroll-proportion="-4.0" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Source/3rdParty/DataTable/Sample.DataTable.htm">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="8" column="32" selection-start="546" selection-end="546" vertical-scroll-proportion="-4.1923075" />
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/Source/3rdParty/jQueryUI/AutoComplete.htm">
       <provider selected="true" editor-type-id="text-editor">
         <state line="10" column="55" selection-start="758" selection-end="758" vertical-scroll-proportion="-4.5" />
@@ -532,11 +481,6 @@
     <entry file="file://$PROJECT_DIR$/Source/3rdParty/SlickGrid/Sample.SlickGrid.htm">
       <provider selected="true" editor-type-id="text-editor">
         <state line="17" column="21" selection-start="991" selection-end="991" vertical-scroll-proportion="-5.8076925" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Build/Build.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/Source/array/array.js">
@@ -567,16 +511,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Source/Tests/binding/flow/FlowIfBindingTests.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
-          <folding>
-            <marker date="1336991668831" expanded="true" signature="1330:1505" placeholder="..." />
-            <marker date="1336991668831" expanded="true" signature="1388:1481" placeholder="..." />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/Source/Tests/jsTestDriver.conf">
       <provider selected="true" editor-type-id="text-editor">
         <state line="15" column="32" selection-start="507" selection-end="507" vertical-scroll-proportion="0.0">
@@ -584,22 +518,60 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Output/Photon-debug.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/Source/Tests/binding/flow/FlowBinding.DataContext.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="64" column="14" selection-start="2370" selection-end="2370" vertical-scroll-proportion="0.4822695">
+        <state line="64" column="14" selection-start="2370" selection-end="2370" vertical-scroll-proportion="0.0">
           <folding>
             <marker date="1338236427151" expanded="true" signature="3183:3360" placeholder="..." />
             <marker date="1338236427151" expanded="true" signature="3241:3336" placeholder="..." />
             <marker date="1338236427151" expanded="true" signature="3513:3781" placeholder="..." />
             <marker date="1338236427151" expanded="true" signature="3574:3757" placeholder="..." />
             <marker date="1338236427151" expanded="true" signature="3635:3733" placeholder="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Source/binding/flow/FlowRenderTarget.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="3" column="30" selection-start="56" selection-end="56" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$APPLICATION_HOME_DIR$/lib/webide.jar!/standardSchemas/xhtml1-transitional.xsd">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="1014" column="2" selection-start="29961" selection-end="29961" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Build/Build.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="1" column="18" selection-start="58" selection-end="58" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Build/Build.msbuild">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="11" column="33" selection-start="436" selection-end="436" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Source/binding/flow/FlowBinding.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="121" column="38" selection-start="3699" selection-end="3699" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Source/Tests/binding/flow/FlowBinding.If.ExpressionChanged.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="32" column="20" selection-start="1495" selection-end="1495" vertical-scroll-proportion="0.68125">
+          <folding>
+            <marker date="1338238873668" expanded="true" signature="1748:1936" placeholder="..." />
+            <marker date="1338238873668" expanded="true" signature="1809:1912" placeholder="..." />
           </folding>
         </state>
       </provider>

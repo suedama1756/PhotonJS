@@ -9,7 +9,7 @@
 
     <Today>$([System.DateTime]::Now)</Today>
 
-    <SourcePath>$(BasePath)photon\</SourcePath>
+    <SourcePath>$(BasePath)Source\</SourcePath>
     <SourceTempFile>$(BuildTempPath)photon.temp</SourceTempFile>
 
     <OutputPath>$(BasePath)Output\</OutputPath>

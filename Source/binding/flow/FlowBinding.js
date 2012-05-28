@@ -89,17 +89,9 @@ photon.defineType(
             if (this.flowData_ !== flowData) {
                 this.flowData_ = flowData;
                 this.flowDataChanged();
-            } else if (this.getExpression().getFlowType() === "if" && this.nodeSets_) {
-                var nodeSet = this.nodeSets_[0];
-                if (nodeSet) {
-                    photon.array.forEach(nodeSet, function (node) {
-                        photon.binding.DataContext.getForElement(node).setValue(this.getDataSource());
-                    }, this);
-                }
             }
         },
         flowDataChanged:function () {
-            //this.clearNodeSets();
             if (this.getExpression().getFlowType() === "if") {
                 this.applyIf();
             } else {
@@ -125,6 +117,10 @@ photon.defineType(
                 applyTo = this.getExpression().getApplyTo();
 
             if (sourceValue) {
+                if (this.nodeSets_) {
+                    return;
+                }
+
                 var fragment = photon.templating.FlowTemplateCacheEntry.
                     getForElement(target).getFragment();
                 if (applyTo === photon.binding.flow.FlowRenderTarget.Child) {
