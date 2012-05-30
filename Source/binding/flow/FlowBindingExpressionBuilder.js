@@ -31,8 +31,8 @@ photon.defineType(
                 this.getSubType(), getFlowData, this.applyTo_);
         },
         "set-applyTo":function (value) {
-            assert(photon.binding.flow.FlowRenderTarget.hasOwnProperty(value),
+            assert(photon.binding.flow.RenderTarget.hasOwnProperty(value),
                 "Invalid applyTo value '{0}'.", value);
-            this.applyTo_ = photon.binding.flow.FlowRenderTarget[value];
+            this.applyTo_ = photon.binding.flow.RenderTarget[value];
         }
     });

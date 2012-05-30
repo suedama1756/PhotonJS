@@ -110,26 +110,20 @@ photon.defineType(
             var target = binding.getTarget(),
                 fragment = this.getFragment(newValue.name);
 
-            // clear nodes
-            photon.dom.empty(target);
-
             // we know the parent, we don't need to look for it, so set it explicitly, faster!!
             var parentDataContext = photon.binding.DataContext.getForElement(target);
             if (newValue.each) {
-                if (binding.arraySubscriber) {
-                    if (binding.arraySubscriber.getOwner() !== newValue.each) {
-                        binding.arraySubscriber.dispose();
-                        binding.arraySubscriber = null;
-                    }
+                // TODO: If the template has changed we will need to re-render everything!!
+                if (!this.itemsRenderer_) {
+                    this.itemsRenderer_ = new photon.templating.ItemsRenderer(
+                        target, photon.binding.flow.RenderTarget.NextSibling, photon.templating.getCache().getEntry(newValue.name)
+                    );
+                    photon.addDisposable(target, this.itemsRenderer_);
                 }
-                if (!binding.arraySubscriber && newValue.each && newValue.each.subscribe) {
-                    binding.arraySubscriber = newValue.each.subscribe(this.collectionChanged, this, binding);
-                    photon.addDisposable(target, binding.arraySubscriber);
-                }
-
-                this.insertEachBefore(target, fragment, null, newValue.each, parentDataContext);
+                this.itemsRenderer_.setItems(newValue.each);
             }
             else {
+                photon.dom.empty(target);
                 this.insertBefore(target, fragment, null, newValue.data, parentDataContext);
             }
         }

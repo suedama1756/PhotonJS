@@ -1,7 +1,7 @@
 /**
  * @enum {Number}
  */
-photon.binding.flow.FlowRenderTarget = {
+photon.binding.flow.RenderTarget = {
     /**
      * @constant
      */

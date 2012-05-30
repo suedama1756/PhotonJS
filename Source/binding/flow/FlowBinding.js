@@ -65,12 +65,12 @@ photon.defineType(
      */
     {
         dispose:function () {
-            if (this.arraySubscriber_) {
-                this.arraySubscriber_.dispose();
-                this.arraySubscriber_ = null;
-            }
             this.clearNodeSets();
             this.setDataContext(null);
+            if (this.itemsRenderer_) {
+                this.itemsRenderer_.dispose();
+                this.itemsRenderer_ = null;
+            }
         },
         dataSourceChanged:function () {
             if (this.getDataContext()) {
@@ -123,7 +123,7 @@ photon.defineType(
 
                 var fragment = photon.templating.FlowTemplateCacheEntry.
                     getForElement(target).getFragment();
-                if (applyTo === photon.binding.flow.FlowRenderTarget.Child) {
+                if (applyTo === photon.binding.flow.RenderTarget.Child) {
                     this.nodeSets_ = [photon.binding.data.properties["data.template"]
                         .insertBefore2(target, fragment, null)];
                 } else {
@@ -136,91 +136,12 @@ photon.defineType(
             }
         },
         applyEach:function () {
-            var sourceValue = this.flowData_, target = this.getTarget(),
-                applyTo = this.getExpression().getApplyTo();
+            var target = this.getTarget();
 
-            if (this.arraySubscriber_) {
-                if (this.arraySubscriber_.getOwner() !== sourceValue) {
-                    this.arraySubscriber_.dispose();
-                    this.arraySubscriber_ = null;
-                }
-            }
-
-            if (!this.arraySubscriber_ && sourceValue && sourceValue.subscribe) {
-                this.arraySubscriber_ = sourceValue.subscribe(this.flowDataChanged, this);
-            }
-
-            sourceValue = photon.observable.unwrap(sourceValue) || [];
-            this.renderEach(this.oldSourceValue_ || [], sourceValue);
-            this.oldSourceValue_ = sourceValue.slice(0);
-        },
-        renderEach:function (oldValue, newValue) {
-            this.nodeSets_ = this.nodeSets_ || [];
-
-            var diffs = photon.array.diff(oldValue, newValue),
-                diff,
-                startA,
-                target = this.getTarget(),
-                nodeSets = this.nodeSets_,
-                nodeSet,
-                offset = 0,
-                templatePool = new TemplatePool(photon.templating.FlowTemplateCacheEntry.getForElement(target)),
-                defaultReferenceNode = this.getExpression().getApplyTo() === photon.binding.flow.FlowRenderTarget.Child ?
-                    null :
-                    target.nextSibling,
-                parentNode = this.getExpression().getApplyTo() === photon.binding.flow.FlowRenderTarget.Child ?
-                    target :
-                    target.parentNode,
-                dataContext = this.getDataContext();
-
-            // process set/delete
-            for (var diffIndex = 0, diffLength = diffs.length; diffIndex < diffLength; diffIndex++) {
-                // get current diff
-                diff = diffs[diffIndex];
-
-                // get the number of items that could be set (rather than delete/insert)
-                var setLength = Math.min(diff.deletedA, diff.insertedB);
-
-                // extract deletions into pool
-                startA = diff.startA - offset;
-                for (var delIndex = startA, delEnd = startA + diff.deletedA - setLength; delIndex < delEnd; delIndex++, offset++) {
-                    templatePool.addToPool(nodeSets[delIndex]);
-                }
-
-                // update node sets
-                nodeSets.splice(startA, diff.deletedA - setLength);
-
-                // apply set operations
-                for (var setIndex = 0; setIndex < setLength; setIndex++) {
-                    nodeSet = nodeSets[startA++];
-                    for (var nodeIndex = 0, nodeCount = nodeSet.length; nodeIndex < nodeCount; nodeIndex++) {
-                        photon.binding.applyBindings(newValue[diff.startB + setIndex], nodeSet[nodeIndex], dataContext);
-                    }
-                }
-
-                // update diff (should now only contain adjusted inserts)
-                diff.startA = startA;
-                diff.startB = diff.startB + setLength;
-                diff.insertedB = diff.insertedB - setLength;
-                diff.deletedA = 0;
-            }
-
-            // process inserts
-            offset = 0;
-            for (diffIndex = 0; diffIndex < diffLength; diffIndex++) {
-                diff = diffs[diffIndex];
-
-                startA = diff.startA + offset;
-
-                var referenceNode = nodeSets[startA] ? nodeSets[startA][0] : defaultReferenceNode;
-                for (var insIndex = diff.startB, insLength = insIndex + diff.insertedB; insIndex < insLength; insIndex++, offset++) {
-                    nodeSets.splice(startA++, 0, photon.binding.data.properties["data.template"]
-                        .insertBefore(parentNode, templatePool.getTemplate(), referenceNode, newValue[insIndex], dataContext));
-                }
-            }
-
-            // clean remaining nodes
-            templatePool.dispose();
+            this.itemsRenderer_ = this.itemsRenderer_ || new photon.templating.ItemsRenderer(
+                target, this.getExpression().getApplyTo(), photon.templating.FlowTemplateCacheEntry.getForElement(target)
+            );
+            this.itemsRenderer_.setItems(this.flowData_);
         },
         clearNodeSets:function () {
             var nodeSets = this.nodeSets_;

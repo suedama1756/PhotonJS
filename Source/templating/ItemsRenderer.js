@@ -1,13 +1,14 @@
-photon.templating.itemsRenderer = function (target, renderTargetType, itemTemplateEntry) {
-    this.target_ = target;
-    this.renderTargetType_ = renderTargetType;
-    this.itemTemplateEntry_ = itemTemplateEntry;
+photon.templating.ItemsRenderer = function (referenceElement, renderTarget, templateEntry) {
+    this.referenceElement_ = referenceElement;
+    this.renderTarget_ = renderTarget;
+    this.templateEntry_ = templateEntry;
 };
 
-photon.defineType(photon.templating.itemsRenderer,
+photon.defineType(
+    photon.templating.ItemsRenderer,
     {
         dispose:function () {
-            this.subscribe(null);
+            this.subscribe_(null);
 
             var nodeSets = this.nodeSets_;
             if (nodeSets) {
@@ -16,16 +17,27 @@ photon.defineType(photon.templating.itemsRenderer,
                 }
                 this.nodeSets_ = null;
             }
-
-            this.setDataContext(null);
         },
-        update:function (items) {
-            if (this.items_ !== items) {
-                this.items_ = items;
-                this.itemsChanged();
+        getReferenceElement : function() {
+            return this.referenceElement_;
+        },
+        setItems:function (value, refresh) {
+            if (this.items_ !== value) {
+                this.items_ = value;
+                this.itemsChanged_();
+            } else if (refresh) {
+                this.itemsChanged_();
             }
         },
-        subscribe : function(items) {
+        getItems:function () {
+            return this.items_;
+        },
+        refresh : function() {
+            if (this.items_) {
+                this.itemsChanged_();
+            }
+        },
+        subscribe_:function (items) {
             var subscriber = this.subscriber_;
             if (subscriber && subscriber.getOwner() !== items) {
                 subscriber.dispose();
@@ -33,33 +45,32 @@ photon.defineType(photon.templating.itemsRenderer,
             }
 
             if (!subscriber && items && items.subscribe) {
-                this.subscriber_ = items.subscribe(this.itemsChanged, this);
+                this.subscriber_ = items.subscribe(this.itemsChanged_, this);
             }
         },
-        itemsChanged:function () {
-            var items = photon.observable.unwrap(items) || [];
-            this.subscribe(items);
-            this.render(this.itemsCopy_ || [], items);
+        itemsChanged_:function () {
+            var items = this.items_;
+            this.subscribe_(items);
+            items = photon.observable.unwrap(items) || [];
+            this.render_(this.itemsCopy_ || [], items);
             this.itemsCopy_ = items.slice(0);
         },
-        render:function (oldItems, newItems) {
+        render_:function (oldItems, newItems) {
             this.nodeSets_ = this.nodeSets_ || [];
 
             var diffs = photon.array.diff(oldItems, newItems),
                 diff,
                 startA,
-                target = this.getTarget(),
+                referenceElement = this.referenceElement_,
                 nodeSets = this.nodeSets_,
                 nodeSet,
                 offset = 0,
-                templatePool = new TemplatePool(this.itemTemplateEntry_),
-                defaultReferenceNode = this.renderTargetType_ === photon.binding.flow.FlowRenderTarget.Child ?
-                    null :
-                    target.nextSibling,
-                parentNode = this.renderTargetType_ === photon.binding.flow.FlowRenderTarget.Child ?
-                    target :
-                    target.parentNode,
-                dataContext = photon.binding.DataContext.getForElement(this.target_);
+                defaultReferenceNode = null,
+                templatePool = new TemplatePool(this.templateEntry_),
+                parentNode = this.renderTarget_ === photon.binding.flow.RenderTarget.Child ?
+                    referenceElement :
+                    referenceElement.parentNode,
+                dataContext = photon.binding.DataContext.getForElement(referenceElement);
 
             // process set/delete
             for (var diffIndex = 0, diffLength = diffs.length; diffIndex < diffLength; diffIndex++) {
@@ -93,6 +104,11 @@ photon.defineType(photon.templating.itemsRenderer,
                 diff.deletedA = 0;
             }
 
+            if (this.renderTarget_ === photon.binding.flow.RenderTarget.NextSibling && nodeSets.length > 0) {
+                var nodeSet = nodeSets[nodeSets.length - 1],
+                    defaultReferenceNode = nodeSet[nodeSet.length - 1].nextSibling;
+            }
+
             // process inserts
             offset = 0;
             for (diffIndex = 0; diffIndex < diffLength; diffIndex++) {
@@ -112,3 +128,7 @@ photon.defineType(photon.templating.itemsRenderer,
         }
     }
 );
+
+
+
+

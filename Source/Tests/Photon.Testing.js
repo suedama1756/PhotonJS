@@ -140,6 +140,12 @@ photon.testing.mock.recordCalls = function (obj, name) {
     obj[name] = modifiedFn;
 };
 
+timeCall = function(fn, thisObj, args) {
+    var start = (new Date).getTime();
+    fn.apply(thisObj, args);
+    return (new Date).getTime() - start;
+}
+
 
 DefineTestCase = function (suiteName, testCaseName, prototype /* ... */) {
     var obj = {};

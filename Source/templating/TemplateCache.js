@@ -12,13 +12,21 @@ photon.defineType(
     {
         resourceDelimiterRegEx:/<!--\s*Template:\s*([\w\.]*)\s*-->/,
         /**
-         * Gets the entry
+         * Gets an entry by name, an exception is thrown if the entry cannot be found.
          * @private
          * @returns {photon.templating.TemplateCacheEntry}
          */
-        getEntry_:function (name) {
+        getEntry:function (name) {
             return assert(this.entries_[name],
                 "No template could be found with key '{0}'.", name);
+        },
+        /**
+         * Finds an entry by name;
+         * @param name
+         * @return {photon.templating.TemplateCacheEntry}
+         */
+        findEntry:function(name) {
+            return this.entries_[name];
         },
         /**
          * Removes the template with the specified name
@@ -49,7 +57,7 @@ photon.defineType(
          * @returns {String} The template
          */
         getFragment:function (name) {
-            return this.getEntry_(name).getFragment();
+            return this.getEntry(name).getFragment();
         },
         /**
          * Finds the template with the specified name, no exception is thrown if the template does not exist.
@@ -70,7 +78,7 @@ photon.defineType(
          * @returns {String} The template
          */
         getHtml:function (name) {
-            return this.getEntry_(name).getHtml();
+            return this.getEntry(name).getHtml();
         },
         /**
          * Finds the template with the specified name, no exception is thrown if the template does not exist.

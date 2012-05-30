@@ -15,7 +15,7 @@ DefineTestSuite("FlowBindingExpression.Parsing",
                 assertEquals("if:expression", this.expression_.getText());
             },
             "Should default render target to child":function () {
-                assertEquals(photon.binding.flow.FlowRenderTarget.Child, this.expression_.getApplyTo());
+                assertEquals(photon.binding.flow.RenderTarget.Child, this.expression_.getApplyTo());
             },
             "Should compile correct source value function":function () {
                 var dataContext = new photon.binding.DataContext();
@@ -34,7 +34,7 @@ DefineTestSuite("FlowBindingExpression.Parsing",
                 this.expression_ = expressionParser.readNext();
             },
             "Should default apply to child":function () {
-                assertEquals(photon.binding.flow.FlowRenderTarget.NextSibling, this.expression_.getApplyTo());
+                assertEquals(photon.binding.flow.RenderTarget.NextSibling, this.expression_.getApplyTo());
             }
         },
         "When parsing with an invalid render target":{
