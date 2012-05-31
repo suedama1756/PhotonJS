@@ -1,8 +1,8 @@
 photon.defineType(
     /**
-     * @param {photon.templating.TemplateCacheEntry} [parent]
+     * @param {photon.templating.Template} [parent]
      */
-    photon.templating.TemplateCacheEntry = function (parent, key) {
+    photon.templating.Template = function (parent, key) {
         this.parent_ = null;
         if (parent) {
             parent.addChild(this);
@@ -13,7 +13,7 @@ photon.defineType(
         }
     },
     /**
-     * lends : photon.templating.TemplateCacheEntry.prototype
+     * lends : photon.templating.Template.prototype
      */
     {
         /**
@@ -36,7 +36,7 @@ photon.defineType(
         },
         /**
          * Adds a child entry
-         * @param {photon.templating.TemplateCacheEntry} value
+         * @param {photon.templating.Template} value
          */
         addChild:function (value) {
             value.parent_ = this;
@@ -56,7 +56,7 @@ photon.defineType(
         /**
          * Gets a child entry by index
          * @param {Number} index
-         * @return {photon.templating.TemplateCacheEntry}
+         * @return {photon.templating.Template}
          */
         getChild:function (index) {
             return this.children_ ? this.children_[index] : 0;
@@ -70,7 +70,7 @@ photon.defineType(
         },
         /**
          * Gets the entries parent
-         * @return {photon.templating.TemplateCacheEntry}
+         * @return {photon.templating.Template}
          */
         getParent:function () {
             return this.parent_;

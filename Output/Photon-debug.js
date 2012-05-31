@@ -3409,7 +3409,7 @@
 	                // TODO: If the template has changed we will need to re-render everything!!
 	                if (!this.itemsRenderer_) {
 	                    this.itemsRenderer_ = new photon.templating.ItemsRenderer(
-	                        target, photon.binding.flow.RenderTarget.NextSibling, photon.templating.getCache().getEntry(newValue.name)
+	                        target, photon.templating.RenderTarget.NextSibling, photon.templating.getCache().getTemplate(newValue.name)
 	                    );
 	                    photon.addDisposable(target, this.itemsRenderer_);
 	                }
@@ -3596,19 +3596,6 @@
 	/** @namespace photon.binding.flow */
 	provide("photon.binding.flow");
 	/**
-	 * @enum {Number}
-	 */
-	photon.binding.flow.RenderTarget = {
-	    /**
-	     * @constant
-	     */
-	    Child:0,
-	    /**
-	     * @constant
-	     */
-	    NextSibling:1
-	};
-	/**
 	 * Creates a new instance of the FlowBinding type.
 	 *
 	 * @param {HTMLElement|HTMLDocument} target The target element to bind to.
@@ -3619,47 +3606,6 @@
 	    photon.binding.flow.FlowBinding.base(this, target, expression);
 	    photon.addDisposable(target, this);
 	};
-	
-	var TemplatePool = function (cacheEntry) {
-	    this.pool_ = [];
-	    this.poolIndex_ = 0;
-	    this.cacheEntry_ = cacheEntry;
-	};
-	
-	photon.defineType(TemplatePool, {
-	    addToPool:function (templateNodes) {
-	        this.pool_.push(templateNodes);
-	
-	        // remove from from (if attached)
-	        photon.array.forEach(templateNodes,
-	            photon.dom.remove);
-	    },
-	    getTemplate:function () {
-	        if (this.poolIndex_ < this.pool_.length) {
-	            // grab node(s) from pool
-	            var result = this.pool_[this.poolIndex_++];
-	
-	            // if single node then return
-	            if (result.length === 1) {
-	                return result[0];
-	            }
-	
-	            // otherwise add to fragment
-	            var fragment = document.createDocumentFragment();
-	            for (var i = 0, n = result.length; i < n; i++) {
-	                fragment.appendChild(result[i]);
-	            }
-	            return fragment;
-	        }
-	        return this.cacheEntry_.getFragment();
-	    },
-	    dispose:function () {
-	        for (var i = this.poolIndex_, n = this.pool_.length; i < n; i++) {
-	            photon.dom.cleanNodes(this.pool_[i]);
-	        }
-	        this.pool_ = this.poolIndex_ = undefined;
-	    }
-	});
 	
 	photon.defineType(
 	    /**
@@ -3731,9 +3677,9 @@
 	                    return;
 	                }
 	
-	                var fragment = photon.templating.FlowTemplateCacheEntry.
+	                var fragment = photon.templating.FlowTemplate.
 	                    getForElement(target).getFragment();
-	                if (applyTo === photon.binding.flow.RenderTarget.Child) {
+	                if (applyTo === photon.templating.RenderTarget.Child) {
 	                    this.nodeSets_ = [photon.binding.data.properties["data.template"]
 	                        .insertBefore2(target, fragment, null)];
 	                } else {
@@ -3749,7 +3695,7 @@
 	            var target = this.getTarget();
 	
 	            this.itemsRenderer_ = this.itemsRenderer_ || new photon.templating.ItemsRenderer(
-	                target, this.getExpression().getApplyTo(), photon.templating.FlowTemplateCacheEntry.getForElement(target)
+	                target, this.getExpression().getApplyTo(), photon.templating.FlowTemplate.getForElement(target)
 	            );
 	            this.itemsRenderer_.setItems(this.flowData_);
 	        },
@@ -3769,7 +3715,7 @@
 	 * @param {String} text the text of the expression
 	 * @param {String} flowType
 	 * @param {Function} getFlowData
-	 * @param {photon.binding.flow.RenderTarget} applyTo
+	 * @param {photon.templating.RenderTarget} applyTo
 	 *
 	 * @constructor
 	 * @extends photon.binding.BindingExpression
@@ -3785,11 +3731,11 @@
 	    this.flowType_ = flowType;
 	
 	    /**
-	     * @type {photon.binding.flow.RenderTarget}
+	     * @type {photon.templating.RenderTarget}
 	     * @private
 	     */
 	    this.applyTo_ = photon.isNullOrUndefined(applyTo) ?
-	        photon.binding.flow.RenderTarget.Child :
+	        photon.templating.RenderTarget.Child :
 	        applyTo;
 	
 	    /**
@@ -3833,7 +3779,7 @@
 	        },
 	        /**
 	         * Gets a value indicating where in the DOM the flow template should be applied.
-	         * @return {photon.binding.flow.RenderTarget}
+	         * @return {photon.templating.RenderTarget}
 	         */
 	        getApplyTo : function() {
 	            return this.applyTo_;
@@ -3872,9 +3818,9 @@
 	                this.getSubType(), getFlowData, this.applyTo_);
 	        },
 	        "set-applyTo":function (value) {
-	            assert(photon.binding.flow.RenderTarget.hasOwnProperty(value),
+	            assert(photon.templating.RenderTarget.hasOwnProperty(value),
 	                "Invalid applyTo value '{0}'.", value);
-	            this.applyTo_ = photon.binding.flow.RenderTarget[value];
+	            this.applyTo_ = photon.templating.RenderTarget[value];
 	        }
 	    });
 	/**
@@ -4158,7 +4104,7 @@
 	         * Template storage
 	         * @private
 	         */
-	        this.entries_ = {};
+	        this.templates_ = {};
 	    },
 	    /**
 	     * @lends photon.templating.TemplateCache.prototype
@@ -4166,21 +4112,21 @@
 	    {
 	        resourceDelimiterRegEx:/<!--\s*Template:\s*([\w\.]*)\s*-->/,
 	        /**
-	         * Gets an entry by name, an exception is thrown if the entry cannot be found.
+	         * Gets a template by name, an exception is thrown if the template cannot be found.
 	         * @private
-	         * @returns {photon.templating.TemplateCacheEntry}
+	         * @returns {photon.templating.Template}
 	         */
-	        getEntry:function (name) {
-	            return assert(this.entries_[name],
+	        getTemplate:function (name) {
+	            return assert(this.templates_[name],
 	                "No template could be found with key '{0}'.", name);
 	        },
 	        /**
-	         * Finds an entry by name;
+	         * Finds an template by name;
 	         * @param name
-	         * @return {photon.templating.TemplateCacheEntry}
+	         * @return {photon.templating.Template}
 	         */
-	        findEntry:function(name) {
-	            return this.entries_[name];
+	        findTemplate:function(name) {
+	            return this.templates_[name];
 	        },
 	        /**
 	         * Removes the template with the specified name
@@ -4188,17 +4134,17 @@
 	         * @returns {boolean} true; if the template was removed; otherwise, false.
 	         */
 	        remove:function (name) {
-	            var entry = this.entries_[name];
-	            if (entry) {
-	                entry.dispose();
+	            var template = this.templates_[name];
+	            if (template) {
+	                template.dispose();
 	            }
-	            return delete this.entries_[name];
+	            return delete this.templates_[name];
 	        },
 	        /**
 	         * Clears the cache
 	         */
 	        clear:function () {
-	            photon.array.forEach(photon.object.getOwnPropertyNames(this.entries_), function (name) {
+	            photon.array.forEach(photon.object.getOwnPropertyNames(this.templates_), function (name) {
 	                this.remove(name);
 	            }, this);
 	        },
@@ -4211,7 +4157,7 @@
 	         * @returns {String} The template
 	         */
 	        getFragment:function (name) {
-	            return this.getEntry(name).getFragment();
+	            return this.getTemplate(name).getFragment();
 	        },
 	        /**
 	         * Finds the template with the specified name, no exception is thrown if the template does not exist.
@@ -4222,7 +4168,7 @@
 	         * @returns {String} The template
 	         */
 	        findFragment:function (name) {
-	            var result = this.entries_[name];
+	            var result = this.templates_[name];
 	            return result ? result.getFragment() : null;
 	        },
 	        /**
@@ -4232,7 +4178,7 @@
 	         * @returns {String} The template
 	         */
 	        getHtml:function (name) {
-	            return this.getEntry(name).getHtml();
+	            return this.getTemplate(name).getHtml();
 	        },
 	        /**
 	         * Finds the template with the specified name, no exception is thrown if the template does not exist.
@@ -4241,7 +4187,7 @@
 	         * @returns {String} The template
 	         */
 	        findHtml:function (name) {
-	            var result = this.entries_[name];
+	            var result = this.templates_[name];
 	            return result ? result.template : null;
 	        },
 	        /**
@@ -4260,7 +4206,7 @@
 	            var childEntries = photon.templating.prepareFlowTemplates(
 	                templateElement);
 	
-	            var entry = new photon.templating.TemplateCacheEntry(null, name);
+	            var entry = new photon.templating.Template(null, name);
 	            if (childEntries.length > 0) {
 	                entry.setTemplate(templateElement.innerHTML);
 	                photon.array.forEach(childEntries, function (childEntry) {
@@ -4271,7 +4217,7 @@
 	                entry.setTemplate(html);
 	            }
 	
-	            this.entries_[name] = entry;
+	            this.templates_[name] = entry;
 	        },
 	        /**
 	         * Adds an a template to the cache based on an element's inner HTML. If no name is supplied the elements
@@ -4427,9 +4373,9 @@
 	};
 	photon.defineType(
 	    /**
-	     * @param {photon.templating.TemplateCacheEntry} [parent]
+	     * @param {photon.templating.Template} [parent]
 	     */
-	    photon.templating.TemplateCacheEntry = function (parent, key) {
+	    photon.templating.Template = function (parent, key) {
 	        this.parent_ = null;
 	        if (parent) {
 	            parent.addChild(this);
@@ -4440,7 +4386,7 @@
 	        }
 	    },
 	    /**
-	     * lends : photon.templating.TemplateCacheEntry.prototype
+	     * lends : photon.templating.Template.prototype
 	     */
 	    {
 	        /**
@@ -4463,7 +4409,7 @@
 	        },
 	        /**
 	         * Adds a child entry
-	         * @param {photon.templating.TemplateCacheEntry} value
+	         * @param {photon.templating.Template} value
 	         */
 	        addChild:function (value) {
 	            value.parent_ = this;
@@ -4483,7 +4429,7 @@
 	        /**
 	         * Gets a child entry by index
 	         * @param {Number} index
-	         * @return {photon.templating.TemplateCacheEntry}
+	         * @return {photon.templating.Template}
 	         */
 	        getChild:function (index) {
 	            return this.children_ ? this.children_[index] : 0;
@@ -4497,7 +4443,7 @@
 	        },
 	        /**
 	         * Gets the entries parent
-	         * @return {photon.templating.TemplateCacheEntry}
+	         * @return {photon.templating.Template}
 	         */
 	        getParent:function () {
 	            return this.parent_;
@@ -4566,77 +4512,92 @@
 	            return this.fragment_.cloneNode(true);
 	        }
 	    });
+	/**
+	 * Cache storage for flow templates
+	 * @private
+	 * @type {Object}
+	 */
 	var flowTemplateCache = {};
 	
-	var nextFlowTemplateCacheId = 0;
+	/**
+	 * Next key for a flow template
+	 * @private
+	 * @type {Number}
+	 */
+	var nextFlowTemplateKey = 0;
 	
+	/**
+	 * Attribute name for data template identifiers
+	 * @const
+	 * @type {String}
+	 */
 	var ATTR_TEMPLATE_ID = "data-template-id";
 	
-	function isFlowTemplateEntryParent(element) {
-	    return this === element || element.flowTemplateEntry_;
+	function isFlowTemplateParent(element) {
+	    return this === element || element.flowTemplate_;
 	}
 	
-	function findFlowTemplateEntryParent(element, rootElement) {
+	function findFlowTemplateParent(element, rootElement) {
 	    if (element === rootElement) {
 	        return null;
 	    }
 	    var parent = photon.dom.findParent(element,
-	        isFlowTemplateEntryParent, rootElement);
-	    return parent ? parent.flowTemplateEntry_ : null;
+	        isFlowTemplateParent, rootElement);
+	    return parent ? parent.flowTemplate_ : null;
 	}
 	
-	function createFlowTemplateEntry(rootEntries, element, rootElement) {
+	function createFlowTemplate(rootEntries, element, rootElement) {
 	    // find parent
-	    var parent = findFlowTemplateEntryParent(element, rootElement);
+	    var parent = findFlowTemplateParent(element, rootElement);
 	
 	    // create template node
-	    var entry = new photon.templating.FlowTemplateCacheEntry(parent);
-	    if (!entry.getParent()) {
-	        rootEntries.push(entry);
+	    var template = new photon.templating.FlowTemplate(parent);
+	    if (!template.getParent()) {
+	        rootEntries.push(template);
 	    }
 	
 	    // associate items
-	    entry.element_ = element;
-	    element.flowTemplateEntry_ = entry;
+	    template.element_ = element;
+	    element.flowTemplate_ = template;
 	
 	    // associate key
 	    element.setAttribute(ATTR_TEMPLATE_ID,
-	        entry.getKey());
+	        template.getKey());
 	}
 	
-	function prepareFlowTemplateEntry(entry) {
-	    var element = entry.element_;
+	function prepareFlowTemplate(template) {
+	    var element = template.element_;
 	    if (element) {
 	        // prepare children
-	        var children = entry.children_;
+	        var children = template.children_;
 	        if (children) {
 	            for (var i = 0, n = children.length; i < n; i++) {
-	                prepareFlowTemplateEntry(children[i]);
+	                prepareFlowTemplate(children[i]);
 	            }
 	        }
 	
 	        // extract template
-	        entry.setTemplate(element.innerHTML);
+	        template.setTemplate(element.innerHTML);
 	        photon.dom.empty(element);
 	
 	        // remove target association, its no longer required and the node is likely to be removed anyway
-	        delete entry.element_;
+	        delete template.element_;
 	    }
 	}
 	
 	photon.defineType(
 	    /**
-	     * @param {TemplateCacheEntry} parent
+	     * @param {Template} parent
 	     */
-	    photon.templating.FlowTemplateCacheEntry = function (parent) {
-	        flowTemplateCache[++nextFlowTemplateCacheId] = this;
-	        photon.templating.FlowTemplateCacheEntry.base(this, parent,
-	            nextFlowTemplateCacheId);
+	    photon.templating.FlowTemplate = function (parent) {
+	        flowTemplateCache[++nextFlowTemplateKey] = this;
+	        photon.templating.FlowTemplate.base(this, parent,
+	            nextFlowTemplateKey);
 	
 	    },
-	    photon.templating.TemplateCacheEntry,
+	    photon.templating.Template,
 	    /**
-	     * @lends  photon.templating.FlowTemplateCacheEntry.prototype
+	     * @lends  photon.templating.FlowTemplate.prototype
 	     */
 	    {
 	        dispose:function () {
@@ -4647,7 +4608,7 @@
 	            }
 	
 	            // invoke base dispose
-	            photon.templating.FlowTemplateCacheEntry
+	            photon.templating.FlowTemplate
 	                .superType.dispose.call(this);
 	
 	            // remove ourselves from the cache
@@ -4656,7 +4617,7 @@
 	        }
 	    },
 	    /**
-	     * @lends photon.templating.FlowTemplateCacheEntry
+	     * @lends photon.templating.FlowTemplate
 	     */
 	    {
 	        getForElement:function (element) {
@@ -4670,19 +4631,19 @@
 	 * @param {HTMLElement} element
 	 */
 	photon.templating.prepareFlowTemplates = function (element) {
-	    var rootEntries = [];
+	    var rootTemplates = [];
 	    if (element.nodeType === 1 && element.getAttribute("data-flow") && !element.getAttribute(ATTR_TEMPLATE_ID)) {
-	        createFlowTemplateEntry(rootEntries, element, element);
+	        createFlowTemplate(rootTemplates, element, element);
 	    }
 	    $('*[data-flow]:not(*[data-template-id])', element).each(function (i, current) {
-	        createFlowTemplateEntry(rootEntries, current, element);
+	        createFlowTemplate(rootTemplates, current, element);
 	    });
 	
-	    for (var i = 0, n = rootEntries.length; i < n; i++) {
-	        prepareFlowTemplateEntry(rootEntries[i]);
+	    for (var i = 0, n = rootTemplates.length; i < n; i++) {
+	        prepareFlowTemplate(rootTemplates[i]);
 	    }
 	
-	    return rootEntries;
+	    return rootTemplates;
 	};
 	
 	/**
@@ -4700,15 +4661,70 @@
 	 */
 	photon.dom.subscribeToCleanup(function (node) {
 	    if (photon.isElement(node)) {
-	        var entry = node.flowTemplateEntry_;
-	        if (entry) {
-	            if (!entry.getParent()) {
-	                entry.dispose();
+	        var template = node.flowTemplate_;
+	        if (template) {
+	            if (!template.getParent()) {
+	                template.dispose();
 	            }
-	            node.flowTemplateEntry_ = undefined;
+	            node.flowTemplate_ = undefined;
 	        }
 	    }
 	});
+	/**
+	 * Pools nodes for rendering
+	 *
+	 * @private
+	 * @param {photon.templating.Template} template
+	 * @constructor
+	 */
+	var TemplatePool = function (template) {
+	    this.pool_ = [];
+	    this.poolIndex_ = 0;
+	    this.template_ = template;
+	};
+	
+	photon.defineType(TemplatePool,
+	    /**
+	     * @lends TemplatePool.prototype
+	     */
+	    {
+	        addToPool:function (templateNodes) {
+	            this.pool_.push(templateNodes);
+	
+	            // remove from from (if attached)
+	            photon.array.forEach(templateNodes,
+	                photon.dom.remove);
+	        },
+	        /**
+	         * Gets a template from the pool
+	         * @return {*}
+	         */
+	        getFragment:function () {
+	            if (this.poolIndex_ < this.pool_.length) {
+	                // grab node(s) from pool
+	                var result = this.pool_[this.poolIndex_++];
+	
+	                // if single node then return
+	                if (result.length === 1) {
+	                    return result[0];
+	                }
+	
+	                // otherwise add to fragment
+	                var fragment = document.createDocumentFragment();
+	                for (var i = 0, n = result.length; i < n; i++) {
+	                    fragment.appendChild(result[i]);
+	                }
+	                return fragment;
+	            }
+	            return this.template_.getFragment();
+	        },
+	        dispose:function () {
+	            for (var i = this.poolIndex_, n = this.pool_.length; i < n; i++) {
+	                photon.dom.cleanNodes(this.pool_[i]);
+	            }
+	            this.pool_ = this.poolIndex_ = undefined;
+	        }
+	    });
 	photon.templating.ItemsRenderer = function (referenceElement, renderTarget, templateEntry) {
 	    this.referenceElement_ = referenceElement;
 	    this.renderTarget_ = renderTarget;
@@ -4717,6 +4733,9 @@
 	
 	photon.defineType(
 	    photon.templating.ItemsRenderer,
+	    /**
+	     * @lends photon.templating.ItemsRenderer.prototype
+	     */
 	    {
 	        dispose:function () {
 	            this.subscribe_(null);
@@ -4729,9 +4748,18 @@
 	                this.nodeSets_ = null;
 	            }
 	        },
+	        /**
+	         * Gets the reference element
+	         * @return {*}
+	         */
 	        getReferenceElement : function() {
 	            return this.referenceElement_;
 	        },
+	        /**
+	         * Sets the items to render
+	         * @param {Array} value The items to render.
+	         * @param {Boolean} [refresh] A value indicating whether the items must be refreshed.
+	         */
 	        setItems:function (value, refresh) {
 	            if (this.items_ !== value) {
 	                this.items_ = value;
@@ -4740,14 +4768,25 @@
 	                this.itemsChanged_();
 	            }
 	        },
+	        /**
+	         * Gets the items to render
+	         * @return {*}
+	         */
 	        getItems:function () {
 	            return this.items_;
 	        },
+	        /**
+	         * Refreshes the rendered view
+	         */
 	        refresh : function() {
 	            if (this.items_) {
 	                this.itemsChanged_();
 	            }
 	        },
+	        /**
+	         * @param items
+	         * @private
+	         */
 	        subscribe_:function (items) {
 	            var subscriber = this.subscriber_;
 	            if (subscriber && subscriber.getOwner() !== items) {
@@ -4759,6 +4798,9 @@
 	                this.subscriber_ = items.subscribe(this.itemsChanged_, this);
 	            }
 	        },
+	        /**
+	         * @private
+	         */
 	        itemsChanged_:function () {
 	            var items = this.items_;
 	            this.subscribe_(items);
@@ -4766,6 +4808,11 @@
 	            this.render_(this.itemsCopy_ || [], items);
 	            this.itemsCopy_ = items.slice(0);
 	        },
+	        /**
+	         * @param {Array} oldItems
+	         * @param {Array} newItems
+	         * @private
+	         */
 	        render_:function (oldItems, newItems) {
 	            this.nodeSets_ = this.nodeSets_ || [];
 	
@@ -4778,7 +4825,7 @@
 	                offset = 0,
 	                defaultReferenceNode = null,
 	                templatePool = new TemplatePool(this.templateEntry_),
-	                parentNode = this.renderTarget_ === photon.binding.flow.RenderTarget.Child ?
+	                parentNode = this.renderTarget_ === photon.templating.RenderTarget.Child ?
 	                    referenceElement :
 	                    referenceElement.parentNode,
 	                dataContext = photon.binding.DataContext.getForElement(referenceElement);
@@ -4815,7 +4862,7 @@
 	                diff.deletedA = 0;
 	            }
 	
-	            if (this.renderTarget_ === photon.binding.flow.RenderTarget.NextSibling && nodeSets.length > 0) {
+	            if (this.renderTarget_ === photon.templating.RenderTarget.NextSibling && nodeSets.length > 0) {
 	                var nodeSet = nodeSets[nodeSets.length - 1],
 	                    defaultReferenceNode = nodeSet[nodeSet.length - 1].nextSibling;
 	            }
@@ -4830,7 +4877,7 @@
 	                var referenceNode = nodeSets[startA] ? nodeSets[startA][0] : defaultReferenceNode;
 	                for (var insIndex = diff.startB, insLength = insIndex + diff.insertedB; insIndex < insLength; insIndex++, offset++) {
 	                    nodeSets.splice(startA++, 0, photon.binding.data.properties["data.template"]
-	                        .insertBefore(parentNode, templatePool.getTemplate(), referenceNode, newItems[insIndex], dataContext));
+	                        .insertBefore(parentNode, templatePool.getFragment(), referenceNode, newItems[insIndex], dataContext));
 	                }
 	            }
 	
@@ -4839,6 +4886,19 @@
 	        }
 	    }
 	);
+	/**
+	 * @enum {Number}
+	 */
+	photon.templating.RenderTarget = {
+	    /**
+	     * @constant
+	     */
+	    Child:0,
+	    /**
+	     * @constant
+	     */
+	    NextSibling:1
+	};
 	photon.defineType(
 	    photon.binding.DataContext = function () {
 	        this.value_ = undefined;

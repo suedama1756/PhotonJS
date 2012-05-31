@@ -418,11 +418,11 @@ DefineTestSuite("ItemsRenderer",
             requiredHtmlResources : "eachChild",
             becauseOf : function() {
                 var data = [];
-                for (var i=0; i<10000; i++) {
+                for (var i=0; i<1000; i++) {
                     data[i] = i;
                 }
                 this.bindMs = timeCall(this.bind, this, [data]);
-                for (var i=0; i<1000; i++) {
+                for (var i=0; i<250; i++) {
                     switch (this.randomInt(3)) {
                         case 0:
                             data.splice(this.randomInt(data.length), 0, this.randomInt(10000));
@@ -453,14 +453,17 @@ DefineTestSuite("ItemsRenderer",
     },
     {
         defaultInitialData:[1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+        tearDown:function() {
+           photon.dom.cleanNode(document);
+        },
         bind:function (data) {
             this.flowElement_ = $("#flow")[0];
 
-            var templateEntry = new photon.templating.TemplateCacheEntry(null, "key");
+            var templateEntry = new photon.templating.Template(null, "key");
             templateEntry.setTemplate("<span class='item' data-bind='innerText:$data' ></span>");
 
             this.itemsRenderer_ = new photon.templating.ItemsRenderer(
-                this.flowElement_, photon.binding.flow.RenderTarget.Child, templateEntry);
+                this.flowElement_, photon.templating.RenderTarget.Child, templateEntry);
 
             this.dataContexts_ = this.dataContexts_ || [];
             this.dataContexts_.push(data);

@@ -57,7 +57,7 @@ DefineTestSuite("TemplateCache",
                 this.systemUnderTest_.addElement("template");
             },
             "Should be able to get entry using the element id as the name":function () {
-                assertNotNullOrUndefined(this.systemUnderTest_.getEntry("template"));
+                assertNotNullOrUndefined(this.systemUnderTest_.getTemplate("template"));
             }
         },
         "When adding an element and no name is specified":{
@@ -66,7 +66,7 @@ DefineTestSuite("TemplateCache",
                 this.systemUnderTest_.addElement($("#template")[0]);
             },
             "Should be able to get entry using the element id as the name":function () {
-                assertNotNullOrUndefined(this.systemUnderTest_.getEntry("template"));
+                assertNotNullOrUndefined(this.systemUnderTest_.getTemplate("template"));
             }
         },
         "When adding an element by id and a name has been specified":{
@@ -75,7 +75,7 @@ DefineTestSuite("TemplateCache",
                 this.systemUnderTest_.addElement("template", "alternativeName");
             },
             "Should get entry by specified name ":function () {
-                assertNotNullOrUndefined(this.systemUnderTest_.getEntry("alternativeName"));
+                assertNotNullOrUndefined(this.systemUnderTest_.getTemplate("alternativeName"));
             }
         },
         "When adding an element and a name has been specified":{
@@ -84,7 +84,7 @@ DefineTestSuite("TemplateCache",
                 this.systemUnderTest_.addElement($("#template")[0], "alternativeName");
             },
             "Should get entry by specified name ":function () {
-                assertNotNullOrUndefined(this.systemUnderTest_.getEntry("alternativeName"));
+                assertNotNullOrUndefined(this.systemUnderTest_.getTemplate("alternativeName"));
             }
         },
         "When adding an element with no id and no name has been specified":{
@@ -100,8 +100,8 @@ DefineTestSuite("TemplateCache",
                 this.systemUnderTest_.addResourceElement("templates");
             },
             "Should add correctly named template entries":function () {
-                assertNotNullOrUndefined(this.systemUnderTest_.getEntry("templates.Template1"));
-                assertNotNullOrUndefined(this.systemUnderTest_.getEntry("templates.Template2"));
+                assertNotNullOrUndefined(this.systemUnderTest_.getTemplate("templates.Template1"));
+                assertNotNullOrUndefined(this.systemUnderTest_.getTemplate("templates.Template2"));
             }
         },
         "When adding an element resource that contains multiple comment delimited templates":{
@@ -110,8 +110,8 @@ DefineTestSuite("TemplateCache",
                 this.systemUnderTest_.addResourceElement($("#templates")[0]);
             },
             "Should add correctly named template entries":function () {
-                assertNotNullOrUndefined(this.systemUnderTest_.getEntry("templates.Template1"));
-                assertNotNullOrUndefined(this.systemUnderTest_.getEntry("templates.Template2"));
+                assertNotNullOrUndefined(this.systemUnderTest_.getTemplate("templates.Template1"));
+                assertNotNullOrUndefined(this.systemUnderTest_.getTemplate("templates.Template2"));
             }
         },
         "When adding an element resource by id that contains multiple comment delimited templates and a name has been specified":{
@@ -120,8 +120,8 @@ DefineTestSuite("TemplateCache",
                 this.systemUnderTest_.addResourceElement("templates", "alternativeName");
             },
             "Should add correctly named template entries":function () {
-                assertNotNullOrUndefined(this.systemUnderTest_.getEntry("alternativeName.Template1"));
-                assertNotNullOrUndefined(this.systemUnderTest_.getEntry("alternativeName.Template2"));
+                assertNotNullOrUndefined(this.systemUnderTest_.getTemplate("alternativeName.Template1"));
+                assertNotNullOrUndefined(this.systemUnderTest_.getTemplate("alternativeName.Template2"));
             }
         },
         "When adding an element resource that contains multiple comment delimited templates and a name has been specified":{
@@ -130,8 +130,8 @@ DefineTestSuite("TemplateCache",
                 this.systemUnderTest_.addResourceElement($("#templates")[0], "alternativeName");
             },
             "Should add correctly named template entries":function () {
-                assertNotNullOrUndefined(this.systemUnderTest_.getEntry("alternativeName.Template1"));
-                assertNotNullOrUndefined(this.systemUnderTest_.getEntry("alternativeName.Template2"));
+                assertNotNullOrUndefined(this.systemUnderTest_.getTemplate("alternativeName.Template1"));
+                assertNotNullOrUndefined(this.systemUnderTest_.getTemplate("alternativeName.Template2"));
             }
         },
         "When adding an element resource by id that does not contain template comment delimiters":{
@@ -140,7 +140,7 @@ DefineTestSuite("TemplateCache",
                 this.systemUnderTest_.addResourceElement("template");
             },
             "Should set the templates name to the if of the element":function () {
-                assertNotNullOrUndefined(this.systemUnderTest_.getEntry("template"));
+                assertNotNullOrUndefined(this.systemUnderTest_.getTemplate("template"));
             },
             "Should successfully get as html":function () {
                 assertHtml(this.htmlResources.nonCommentDelimitedTemplate.expectedTemplateHtml,
@@ -155,7 +155,7 @@ DefineTestSuite("TemplateCache",
             becauseOf:function () {
                 this.systemUnderTest_.addHtml('template', '<div id="singleFlow" data-flow="if:condition()">' +
                     '<span>data flow content</span></div>');
-                this.cacheEntry_ = this.systemUnderTest_.getEntry('template');
+                this.template_ = this.systemUnderTest_.getTemplate('template');
             },
             "Should remove flow element content":function () {
                 var flowElement = this.queryFragment('template', '#singleFlow');
@@ -169,15 +169,15 @@ DefineTestSuite("TemplateCache",
                 assertNotNullOrUndefined(templateId);
 
                 // assert ids match
-                assertEquals(templateId, this.cacheEntry_.getChild(0).getKey());
+                assertEquals(templateId, this.template_.getChild(0).getKey());
             },
             "Should attach child flow dependency to entry":function() {
                 // get child "flow" dependancy and verify link to parent
-                assertEquals(1, this.cacheEntry_.getChildCount());
+                assertEquals(1, this.template_.getChildCount());
 
-                var entryFlowTemplateEntry = this.cacheEntry_.getChild(0);
+                var entryFlowTemplateEntry = this.template_.getChild(0);
                 assertNotNullOrUndefined(entryFlowTemplateEntry);
-                assertEquals(this.cacheEntry_, entryFlowTemplateEntry.getParent());
+                assertEquals(this.template_, entryFlowTemplateEntry.getParent());
             }
         },
         "When removing a template" : {
@@ -186,10 +186,10 @@ DefineTestSuite("TemplateCache",
                     '<span>data flow content</span></div>');
 
                 // get cache entry
-                this.cacheEntry_ = this.systemUnderTest_.getEntry('template');
+                this.template_ = this.systemUnderTest_.getTemplate('template');
 
                 // record calls to dispose
-                photon.testing.mock.recordCalls(this.cacheEntry_, "dispose");
+                photon.testing.mock.recordCalls(this.template_, "dispose");
 
                 // remove the entry
                 this.systemUnderTest_.remove('template');
@@ -199,7 +199,7 @@ DefineTestSuite("TemplateCache",
                 assertNull(this.systemUnderTest_.findFragment('template'));
             },
             "Should invoke dispose on entry" : function() {
-                this.cacheEntry_.dispose.assertWasCalled(1);
+                this.template_.dispose.assertWasCalled(1);
             }
         },
         "When clearing" : {
@@ -208,8 +208,8 @@ DefineTestSuite("TemplateCache",
                 this.systemUnderTest_.addHtml('template2', '<div>Template2</div>');
 
                 // get cache entry
-                this.cacheEntry1_ = this.systemUnderTest_.getEntry('template1');
-                this.cacheEntry2_ = this.systemUnderTest_.getEntry('template2');
+                this.cacheEntry1_ = this.systemUnderTest_.getTemplate('template1');
+                this.cacheEntry2_ = this.systemUnderTest_.getTemplate('template2');
 
                 // record calls to dispose
                 photon.testing.mock.recordCalls(this.cacheEntry1_, "dispose");

@@ -116,7 +116,7 @@ photon.defineType(
                 // TODO: If the template has changed we will need to re-render everything!!
                 if (!this.itemsRenderer_) {
                     this.itemsRenderer_ = new photon.templating.ItemsRenderer(
-                        target, photon.binding.flow.RenderTarget.NextSibling, photon.templating.getCache().getEntry(newValue.name)
+                        target, photon.templating.RenderTarget.NextSibling, photon.templating.getCache().getTemplate(newValue.name)
                     );
                     photon.addDisposable(target, this.itemsRenderer_);
                 }

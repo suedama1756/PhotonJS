@@ -10,47 +10,6 @@ photon.binding.flow.FlowBinding = function (target, expression) {
     photon.addDisposable(target, this);
 };
 
-var TemplatePool = function (cacheEntry) {
-    this.pool_ = [];
-    this.poolIndex_ = 0;
-    this.cacheEntry_ = cacheEntry;
-};
-
-photon.defineType(TemplatePool, {
-    addToPool:function (templateNodes) {
-        this.pool_.push(templateNodes);
-
-        // remove from from (if attached)
-        photon.array.forEach(templateNodes,
-            photon.dom.remove);
-    },
-    getTemplate:function () {
-        if (this.poolIndex_ < this.pool_.length) {
-            // grab node(s) from pool
-            var result = this.pool_[this.poolIndex_++];
-
-            // if single node then return
-            if (result.length === 1) {
-                return result[0];
-            }
-
-            // otherwise add to fragment
-            var fragment = document.createDocumentFragment();
-            for (var i = 0, n = result.length; i < n; i++) {
-                fragment.appendChild(result[i]);
-            }
-            return fragment;
-        }
-        return this.cacheEntry_.getFragment();
-    },
-    dispose:function () {
-        for (var i = this.poolIndex_, n = this.pool_.length; i < n; i++) {
-            photon.dom.cleanNodes(this.pool_[i]);
-        }
-        this.pool_ = this.poolIndex_ = undefined;
-    }
-});
-
 photon.defineType(
     /**
      * Constructor
@@ -121,9 +80,9 @@ photon.defineType(
                     return;
                 }
 
-                var fragment = photon.templating.FlowTemplateCacheEntry.
+                var fragment = photon.templating.FlowTemplate.
                     getForElement(target).getFragment();
-                if (applyTo === photon.binding.flow.RenderTarget.Child) {
+                if (applyTo === photon.templating.RenderTarget.Child) {
                     this.nodeSets_ = [photon.binding.data.properties["data.template"]
                         .insertBefore2(target, fragment, null)];
                 } else {
@@ -139,7 +98,7 @@ photon.defineType(
             var target = this.getTarget();
 
             this.itemsRenderer_ = this.itemsRenderer_ || new photon.templating.ItemsRenderer(
-                target, this.getExpression().getApplyTo(), photon.templating.FlowTemplateCacheEntry.getForElement(target)
+                target, this.getExpression().getApplyTo(), photon.templating.FlowTemplate.getForElement(target)
             );
             this.itemsRenderer_.setItems(this.flowData_);
         },

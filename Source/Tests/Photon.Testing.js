@@ -142,7 +142,7 @@ photon.testing.mock.recordCalls = function (obj, name) {
 
 timeCall = function(fn, thisObj, args) {
     var start = (new Date).getTime();
-    fn.apply(thisObj, args);
+    fn.apply(thisObj, args || []);
     return (new Date).getTime() - start;
 }
 

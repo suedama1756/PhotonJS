@@ -4,7 +4,7 @@
  * @param {String} text the text of the expression
  * @param {String} flowType
  * @param {Function} getFlowData
- * @param {photon.binding.flow.RenderTarget} applyTo
+ * @param {photon.templating.RenderTarget} applyTo
  *
  * @constructor
  * @extends photon.binding.BindingExpression
@@ -20,11 +20,11 @@ photon.binding.flow.FlowBindingExpression = function (text, flowType, getFlowDat
     this.flowType_ = flowType;
 
     /**
-     * @type {photon.binding.flow.RenderTarget}
+     * @type {photon.templating.RenderTarget}
      * @private
      */
     this.applyTo_ = photon.isNullOrUndefined(applyTo) ?
-        photon.binding.flow.RenderTarget.Child :
+        photon.templating.RenderTarget.Child :
         applyTo;
 
     /**
@@ -68,7 +68,7 @@ photon.defineType(
         },
         /**
          * Gets a value indicating where in the DOM the flow template should be applied.
-         * @return {photon.binding.flow.RenderTarget}
+         * @return {photon.templating.RenderTarget}
          */
         getApplyTo : function() {
             return this.applyTo_;

@@ -1,4 +1,4 @@
-DefineTestSuite("FlowTemplateCacheEntry",
+DefineTestSuite("FlowTemplate",
     {
         "When creating":{
             "Should create":function () {
@@ -16,7 +16,7 @@ DefineTestSuite("FlowTemplateCacheEntry",
                     this.systemUnderTest_);
             },
             "Should increment keys":function () {
-                var newEntry = new photon.templating.FlowTemplateCacheEntry();
+                var newEntry = new photon.templating.FlowTemplate();
                 assertEquals(this.systemUnderTest_.getKey() + 1,
                     newEntry.getKey());
             }
@@ -152,7 +152,7 @@ DefineTestSuite("FlowTemplateCacheEntry",
     },
     {
         createSystemUnderTest:function () {
-            return this.skipCreationOfSystemUnderTest_ ? null : new photon.templating.FlowTemplateCacheEntry();
+            return this.skipCreationOfSystemUnderTest_ ? null : new photon.templating.FlowTemplate();
         },
         tearDown : function() {
             var cache = photon.templating.getFlowTemplateCache_();

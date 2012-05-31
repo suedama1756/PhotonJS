@@ -1,74 +1,89 @@
+/**
+ * Cache storage for flow templates
+ * @private
+ * @type {Object}
+ */
 var flowTemplateCache = {};
 
-var nextFlowTemplateCacheId = 0;
+/**
+ * Next key for a flow template
+ * @private
+ * @type {Number}
+ */
+var nextFlowTemplateKey = 0;
 
+/**
+ * Attribute name for data template identifiers
+ * @const
+ * @type {String}
+ */
 var ATTR_TEMPLATE_ID = "data-template-id";
 
-function isFlowTemplateEntryParent(element) {
-    return this === element || element.flowTemplateEntry_;
+function isFlowTemplateParent(element) {
+    return this === element || element.flowTemplate_;
 }
 
-function findFlowTemplateEntryParent(element, rootElement) {
+function findFlowTemplateParent(element, rootElement) {
     if (element === rootElement) {
         return null;
     }
     var parent = photon.dom.findParent(element,
-        isFlowTemplateEntryParent, rootElement);
-    return parent ? parent.flowTemplateEntry_ : null;
+        isFlowTemplateParent, rootElement);
+    return parent ? parent.flowTemplate_ : null;
 }
 
-function createFlowTemplateEntry(rootEntries, element, rootElement) {
+function createFlowTemplate(rootEntries, element, rootElement) {
     // find parent
-    var parent = findFlowTemplateEntryParent(element, rootElement);
+    var parent = findFlowTemplateParent(element, rootElement);
 
     // create template node
-    var entry = new photon.templating.FlowTemplateCacheEntry(parent);
-    if (!entry.getParent()) {
-        rootEntries.push(entry);
+    var template = new photon.templating.FlowTemplate(parent);
+    if (!template.getParent()) {
+        rootEntries.push(template);
     }
 
     // associate items
-    entry.element_ = element;
-    element.flowTemplateEntry_ = entry;
+    template.element_ = element;
+    element.flowTemplate_ = template;
 
     // associate key
     element.setAttribute(ATTR_TEMPLATE_ID,
-        entry.getKey());
+        template.getKey());
 }
 
-function prepareFlowTemplateEntry(entry) {
-    var element = entry.element_;
+function prepareFlowTemplate(template) {
+    var element = template.element_;
     if (element) {
         // prepare children
-        var children = entry.children_;
+        var children = template.children_;
         if (children) {
             for (var i = 0, n = children.length; i < n; i++) {
-                prepareFlowTemplateEntry(children[i]);
+                prepareFlowTemplate(children[i]);
             }
         }
 
         // extract template
-        entry.setTemplate(element.innerHTML);
+        template.setTemplate(element.innerHTML);
         photon.dom.empty(element);
 
         // remove target association, its no longer required and the node is likely to be removed anyway
-        delete entry.element_;
+        delete template.element_;
     }
 }
 
 photon.defineType(
     /**
-     * @param {TemplateCacheEntry} parent
+     * @param {Template} parent
      */
-    photon.templating.FlowTemplateCacheEntry = function (parent) {
-        flowTemplateCache[++nextFlowTemplateCacheId] = this;
-        photon.templating.FlowTemplateCacheEntry.base(this, parent,
-            nextFlowTemplateCacheId);
+    photon.templating.FlowTemplate = function (parent) {
+        flowTemplateCache[++nextFlowTemplateKey] = this;
+        photon.templating.FlowTemplate.base(this, parent,
+            nextFlowTemplateKey);
 
     },
-    photon.templating.TemplateCacheEntry,
+    photon.templating.Template,
     /**
-     * @lends  photon.templating.FlowTemplateCacheEntry.prototype
+     * @lends  photon.templating.FlowTemplate.prototype
      */
     {
         dispose:function () {
@@ -79,7 +94,7 @@ photon.defineType(
             }
 
             // invoke base dispose
-            photon.templating.FlowTemplateCacheEntry
+            photon.templating.FlowTemplate
                 .superType.dispose.call(this);
 
             // remove ourselves from the cache
@@ -88,7 +103,7 @@ photon.defineType(
         }
     },
     /**
-     * @lends photon.templating.FlowTemplateCacheEntry
+     * @lends photon.templating.FlowTemplate
      */
     {
         getForElement:function (element) {
@@ -102,19 +117,19 @@ photon.defineType(
  * @param {HTMLElement} element
  */
 photon.templating.prepareFlowTemplates = function (element) {
-    var rootEntries = [];
+    var rootTemplates = [];
     if (element.nodeType === 1 && element.getAttribute("data-flow") && !element.getAttribute(ATTR_TEMPLATE_ID)) {
-        createFlowTemplateEntry(rootEntries, element, element);
+        createFlowTemplate(rootTemplates, element, element);
     }
     $('*[data-flow]:not(*[data-template-id])', element).each(function (i, current) {
-        createFlowTemplateEntry(rootEntries, current, element);
+        createFlowTemplate(rootTemplates, current, element);
     });
 
-    for (var i = 0, n = rootEntries.length; i < n; i++) {
-        prepareFlowTemplateEntry(rootEntries[i]);
+    for (var i = 0, n = rootTemplates.length; i < n; i++) {
+        prepareFlowTemplate(rootTemplates[i]);
     }
 
-    return rootEntries;
+    return rootTemplates;
 };
 
 /**
@@ -132,12 +147,12 @@ photon.templating.getFlowTemplateCache_ = function () {
  */
 photon.dom.subscribeToCleanup(function (node) {
     if (photon.isElement(node)) {
-        var entry = node.flowTemplateEntry_;
-        if (entry) {
-            if (!entry.getParent()) {
-                entry.dispose();
+        var template = node.flowTemplate_;
+        if (template) {
+            if (!template.getParent()) {
+                template.dispose();
             }
-            node.flowTemplateEntry_ = undefined;
+            node.flowTemplate_ = undefined;
         }
     }
 });

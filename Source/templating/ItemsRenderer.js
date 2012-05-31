@@ -6,6 +6,9 @@ photon.templating.ItemsRenderer = function (referenceElement, renderTarget, temp
 
 photon.defineType(
     photon.templating.ItemsRenderer,
+    /**
+     * @lends photon.templating.ItemsRenderer.prototype
+     */
     {
         dispose:function () {
             this.subscribe_(null);
@@ -18,9 +21,18 @@ photon.defineType(
                 this.nodeSets_ = null;
             }
         },
+        /**
+         * Gets the reference element
+         * @return {*}
+         */
         getReferenceElement : function() {
             return this.referenceElement_;
         },
+        /**
+         * Sets the items to render
+         * @param {Array} value The items to render.
+         * @param {Boolean} [refresh] A value indicating whether the items must be refreshed.
+         */
         setItems:function (value, refresh) {
             if (this.items_ !== value) {
                 this.items_ = value;
@@ -29,14 +41,25 @@ photon.defineType(
                 this.itemsChanged_();
             }
         },
+        /**
+         * Gets the items to render
+         * @return {*}
+         */
         getItems:function () {
             return this.items_;
         },
+        /**
+         * Refreshes the rendered view
+         */
         refresh : function() {
             if (this.items_) {
                 this.itemsChanged_();
             }
         },
+        /**
+         * @param items
+         * @private
+         */
         subscribe_:function (items) {
             var subscriber = this.subscriber_;
             if (subscriber && subscriber.getOwner() !== items) {
@@ -48,6 +71,9 @@ photon.defineType(
                 this.subscriber_ = items.subscribe(this.itemsChanged_, this);
             }
         },
+        /**
+         * @private
+         */
         itemsChanged_:function () {
             var items = this.items_;
             this.subscribe_(items);
@@ -55,6 +81,11 @@ photon.defineType(
             this.render_(this.itemsCopy_ || [], items);
             this.itemsCopy_ = items.slice(0);
         },
+        /**
+         * @param {Array} oldItems
+         * @param {Array} newItems
+         * @private
+         */
         render_:function (oldItems, newItems) {
             this.nodeSets_ = this.nodeSets_ || [];
 
@@ -67,7 +98,7 @@ photon.defineType(
                 offset = 0,
                 defaultReferenceNode = null,
                 templatePool = new TemplatePool(this.templateEntry_),
-                parentNode = this.renderTarget_ === photon.binding.flow.RenderTarget.Child ?
+                parentNode = this.renderTarget_ === photon.templating.RenderTarget.Child ?
                     referenceElement :
                     referenceElement.parentNode,
                 dataContext = photon.binding.DataContext.getForElement(referenceElement);
@@ -104,7 +135,7 @@ photon.defineType(
                 diff.deletedA = 0;
             }
 
-            if (this.renderTarget_ === photon.binding.flow.RenderTarget.NextSibling && nodeSets.length > 0) {
+            if (this.renderTarget_ === photon.templating.RenderTarget.NextSibling && nodeSets.length > 0) {
                 var nodeSet = nodeSets[nodeSets.length - 1],
                     defaultReferenceNode = nodeSet[nodeSet.length - 1].nextSibling;
             }
@@ -119,7 +150,7 @@ photon.defineType(
                 var referenceNode = nodeSets[startA] ? nodeSets[startA][0] : defaultReferenceNode;
                 for (var insIndex = diff.startB, insLength = insIndex + diff.insertedB; insIndex < insLength; insIndex++, offset++) {
                     nodeSets.splice(startA++, 0, photon.binding.data.properties["data.template"]
-                        .insertBefore(parentNode, templatePool.getTemplate(), referenceNode, newItems[insIndex], dataContext));
+                        .insertBefore(parentNode, templatePool.getFragment(), referenceNode, newItems[insIndex], dataContext));
                 }
             }
 
