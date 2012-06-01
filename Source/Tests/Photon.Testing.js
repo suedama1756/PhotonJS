@@ -163,10 +163,6 @@ DefineTestCase = function (suiteName, testCaseName, prototype /* ... */) {
     }
 
     obj.setUp = function () {
-        if (this.createSystemUnderTest) {
-            this.systemUnderTest_ = this.createSystemUnderTest();
-        }
-
         if (this.requiredHtmlResources) {
             if (photon.isArray(this.htmlResources)) {
                 photon.array.forEach(this.htmlResources, function (htmlResource) {
@@ -177,6 +173,11 @@ DefineTestCase = function (suiteName, testCaseName, prototype /* ... */) {
                 invokeCommentDependentHtmlWriter(this.htmlResources[this.requiredHtmlResources], this);
             }
         }
+
+        if (this.createSystemUnderTest) {
+            this.systemUnderTest_ = this.createSystemUnderTest();
+        }
+
         if (this.becauseOf) {
             this.becauseOf();
         }
