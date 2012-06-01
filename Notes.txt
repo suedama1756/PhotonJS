@@ -160,8 +160,9 @@ We need to seperate the binding tree creation from the actual initialization. Id
 11. Add support for expression triggers, expression triggers fire when an expression changes, you could argue that
     this should be handled in the view model layer, especially for tracking purposes (and perhaps this is true)...
 12. Add support for background rebinding on any pojo.
-13. Move each rendering code into a separate namespace/type so it can be shared and tested in isolation.
 14. Change setTemplate in template entry, to setHtml, setFragment.
+15. Fix issues in data-template property, re-it not being able to switch template.
+16. Refactor flow bindings to be two separate types.
 
 
 

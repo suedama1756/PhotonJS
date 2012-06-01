@@ -2,26 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="12b894be-7c6b-4b2d-aae8-2c4fccad1ed9" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Examples/NamedTemplates.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Build/Build.msbuild" afterPath="$PROJECT_DIR$/Build/Build.msbuild" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/dictionaries/Jason_Young.xml" afterPath="$PROJECT_DIR$/.idea/dictionaries/Jason_Young.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Build/Temp/photon.temp" afterPath="$PROJECT_DIR$/Build/Temp/photon.temp" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Notes.txt" afterPath="$PROJECT_DIR$/Notes.txt" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Output/Photon-debug.js" afterPath="$PROJECT_DIR$/Output/Photon-debug.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Output/Photon-min.js" afterPath="$PROJECT_DIR$/Output/Photon-min.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Source/3rdParty/SlickGrid/Sample.SlickGrid.htm" afterPath="$PROJECT_DIR$/Source/3rdParty/SlickGrid/Sample.SlickGrid.htm" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Source/Tests/Photon.Testing.js" afterPath="$PROJECT_DIR$/Source/Tests/Photon.Testing.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Source/Tests/binding/flow/FlowBinding.Each.Rending.js" afterPath="$PROJECT_DIR$/Source/Tests/binding/flow/FlowBinding.Each.Rending.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Source/Tests/binding/flow/FlowBindingExpression.Parsing.js" afterPath="$PROJECT_DIR$/Source/Tests/binding/flow/FlowBindingExpression.Parsing.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Source/Tests/templating/TemplateCacheTests.js" afterPath="$PROJECT_DIR$/Source/Tests/templating/TemplateCacheTests.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Source/binding/data/properties/DataTemplateProperty.js" afterPath="$PROJECT_DIR$/Source/binding/data/properties/DataTemplateProperty.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Source/binding/flow/FlowBinding.js" afterPath="$PROJECT_DIR$/Source/binding/flow/FlowBinding.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Source/binding/flow/FlowBindingExpression.js" afterPath="$PROJECT_DIR$/Source/binding/flow/FlowBindingExpression.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Source/binding/flow/FlowBindingExpressionBuilder.js" afterPath="$PROJECT_DIR$/Source/binding/flow/FlowBindingExpressionBuilder.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Source/templating/TemplateCache.js" afterPath="$PROJECT_DIR$/Source/templating/TemplateCache.js" />
-      <change type="MOVED" beforePath="D:\Photon.Web\Source\binding\flow\FlowRenderTarget.js" afterPath="$PROJECT_DIR$/Source/binding/flow/RenderTarget.js" />
-      <change type="MOVED" beforePath="D:\Photon.Web\Source\templating\EachRenderer.js" afterPath="$PROJECT_DIR$/Source/templating/ItemsRenderer.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Source/Tests/jsTestDriver.conf" afterPath="$PROJECT_DIR$/Source/Tests/jsTestDriver.conf" />
     </list>
     <ignored path="Photon.Web.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -43,37 +26,37 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="ItemsRenderer.js" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Source/templating/ItemsRenderer.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="118" column="98" selection-start="4749" selection-end="4749" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file leaf-file-name="FlowBinding.js" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Source/binding/flow/FlowBinding.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="17" column="15" selection-start="523" selection-end="523" vertical-scroll-proportion="0.0">
+            <state line="133" column="0" selection-start="4283" selection-end="4283" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="DataTemplateProperty.js" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="Notes.txt" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/Notes.txt">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="164" column="46" selection-start="8955" selection-end="8955" vertical-scroll-proportion="0.91977614">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="jsTestDriver.conf" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Source/Tests/jsTestDriver.conf">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="19" column="53" selection-start="713" selection-end="713" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="DataTemplateProperty.js" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Source/binding/data/properties/DataTemplateProperty.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="109" column="41" selection-start="4246" selection-end="4246" vertical-scroll-proportion="0.1764706">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="NamedTemplates.html" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Examples/NamedTemplates.html">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="27" column="40" selection-start="1098" selection-end="1098" vertical-scroll-proportion="-5.5">
+            <state line="119" column="21" selection-start="4894" selection-end="4894" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -129,13 +112,13 @@
           <provider selected="true" editor-type-id="text-editor">
             <state line="4742" column="25" selection-start="166822" selection-end="166822" vertical-scroll-proportion="0.0">
               <folding>
-                <marker date="1338409974125" expanded="true" signature="116637:120851" placeholder="{...}" />
-                <marker date="1338409974125" expanded="true" signature="117235:117523" placeholder="{...}" />
-                <marker date="1338409974125" expanded="true" signature="117376:117406" placeholder="{...}" />
-                <marker date="1338409974125" expanded="true" signature="117730:118294" placeholder="{...}" />
-                <marker date="1338409974125" expanded="true" signature="117966:118178" placeholder="{...}" />
-                <marker date="1338409974125" expanded="true" signature="118463:119400" placeholder="{...}" />
-                <marker date="1338409974125" expanded="true" signature="118588:118736" placeholder="{...}" />
+                <marker date="1338485071258" expanded="true" signature="116637:120851" placeholder="{...}" />
+                <marker date="1338485071258" expanded="true" signature="117235:117523" placeholder="{...}" />
+                <marker date="1338485071258" expanded="true" signature="117376:117406" placeholder="{...}" />
+                <marker date="1338485071258" expanded="true" signature="117730:118294" placeholder="{...}" />
+                <marker date="1338485071258" expanded="true" signature="117966:118178" placeholder="{...}" />
+                <marker date="1338485071258" expanded="true" signature="118463:119400" placeholder="{...}" />
+                <marker date="1338485071258" expanded="true" signature="118588:118736" placeholder="{...}" />
               </folding>
             </state>
           </provider>
@@ -159,22 +142,22 @@
   <component name="IdeDocumentHistory">
     <option name="changedFiles">
       <list>
-        <option value="$PROJECT_DIR$/Source/Tests/binding/flow/FlowIfBindingTests.js" />
         <option value="$PROJECT_DIR$/Source/Tests/binding/flow/FlowBinding.If.ExpressionChanged.js" />
         <option value="$PROJECT_DIR$/Examples/ExternalTemplates.Template.htm" />
         <option value="$PROJECT_DIR$/Examples/Validation.html" />
         <option value="$PROJECT_DIR$/Source/binding/flow/FlowRenderTarget.js" />
         <option value="$PROJECT_DIR$/Source/templating/EachRenderer.js" />
         <option value="$PROJECT_DIR$/Build/Build.msbuild" />
-        <option value="$PROJECT_DIR$/Notes.txt" />
         <option value="$PROJECT_DIR$/Source/Tests/Photon.Testing.js" />
         <option value="$PROJECT_DIR$/Source/Tests/binding/flow/FlowBinding.Each.Rending.js" />
         <option value="$PROJECT_DIR$/Source/3rdParty/SlickGrid/Sample.SlickGrid.htm" />
-        <option value="$PROJECT_DIR$/Source/binding/flow/FlowBinding.js" />
         <option value="$PROJECT_DIR$/Source/templating/TemplateCache.js" />
         <option value="$PROJECT_DIR$/Examples/NamedTemplates.html" />
         <option value="$PROJECT_DIR$/Source/templating/ItemsRenderer.js" />
         <option value="$PROJECT_DIR$/Source/binding/data/properties/DataTemplateProperty.js" />
+        <option value="$PROJECT_DIR$/Source/binding/flow/FlowBinding.js" />
+        <option value="$PROJECT_DIR$/Source/Tests/jsTestDriver.conf" />
+        <option value="$PROJECT_DIR$/Notes.txt" />
       </list>
     </option>
   </component>
@@ -399,8 +382,8 @@
       <method />
     </configuration>
     <list size="3">
-      <item index="0" class="java.lang.String" itemvalue="JsTestDriver.Method" />
-      <item index="1" class="java.lang.String" itemvalue="JsTestDriver.jsTestDriver.conf" />
+      <item index="0" class="java.lang.String" itemvalue="JsTestDriver.jsTestDriver.conf" />
+      <item index="1" class="java.lang.String" itemvalue="JsTestDriver.Method" />
       <item index="2" class="java.lang.String" itemvalue="JsTestDriver.All" />
     </list>
   </component>
@@ -438,25 +421,25 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1382" height="754" extended-state="6" />
-    <editor active="false" />
+    <editor active="true" />
     <layout>
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.14983165" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Phing Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.17424242" sideWeight="0.6700337" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.2020202" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="12" side_tool="true" content_ui="tabs" />
-      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
-      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32996634" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32996634" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="Regex Tester" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
+      <window_info id="Phing Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.17424242" sideWeight="0.6700337" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="true" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.22954546" sideWeight="0.6700337" order="0" side_tool="false" content_ui="combo" />
-      <window_info id="Run" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32996634" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.23712121" sideWeight="0.61279464" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="12" side_tool="true" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3861066" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="JsTestDriver Server" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32996634" sideWeight="0.5" order="11" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32996634" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.2020202" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32996634" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.17651515" sideWeight="0.6700337" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
@@ -518,16 +501,6 @@
     <breakpoint-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/Source/templating/TemplateCacheEntry.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="4" column="22" selection-start="119" selection-end="119" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Build/Temp/photon.temp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="195" column="24" selection-start="5754" selection-end="5754" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/Source/binding/binding.js">
       <provider selected="true" editor-type-id="text-editor">
         <state line="123" column="12" selection-start="5125" selection-end="5125" vertical-scroll-proportion="0.0" />
@@ -543,9 +516,29 @@
         <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0" />
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Notes.txt">
+    <entry file="file://$PROJECT_DIR$/Source/templating/ItemsRenderer.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="160" column="66" selection-start="8656" selection-end="8656" vertical-scroll-proportion="0.0" />
+        <state line="118" column="98" selection-start="4749" selection-end="4749" vertical-scroll-proportion="0.0" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Examples/NamedTemplates.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="27" column="40" selection-start="1098" selection-end="1098" vertical-scroll-proportion="0.0" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Source/Tests/binding/flow/FlowBinding.If.ExpressionChanged.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Source/Tests/jsTestDriver.conf">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="19" column="53" selection-start="713" selection-end="713" vertical-scroll-proportion="0.0" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Source/binding/data/properties/DataTemplateProperty.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="119" column="21" selection-start="4894" selection-end="4894" vertical-scroll-proportion="0.0" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/Examples/ExternalTemplates.htm">
@@ -575,41 +568,19 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/Output/Photon-debug.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="4742" column="25" selection-start="166822" selection-end="166822" vertical-scroll-proportion="0.0">
-          <folding>
-            <marker date="1338409974125" expanded="true" signature="116637:120851" placeholder="{...}" />
-            <marker date="1338409974125" expanded="true" signature="117235:117523" placeholder="{...}" />
-            <marker date="1338409974125" expanded="true" signature="117376:117406" placeholder="{...}" />
-            <marker date="1338409974125" expanded="true" signature="117730:118294" placeholder="{...}" />
-            <marker date="1338409974125" expanded="true" signature="117966:118178" placeholder="{...}" />
-            <marker date="1338409974125" expanded="true" signature="118463:119400" placeholder="{...}" />
-            <marker date="1338409974125" expanded="true" signature="118588:118736" placeholder="{...}" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Examples/NamedTemplates.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="27" column="40" selection-start="1098" selection-end="1098" vertical-scroll-proportion="-5.5">
-          <folding />
-        </state>
+        <state line="4742" column="25" selection-start="166822" selection-end="166822" vertical-scroll-proportion="0.0" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/Source/binding/flow/FlowBinding.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="17" column="15" selection-start="523" selection-end="523" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Source/templating/ItemsRenderer.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="118" column="98" selection-start="4749" selection-end="4749" vertical-scroll-proportion="0.0">
+        <state line="133" column="0" selection-start="4283" selection-end="4283" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Source/binding/data/properties/DataTemplateProperty.js">
+    <entry file="file://$PROJECT_DIR$/Notes.txt">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="109" column="41" selection-start="4246" selection-end="4246" vertical-scroll-proportion="0.1764706">
+        <state line="164" column="46" selection-start="8955" selection-end="8955" vertical-scroll-proportion="0.91977614">
           <folding />
         </state>
       </provider>
