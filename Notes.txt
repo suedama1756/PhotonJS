@@ -163,6 +163,8 @@ We need to seperate the binding tree creation from the actual initialization. Id
 14. Change setTemplate in template entry, to setHtml, setFragment.
 15. Fix issues in data-template property, re-it not being able to switch template.
 16. Refactor flow bindings to be two separate types.
+17. Think about how multiple changes are pushed to the browser, perhaps a render cycle, pushing changes,
+    through a dispatcher.
 
 
 

@@ -12,20 +12,21 @@
                 {
                     items : {
                        initializer : function() {
-                           return [8, 0, 0];
-
-
+                           return [];
                        }
                     },
-                    randomize : function() {
-//                        var items = [], length = Math.floor(Math.random() * 10);
-//                        for (var i=0; i<length; i++) {
-//                            items[i] = Math.floor(Math.random() * 10);
-//                        }
-//                        if (console) {
-//                            console.log(items);
-//                        }
-                        this.items([0, 9, 6, 6]);
+                   randomize : function(count) {
+                        var items = [], length = Number(count);
+                       if (isNaN(length)) {
+                           length = 0;
+                       }
+                        for (var i=0; i<length; i++) {
+                            items[i] = Math.floor(Math.random() * 10);
+                        }
+                        if (console) {
+                            console.log(items);
+                        }
+                        this.items(items);
                     }
                 }
         );
@@ -36,10 +37,10 @@
     </script>
 </head>
 <body>
-    <button data-action="randomize()">
-       Content
+    <button data-action="randomize($('#count').val())">
+       Render
     </button>
-    <div data-bind="data-template:{name:'template', each:items()}">
-   </div>
+    <input id="count">
+    <div data-bind="data-template:{name:'template', each:items()}"></div>
 </body>
 </html>
