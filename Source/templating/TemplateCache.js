@@ -4,7 +4,7 @@ photon.defineType(
          * Template storage
          * @private
          */
-        this.entries_ = {};
+        this.templates_ = {};
     },
     /**
      * @lends photon.templating.TemplateCache.prototype
@@ -12,21 +12,21 @@ photon.defineType(
     {
         resourceDelimiterRegEx:/<!--\s*Template:\s*([\w\.]*)\s*-->/,
         /**
-         * Gets an entry by name, an exception is thrown if the entry cannot be found.
+         * Gets a template by name, an exception is thrown if the template cannot be found.
          * @private
-         * @returns {photon.templating.TemplateCacheEntry}
+         * @returns {photon.templating.Template}
          */
-        getEntry:function (name) {
-            return assert(this.entries_[name],
+        getTemplate:function (name) {
+            return assert(this.templates_[name],
                 "No template could be found with key '{0}'.", name);
         },
         /**
-         * Finds an entry by name;
+         * Finds an template by name;
          * @param name
-         * @return {photon.templating.TemplateCacheEntry}
+         * @return {photon.templating.Template}
          */
-        findEntry:function(name) {
-            return this.entries_[name];
+        findTemplate:function(name) {
+            return this.templates_[name];
         },
         /**
          * Removes the template with the specified name
@@ -34,17 +34,17 @@ photon.defineType(
          * @returns {boolean} true; if the template was removed; otherwise, false.
          */
         remove:function (name) {
-            var entry = this.entries_[name];
-            if (entry) {
-                entry.dispose();
+            var template = this.templates_[name];
+            if (template) {
+                template.dispose();
             }
-            return delete this.entries_[name];
+            return delete this.templates_[name];
         },
         /**
          * Clears the cache
          */
         clear:function () {
-            photon.array.forEach(photon.object.getOwnPropertyNames(this.entries_), function (name) {
+            photon.array.forEach(photon.object.getOwnPropertyNames(this.templates_), function (name) {
                 this.remove(name);
             }, this);
         },
@@ -57,7 +57,7 @@ photon.defineType(
          * @returns {String} The template
          */
         getFragment:function (name) {
-            return this.getEntry(name).getFragment();
+            return this.getTemplate(name).getFragment();
         },
         /**
          * Finds the template with the specified name, no exception is thrown if the template does not exist.
@@ -68,7 +68,7 @@ photon.defineType(
          * @returns {String} The template
          */
         findFragment:function (name) {
-            var result = this.entries_[name];
+            var result = this.templates_[name];
             return result ? result.getFragment() : null;
         },
         /**
@@ -78,7 +78,7 @@ photon.defineType(
          * @returns {String} The template
          */
         getHtml:function (name) {
-            return this.getEntry(name).getHtml();
+            return this.getTemplate(name).getHtml();
         },
         /**
          * Finds the template with the specified name, no exception is thrown if the template does not exist.
@@ -87,7 +87,7 @@ photon.defineType(
          * @returns {String} The template
          */
         findHtml:function (name) {
-            var result = this.entries_[name];
+            var result = this.templates_[name];
             return result ? result.template : null;
         },
         /**
@@ -106,7 +106,7 @@ photon.defineType(
             var childEntries = photon.templating.prepareFlowTemplates(
                 templateElement);
 
-            var entry = new photon.templating.TemplateCacheEntry(null, name);
+            var entry = new photon.templating.Template(null, name);
             if (childEntries.length > 0) {
                 entry.setTemplate(templateElement.innerHTML);
                 photon.array.forEach(childEntries, function (childEntry) {
@@ -117,7 +117,7 @@ photon.defineType(
                 entry.setTemplate(html);
             }
 
-            this.entries_[name] = entry;
+            this.templates_[name] = entry;
         },
         /**
          * Adds an a template to the cache based on an element's inner HTML. If no name is supplied the elements

@@ -79,7 +79,6 @@
 
     <!-- Binding/Flow -->
     <Compile Include="Binding\Flow\flow.js" />
-    <Compile Include="Binding\Flow\RenderTarget.js" />
     <Compile Include="Binding\Flow\FlowBinding.js" />
     <Compile Include="Binding\Flow\FlowBindingExpression.js" />
     <Compile Include="Binding\Flow\FlowBindingExpressionBuilder.js" />
@@ -89,9 +88,11 @@
 
     <Compile Include="Templating\templating.js" />
     <Compile Include="Templating\TemplateCache.js" />
-    <Compile Include="Templating\TemplateCacheEntry.js" />
-    <Compile Include="Templating\FlowTemplateCacheEntry.js" />
+    <Compile Include="Templating\Template.js" />
+    <Compile Include="Templating\FlowTemplate.js" />
+    <Compile Include="Templating\TemplatePool.js" />
     <Compile Include="Templating\ItemsRenderer.js" />
+    <Compile Include="Templating\RenderTarget.js" />
 
     <Compile Include="Binding\DataContext.js" />
     <Compile Include="Binding\NodeBindingInfo.js" />

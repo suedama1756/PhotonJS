@@ -12,7 +12,7 @@ DefineTestSuite("FlowBinding.If.ExpressionChanged",
                     value:'Test'
                 }, rootElement);
 
-                assertEquals('Test', $("#test")[0].innerText);
+                assertEquals('Test', $(".testValue")[0].innerText);
 
                 // switch data source on the binding without changing the condition
                 var binding = photon.binding.NodeBindingInfo.getForElement(flowElement)
@@ -28,10 +28,10 @@ DefineTestSuite("FlowBinding.If.ExpressionChanged",
              * they are no longer handled in this way, but lets stay vigilant.
              */
             "Should propagate data source change to child bindings":function () {
-                assertEquals('Test Changed', $("#test")[0].innerText);
+                assertEquals('Test Changed', $(".testValue")[0].innerText);
             },
             "Should not re-apply template" : function() {
-                assertEquals(1, $("span").length);
+                assertEquals(1, $(".testValue").length);
             }
         }
     },
@@ -41,11 +41,14 @@ DefineTestSuite("FlowBinding.If.ExpressionChanged",
                 /*:DOC +=
                  <div id="root">
                     <div id="flow" data-flow="if:condition">
-                        <span id='test' data-bind='innerText:value'></span>
+                        <span class="testValue" data-bind='innerText:value'></span>
                     </div>
                  </div>
                  */
             }
+        } ,
+        tearDown:function() {
+            photon.dom.cleanNode(document);
         }
     }
 );

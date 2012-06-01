@@ -1,4 +1,4 @@
-DefineTestSuite("TemplateCacheEntry",
+DefineTestSuite("Template",
     {
         "When creating":{
             "Should create":function () {
@@ -13,8 +13,8 @@ DefineTestSuite("TemplateCacheEntry",
         },
         "When creating children":{
             becauseOf:function () {
-                this.child1_ = new photon.templating.TemplateCacheEntry(this.systemUnderTest_);
-                this.child2_ = new photon.templating.TemplateCacheEntry(this.systemUnderTest_);
+                this.child1_ = new photon.templating.Template(this.systemUnderTest_);
+                this.child2_ = new photon.templating.Template(this.systemUnderTest_);
             },
             "Should have correct child count":function () {
                 assertEquals(2, this.systemUnderTest_.getChildCount());
@@ -61,10 +61,10 @@ DefineTestSuite("TemplateCacheEntry",
     {
         createSystemUnderTest:function () {
             /**
-             * @type {photon.binding.TemplateCacheEntry}
+             * @type {photon.binding.Template}
              * @private
              */
-            this.systemUnderTest_ = new photon.templating.TemplateCacheEntry();
+            this.systemUnderTest_ = new photon.templating.Template();
             return this.systemUnderTest_;
         }
     }
