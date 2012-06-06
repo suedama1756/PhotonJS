@@ -114,13 +114,13 @@ photon.defineType(
             var parentDataContext = photon.binding.DataContext.getForElement(target);
             if (newValue.each) {
                 // TODO: If the template has changed we will need to re-render everything!!
-                if (!this.itemsRenderer_) {
-                    this.itemsRenderer_ = new photon.templating.ItemsRenderer(
+                if (!this.renderer_) {
+                    this.renderer_ = new photon.templating.ItemsRenderer(
                         target, photon.templating.RenderTarget.NextSibling, photon.templating.getCache().getTemplate(newValue.name)
                     );
-                    photon.addDisposable(target, this.itemsRenderer_);
+                    photon.addDisposable(target, this.renderer_);
                 }
-                this.itemsRenderer_.setItems(newValue.each);
+                this.renderer_.setData(newValue.each);
             }
             else {
                 photon.dom.empty(target);

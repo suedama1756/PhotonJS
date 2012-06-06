@@ -2,6 +2,9 @@
 provide("photon.errors", {
     notImplemented:function() {
         return new Error("Not implemented");
+    },
+    objectDisposed:function() {
+        return new Error("Object disposed");
     }
 });
 

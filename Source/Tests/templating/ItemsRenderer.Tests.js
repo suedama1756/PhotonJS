@@ -7,6 +7,24 @@ function setupMutatorTest(arrayMutator, nodeMutator, initialData) {
             this.itemNodes_ = this.extractItemNodes();
             this.rebind(this.initialData_, arrayMutator);
         },
+        "Should clean unused nodes" : function() {
+            var currentNodes = this.extractItemNodes();
+
+            var nodesToClean = photon.array.filter(this.itemNodes_, function(node) {
+                return photon.array.indexOf(currentNodes, node) === -1;
+            }, this);
+
+            if (this.itemNodes_.length > currentNodes.length) {
+                assertEquals(nodesToClean.length, this.itemNodes_.length - currentNodes.length);
+            }
+
+            photon.array.forEach(nodesToClean, function(node) {
+                assertNull(photon.binding
+                    .NodeBindingInfo.getForElement(node));
+                assertNull(photon.binding
+                    .DataContext.getLocalForElement(node));
+            })
+        },
         "Should render correct items":function () {
             assertEquals(this.dataContexts_[1],
                 this.extractItemValues());
@@ -237,11 +255,11 @@ var itemsRendererTestPrototype = {
     createSystemUnderTest:function () {
         var flowElement = $("#flow")[0];
 
-        var templateEntry = new photon.templating.Template(null, "key");
-        templateEntry.setTemplate("<span class='item' data-bind='innerText:$data' ></span>");
+        var template = new photon.templating.Template(null, "key");
+        template.setTemplate("<span class='item' data-bind='innerText:$data' ></span>");
 
         return new photon.templating.ItemsRenderer(
-            flowElement, this.renderTarget_, templateEntry);
+            flowElement, this.renderTarget_, template);
     },
     tearDown:function () {
         photon.dom.cleanNode(document);
@@ -249,12 +267,12 @@ var itemsRendererTestPrototype = {
     bind:function (data) {
         this.dataContexts_ = this.dataContexts_ || [];
         this.dataContexts_.push(data);
-        this.systemUnderTest_.setItems(data);
+        this.systemUnderTest_.setData(data);
     },
     rebind:function (data, mutator) {
         data = data.slice(0);
         mutator.call(this, data);
-        this.systemUnderTest_.setItems(data);
+        this.systemUnderTest_.setData(data);
         this.dataContexts_.push(data);
     },
     randomInt:function (max) {
