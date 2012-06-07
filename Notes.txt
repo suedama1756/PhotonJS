@@ -166,6 +166,7 @@ We need to seperate the binding tree creation from the actual initialization. Id
 17. Think about how multiple changes are pushed to the browser, perhaps a render cycle, pushing changes,
     through a dispatcher.
 18. Determine what to do about NULL data contexts.
+19. A mechanism for manually updating a binding
 
 
 

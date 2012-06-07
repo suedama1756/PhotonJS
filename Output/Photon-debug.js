@@ -151,16 +151,16 @@
 	 * @return {Boolean}
 	 */
 	photon.isElement = function(value) {
-	    return value.nodeType === 1;
+	    return value && value.nodeType === 1;
 	};
 	
 	photon.isDocument = function(value) {
-	    return value.nodeType === 9;
+	    return value && value.nodeType === 9;
 	};
 	
 	
 	photon.isDocumentOrElement = function(value) {
-	    return value.nodeType === 1 || value.nodeType === 9;
+	    return value && (value.nodeType === 1 || value.nodeType === 9);
 	};
 	
 	/**
@@ -169,7 +169,7 @@
 	 * @return {Boolean}
 	 */
 	photon.isDocumentFragment = function(value) {
-	    return value.nodeType && value.nodeType === 11;
+	    return value && value.nodeType === 11;
 	};
 	
 	/**
@@ -4702,19 +4702,24 @@
 	    getReferenceElement:function () {
 	        return this.referenceElement_;
 	    },
-	    setData:function (value) {
-	        if (this.data_ != value) {
+	    setData:function (value, refresh) {
+	        if (this.data_ !== value) {
 	            this.data_ = value;
 	            this.onDataChanged();
+	        } else if (refresh) {
+	            this.refresh();
 	        }
 	    },
 	    getData:function () {
 	        return this.data_;
 	    },
+	    onDataChanged : function() {
+	       this.refresh();
+	    },
 	    /**
 	     * @protected
 	     */
-	    onDataChanged:function () {
+	    refresh:function () {
 	    }
 	});
 	
@@ -4725,7 +4730,7 @@
 	photon.defineType(photon.templating.ConditionalRenderer,
 	    photon.templating.Renderer,
 	    {
-	        onDataChanged:function () {
+	        refresh:function () {
 	            var renderedNodes = this.renderedNodes_, referenceElement = this.referenceElement_;
 	            if (this.data_) {
 	                if (renderedNodes) {
@@ -4746,57 +4751,34 @@
 	    });
 	
 	photon.templating.ItemsRenderer = function (referenceElement, renderTarget, template) {
-	    this.referenceElement_ = referenceElement;
-	    this.renderTarget_ = renderTarget;
-	    this.template_ = template;
+	    photon.templating.ItemsRenderer.base(this, referenceElement, renderTarget, template);
 	};
 	
 	photon.defineType(
 	    photon.templating.ItemsRenderer,
+	    photon.templating.Renderer,
 	    /**
 	     * @lends photon.templating.ItemsRenderer.prototype
 	     */
 	    {
 	        dispose:function () {
 	            this.subscribe_(null);
+	            this.superType.dispose.call(this);
 	
-	            /*  Clear references, there should be no need to clean contained nodes as they will be
-	             cleaned during dom cleanup. */
-	            this.renderedNodes_ = this.items_ = this.referenceElement_ = this.template_ = null;
-	        },
-	        /**
-	         * Gets the reference element
-	         * @return {*}
-	         */
-	        getReferenceElement:function () {
-	            return this.referenceElement_;
-	        },
-	        /**
-	         * Sets the items to render
-	         * @param {Array} value The items to render.
-	         * @param {Boolean} [refresh] A value indicating whether the items must be refreshed.
-	         */
-	        setData:function (value, refresh) {
-	            if (this.items_ !== value) {
-	                this.items_ = value;
-	                this.itemsChanged_();
-	            } else if (refresh) {
-	                this.itemsChanged_();
-	            }
-	        },
-	        /**
-	         * Gets the items to render
-	         * @return {*}
-	         */
-	        getData:function () {
-	            return this.items_;
+	            /*  Clear node references, there should be no need to clean the nodes as
+	                they will be cleaned during dom cleanup. */
+	            this.renderedNodes_ = null;
 	        },
 	        /**
 	         * Refreshes the rendered view
 	         */
 	        refresh:function () {
-	            if (this.items_) {
-	                this.itemsChanged_();
+	            if (this.data_) {
+	                var data = this.data_;
+	                this.subscribe_(data);
+	                data = photon.observable.unwrap(data) || [];
+	                this.render_(this.itemsCopy_ || [], data);
+	                this.itemsCopy_ = data.slice(0);
 	            }
 	        },
 	        /**
@@ -4811,18 +4793,8 @@
 	            }
 	
 	            if (!subscriber && items && items.subscribe) {
-	                this.subscriber_ = items.subscribe(this.itemsChanged_, this);
+	                this.subscriber_ = items.subscribe(this.refresh, this);
 	            }
-	        },
-	        /**
-	         * @private
-	         */
-	        itemsChanged_:function () {
-	            var items = this.items_;
-	            this.subscribe_(items);
-	            items = photon.observable.unwrap(items) || [];
-	            this.render_(this.itemsCopy_ || [], items);
-	            this.itemsCopy_ = items.slice(0);
 	        },
 	        /**
 	         * @param {Array} oldItems

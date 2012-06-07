@@ -56,15 +56,59 @@ function assertFragmentHtml(expectedHtml, fragment) {
         photon.string.trim(tempDiv.innerHTML));
 }
 
-function bindNodeObject(obj) {
-    assertNotNullOrUndefined("obj is null or undefined in bindNodes", obj);
-    for (var propertyName in obj) {
-        if (obj.hasOwnProperty(propertyName)) {
-            obj[propertyName] = $("#" + propertyName)[0];
-            assertNotNullOrUndefined("Node with id " + propertyName + "could not be found", obj[propertyName]);
-        }
+/**
+ * Asserts a node structure exists as specified by the definition
+ *
+ * Each property in the definition corresponds to the id of an element, the value of the property
+ * determines whether the element is expected (null), not expected ('!'), or optional ('?').
+ * For example:
+ *
+ * { id1:null, id2:'?', id3:'!' }
+ *
+ * id1 is expected
+ * id2 is optional
+ * id3 is not expected
+ *
+ * @param definition
+ * @return {*}
+ */
+function assertElements(message, definition, relativeTo) {
+    if (!photon.isString(message)) {
+       relativeTo = definition;
+       definition = message;
+       message = '';
     }
-    return obj;
+    if (message) {
+        message += ', ';
+    }
+
+    jstestdriver.assertCount++;
+
+    assertNotNullOrUndefined("obj is null or undefined in bindNodes", definition);
+    photon.object.forEachOwnProperty(definition, function(propertyName) {
+        var options = definition[propertyName], selector, required = null;
+        if (photon.isElement(options)) {
+            return;
+        }
+        else if (!options || "!?".indexOf(options) != -1) {
+            selector = "#" + propertyName;
+            required = options
+        }
+        else {
+            required = options.substring(0, 1);
+            if ("!?".indexOf(required) != -1) {
+                selector = photon.string.trim(options.substring(1));
+            }
+        }
+
+        definition[propertyName] = $(selector, relativeTo)[0] || null;
+        if (required === '!') {
+            assertNull(message + "Node with id " + propertyName + " was unexpectedly found.", definition[propertyName]);
+        } else if (required !== '?') {
+            assertNotNullOrUndefined(message + "Node with id " + propertyName + " could not be found", definition[propertyName]);
+        }
+    })
+    return definition;
 }
 
 jstestdriver.toHtml = function (c, e) {

@@ -135,16 +135,16 @@ photon.isString = function (value) {
  * @return {Boolean}
  */
 photon.isElement = function(value) {
-    return value.nodeType === 1;
+    return value && value.nodeType === 1;
 };
 
 photon.isDocument = function(value) {
-    return value.nodeType === 9;
+    return value && value.nodeType === 9;
 };
 
 
 photon.isDocumentOrElement = function(value) {
-    return value.nodeType === 1 || value.nodeType === 9;
+    return value && (value.nodeType === 1 || value.nodeType === 9);
 };
 
 /**
@@ -153,7 +153,7 @@ photon.isDocumentOrElement = function(value) {
  * @return {Boolean}
  */
 photon.isDocumentFragment = function(value) {
-    return value.nodeType && value.nodeType === 11;
+    return value && value.nodeType === 11;
 };
 
 /**
