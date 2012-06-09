@@ -112,8 +112,8 @@ photon.defineType(
 
                 var referenceNode = nodeSets[startA] ? nodeSets[startA][0] : defaultReferenceNode;
                 for (var insIndex = diff.startB, insLength = insIndex + diff.insertedB; insIndex < insLength; insIndex++, offset++) {
-                    nodeSets.splice(startA++, 0, photon.binding.data.properties["data.template"]
-                        .insertBefore(parentNode, templatePool.getFragment(), referenceNode, newItems[insIndex], dataContext));
+                    nodeSets.splice(startA++, 0, photon.templating.insertBeforeAndApplyBindings(
+                        parentNode, templatePool.getFragment(), referenceNode, newItems[insIndex], dataContext));
                 }
             }
 
