@@ -38,7 +38,7 @@ photon.defineType(
         },
         getSourceValue:function () {
            return this.getExpression().getSourceValue(this.getDataContext(),
-               this.dependencyTracker);
+               this.dependencyTracker_);
         },
         getBindingMode:function () {
             var bindingMode = this.expression_.getMode() || photon.binding.data.DataBindingMode.Default;
@@ -52,7 +52,7 @@ photon.defineType(
         },
 
         dataSourceChanged : function() {
-            this.updateSourceValue(this.dependencyTracker);
+            this.updateSourceValue(this.dependencyTracker_);
         },
 
         updateSourceValue : function(dependencyTracker) {
@@ -73,11 +73,11 @@ photon.defineType(
 
         ensureInitialized : function() {
            if (!this.isInitialized_) {
-               this.dependencyTracker = new photon.observable.DependencyTracker(
+               this.dependencyTracker_ = new photon.observable.DependencyTracker(
                    function() {
                        this.updateSourceValue(null);
                    }, this);
-               photon.addDisposable(this.target_, this.dependencyTracker);
+               photon.addDisposable(this.target_, this.dependencyTracker_);
 
                var bindingMode = this.getBindingMode();
                if (bindingMode === photon.binding.data.DataBindingMode.TwoWay) {

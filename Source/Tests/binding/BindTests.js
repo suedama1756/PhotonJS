@@ -43,7 +43,7 @@ SetDataContextTestCase = function (scenario, obj) {
                     /*:DOC += <div id="node">Single Node</div>*/
 
                     // bind the node object to the DOM structure
-                    bindNodeObject(self.nodeObject = {
+                    assertElements(self.nodeObject = {
                         node:null
                     });
                     self.nodeData1 = {Value:1};
@@ -71,7 +71,7 @@ SetDataContextTestCase = function (scenario, obj) {
                      </div>
                      */
 
-                    bindNodeObject(self.nodeObject = {
+                    assertElements(self.nodeObject = {
                         "root":null,
                         "level1A":null,
                         "level1B":null,
@@ -120,7 +120,7 @@ SetDataContextTestCase = function (scenario, obj) {
                      </div>
                      */
 
-                    bindNodeObject(self.bindingsNodeObject = {
+                    assertElements(self.bindingsNodeObject = {
                         "root":null,
                         "level1":null,
                         "level1Binding":null,

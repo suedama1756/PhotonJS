@@ -151,16 +151,16 @@
 	 * @return {Boolean}
 	 */
 	photon.isElement = function(value) {
-	    return value.nodeType === 1;
+	    return value && value.nodeType === 1;
 	};
 	
 	photon.isDocument = function(value) {
-	    return value.nodeType === 9;
+	    return value && value.nodeType === 9;
 	};
 	
 	
 	photon.isDocumentOrElement = function(value) {
-	    return value.nodeType === 1 || value.nodeType === 9;
+	    return value && (value.nodeType === 1 || value.nodeType === 9);
 	};
 	
 	/**
@@ -169,7 +169,7 @@
 	 * @return {Boolean}
 	 */
 	photon.isDocumentFragment = function(value) {
-	    return value.nodeType && value.nodeType === 11;
+	    return value && value.nodeType === 11;
 	};
 	
 	/**
@@ -570,6 +570,9 @@
 	provide("photon.errors", {
 	    notImplemented:function() {
 	        return new Error("Not implemented");
+	    },
+	    objectDisposed:function() {
+	        return new Error("Object disposed");
 	    }
 	});
 	
@@ -2864,7 +2867,7 @@
 	        },
 	        getSourceValue:function () {
 	           return this.getExpression().getSourceValue(this.getDataContext(),
-	               this.dependencyTracker);
+	               this.dependencyTracker_);
 	        },
 	        getBindingMode:function () {
 	            var bindingMode = this.expression_.getMode() || photon.binding.data.DataBindingMode.Default;
@@ -2878,7 +2881,7 @@
 	        },
 	
 	        dataSourceChanged : function() {
-	            this.updateSourceValue(this.dependencyTracker);
+	            this.updateSourceValue(this.dependencyTracker_);
 	        },
 	
 	        updateSourceValue : function(dependencyTracker) {
@@ -2899,11 +2902,11 @@
 	
 	        ensureInitialized : function() {
 	           if (!this.isInitialized_) {
-	               this.dependencyTracker = new photon.observable.DependencyTracker(
+	               this.dependencyTracker_ = new photon.observable.DependencyTracker(
 	                   function() {
 	                       this.updateSourceValue(null);
 	                   }, this);
-	               photon.addDisposable(this.target_, this.dependencyTracker);
+	               photon.addDisposable(this.target_, this.dependencyTracker_);
 	
 	               var bindingMode = this.getBindingMode();
 	               if (bindingMode === photon.binding.data.DataBindingMode.TwoWay) {
@@ -3407,13 +3410,13 @@
 	            var parentDataContext = photon.binding.DataContext.getForElement(target);
 	            if (newValue.each) {
 	                // TODO: If the template has changed we will need to re-render everything!!
-	                if (!this.itemsRenderer_) {
-	                    this.itemsRenderer_ = new photon.templating.ItemsRenderer(
+	                if (!this.renderer_) {
+	                    this.renderer_ = new photon.templating.ItemsRenderer(
 	                        target, photon.templating.RenderTarget.NextSibling, photon.templating.getCache().getTemplate(newValue.name)
 	                    );
-	                    photon.addDisposable(target, this.itemsRenderer_);
+	                    photon.addDisposable(target, this.renderer_);
 	                }
-	                this.itemsRenderer_.setItems(newValue.each);
+	                this.renderer_.setData(newValue.each);
 	            }
 	            else {
 	                photon.dom.empty(target);
@@ -3605,6 +3608,16 @@
 	photon.binding.flow.FlowBinding = function (target, expression) {
 	    photon.binding.flow.FlowBinding.base(this, target, expression);
 	    photon.addDisposable(target, this);
+	
+	    if (this.getExpression().getFlowType() === "if") {
+	        this.renderer_ = new photon.templating.ConditionalRenderer(
+	            target, this.getExpression().getApplyTo(), photon.templating.FlowTemplate.getForElement(target)
+	        );
+	    } else {
+	        this.renderer_ = new photon.templating.ItemsRenderer(
+	            target, this.getExpression().getApplyTo(), photon.templating.FlowTemplate.getForElement(target)
+	        );
+	    }
 	};
 	
 	photon.defineType(
@@ -3621,92 +3634,39 @@
 	     */
 	    {
 	        dispose:function () {
-	            this.clearNodeSets();
 	            this.setDataContext(null);
-	            if (this.itemsRenderer_) {
-	                this.itemsRenderer_.dispose();
-	                this.itemsRenderer_ = null;
+	            if (this.renderer_) {
+	                this.renderer_.dispose();
+	                this.renderer_ = null;
 	            }
 	        },
 	        dataSourceChanged:function () {
 	            if (this.getDataContext()) {
-	                this.updateFlowData(this.dependencyTracker);
+	                this.updateFlowData(this.dependencyTracker_);
 	            }
 	            else {
-	                this.clearNodeSets();
+	                this.renderer_.setData(undefined);
 	            }
 	        },
 	        updateFlowData:function (dependencyTracker) {
-	            var expression = this.getExpression();
+	            var data = this.getExpression().getFlowData(
+	                this.getDataContext(), dependencyTracker);
+	            this.renderer_.setData(data);
 	
-	            var flowData = expression.getFlowData(this.getDataContext(),
-	                dependencyTracker);
-	
-	            if (this.flowData_ !== flowData) {
-	                this.flowData_ = flowData;
-	                this.flowDataChanged();
-	            }
-	        },
-	        flowDataChanged:function () {
-	            if (this.getExpression().getFlowType() === "if") {
-	                this.applyIf();
-	            } else {
-	                this.applyEach();
-	            }
 	        },
 	        bind:function () {
 	            if (!this.isInitialized_) {
-	                this.dependencyTracker = new photon.observable.DependencyTracker(
+	                this.dependencyTracker_ = new photon.observable.DependencyTracker(
 	                    function () {
 	                        this.updateFlowData(null);
 	                    }, this);
-	                photon.addDisposable(this.target_, this.dependencyTracker);
+	                photon.addDisposable(this.target_, this.dependencyTracker_);
 	
 	                // mark as initialized
 	                this.isInitialized_ = true;
 	            }
 	
 	            this.updateDataContext();
-	        },
-	        applyIf:function () {
-	            var sourceValue = this.flowData_, target = this.getTarget(),
-	                applyTo = this.getExpression().getApplyTo();
-	
-	            if (sourceValue) {
-	                if (this.nodeSets_) {
-	                    return;
-	                }
-	
-	                var fragment = photon.templating.FlowTemplate.
-	                    getForElement(target).getFragment();
-	                if (applyTo === photon.templating.RenderTarget.Child) {
-	                    this.nodeSets_ = [photon.binding.data.properties["data.template"]
-	                        .insertBefore2(target, fragment, null)];
-	                } else {
-	                    this.nodeSets_ = [photon.binding.data.properties["data.template"]
-	                        .insertBefore2(target.parentNode, fragment, target.nextSibling)];
-	                }
-	            }
-	            else {
-	                this.clearNodeSets();
-	            }
-	        },
-	        applyEach:function () {
-	            var target = this.getTarget();
-	
-	            this.itemsRenderer_ = this.itemsRenderer_ || new photon.templating.ItemsRenderer(
-	                target, this.getExpression().getApplyTo(), photon.templating.FlowTemplate.getForElement(target)
-	            );
-	            this.itemsRenderer_.setItems(this.flowData_);
-	        },
-	        clearNodeSets:function () {
-	            var nodeSets = this.nodeSets_;
-	            if (nodeSets) {
-	                for (var i = 0, n = nodeSets.length; i < n; i++) {
-	                    photon.array.forEach(nodeSets[i], photon.dom.removeAndClean);
-	                }
-	                this.nodeSets_ = undefined;
-	            }
 	        }
 	    });
 	/**
@@ -4725,62 +4685,100 @@
 	            this.pool_ = this.poolIndex_ = undefined;
 	        }
 	    });
-	photon.templating.ItemsRenderer = function (referenceElement, renderTarget, templateEntry) {
+	photon.templating.Renderer = function (referenceElement, renderTarget, template) {
 	    this.referenceElement_ = referenceElement;
 	    this.renderTarget_ = renderTarget;
-	    this.templateEntry_ = templateEntry;
+	    this.template_ = template;
+	}
+	
+	photon.defineType(photon.templating.Renderer, {
+	    dispose:function () {
+	        this.referenceElement_ = this.data_ = this.template_ = undefined;
+	    },
+	    /**
+	     * Gets the reference element
+	     * @return {*}
+	     */
+	    getReferenceElement:function () {
+	        return this.referenceElement_;
+	    },
+	    setData:function (value, refresh) {
+	        if (this.data_ !== value) {
+	            this.data_ = value;
+	            this.onDataChanged();
+	        } else if (refresh) {
+	            this.refresh();
+	        }
+	    },
+	    getData:function () {
+	        return this.data_;
+	    },
+	    onDataChanged : function() {
+	       this.refresh();
+	    },
+	    /**
+	     * @protected
+	     */
+	    refresh:function () {
+	    }
+	});
+	
+	photon.templating.ConditionalRenderer = function (referenceElement, renderTarget, template) {
+	    photon.templating.ConditionalRenderer.base(this, referenceElement, renderTarget, template);
+	}
+	
+	photon.defineType(photon.templating.ConditionalRenderer,
+	    photon.templating.Renderer,
+	    {
+	        refresh:function () {
+	            var renderedNodes = this.renderedNodes_, referenceElement = this.referenceElement_;
+	            if (this.data_) {
+	                if (renderedNodes) {
+	                    return;
+	                }
+	
+	                var fragment = this.template_.getFragment();
+	                this.renderedNodes_ = this.renderTarget_ === photon.templating.RenderTarget.Child ?
+	                    photon.binding.data.properties["data.template"].insertBefore2(referenceElement, fragment, null) :
+	                    photon.binding.data.properties["data.template"].insertBefore2(referenceElement.parentNode, fragment, referenceElement.nextSibling);
+	            }
+	            else if (renderedNodes) {
+	                photon.array.forEach(renderedNodes,
+	                    photon.dom.removeAndClean);
+	                this.renderedNodes_ = null;
+	            }
+	        }
+	    });
+	
+	photon.templating.ItemsRenderer = function (referenceElement, renderTarget, template) {
+	    photon.templating.ItemsRenderer.base(this, referenceElement, renderTarget, template);
 	};
 	
 	photon.defineType(
 	    photon.templating.ItemsRenderer,
+	    photon.templating.Renderer,
 	    /**
 	     * @lends photon.templating.ItemsRenderer.prototype
 	     */
 	    {
 	        dispose:function () {
 	            this.subscribe_(null);
+	            this.superType.dispose.call(this);
 	
-	            var nodeSets = this.nodeSets_;
-	            if (nodeSets) {
-	                for (var i = 0, n = nodeSets.length; i < n; i++) {
-	                    photon.array.forEach(nodeSets[i], photon.dom.removeAndClean);
-	                }
-	                this.nodeSets_ = null;
-	            }
-	        },
-	        /**
-	         * Gets the reference element
-	         * @return {*}
-	         */
-	        getReferenceElement : function() {
-	            return this.referenceElement_;
-	        },
-	        /**
-	         * Sets the items to render
-	         * @param {Array} value The items to render.
-	         * @param {Boolean} [refresh] A value indicating whether the items must be refreshed.
-	         */
-	        setItems:function (value, refresh) {
-	            if (this.items_ !== value) {
-	                this.items_ = value;
-	                this.itemsChanged_();
-	            } else if (refresh) {
-	                this.itemsChanged_();
-	            }
-	        },
-	        /**
-	         * Gets the items to render
-	         * @return {*}
-	         */
-	        getItems:function () {
-	            return this.items_;
+	            /*  Clear node references, there should be no need to clean the nodes as
+	                they will be cleaned during dom cleanup. */
+	            this.renderedNodes_ = null;
 	        },
 	        /**
 	         * Refreshes the rendered view
 	         */
-	        refresh : function() {
-	            if (this.items_) {
-	                this.itemsChanged_();
+	        refresh:function () {
+	            if (this.data_) {
+	                var data = this.data_;
+	                this.subscribe_(data);
+	                data = photon.observable.unwrap(data) || [];
+	                this.render_(this.itemsCopy_ || [], data);
+	                this.itemsCopy_ = data.slice(0);
 	            }
 	        },
 	        /**
@@ -4795,18 +4793,8 @@
 	            }
 	
 	            if (!subscriber && items && items.subscribe) {
-	                this.subscriber_ = items.subscribe(this.itemsChanged_, this);
+	                this.subscriber_ = items.subscribe(this.refresh, this);
 	            }
-	        },
-	        /**
-	         * @private
-	         */
-	        itemsChanged_:function () {
-	            var items = this.items_;
-	            this.subscribe_(items);
-	            items = photon.observable.unwrap(items) || [];
-	            this.render_(this.itemsCopy_ || [], items);
-	            this.itemsCopy_ = items.slice(0);
 	        },
 	        /**
 	         * @param {Array} oldItems
@@ -4814,17 +4802,17 @@
 	         * @private
 	         */
 	        render_:function (oldItems, newItems) {
-	            this.nodeSets_ = this.nodeSets_ || [];
+	            this.renderedNodes_ = this.renderedNodes_ || [];
 	
 	            var diffs = photon.array.diff(oldItems, newItems),
 	                diff,
 	                startA,
 	                referenceElement = this.referenceElement_,
-	                nodeSets = this.nodeSets_,
+	                nodeSets = this.renderedNodes_,
 	                nodeSet,
 	                offset = 0,
 	                defaultReferenceNode = null,
-	                templatePool = new TemplatePool(this.templateEntry_),
+	                templatePool = new TemplatePool(this.template_),
 	                parentNode = this.renderTarget_ === photon.templating.RenderTarget.Child ?
 	                    referenceElement :
 	                    referenceElement.parentNode,

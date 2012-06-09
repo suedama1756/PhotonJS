@@ -175,9 +175,9 @@ DefineTestSuite("TemplateCache",
                 // get child "flow" dependancy and verify link to parent
                 assertEquals(1, this.template_.getChildCount());
 
-                var entryFlowTemplateEntry = this.template_.getChild(0);
-                assertNotNullOrUndefined(entryFlowTemplateEntry);
-                assertEquals(this.template_, entryFlowTemplateEntry.getParent());
+                var flowTemplate = this.template_.getChild(0);
+                assertNotNullOrUndefined(flowTemplate);
+                assertEquals(this.template_, flowTemplate.getParent());
             }
         },
         "When removing a template" : {
