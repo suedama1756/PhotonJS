@@ -4691,44 +4691,64 @@
 	    this.template_ = template;
 	}
 	
-	photon.defineType(photon.templating.Renderer, {
-	    dispose:function () {
-	        this.referenceElement_ = this.data_ = this.template_ = undefined;
-	    },
+	photon.defineType(photon.templating.Renderer,
 	    /**
-	     * Gets the reference element
-	     * @return {*}
+	     * @lends photon.templating.Renderer.prototype
 	     */
-	    getReferenceElement:function () {
-	        return this.referenceElement_;
-	    },
-	    setData:function (value, refresh) {
-	        if (this.data_ !== value) {
-	            this.data_ = value;
-	            this.onDataChanged();
-	        } else if (refresh) {
+	    {
+	        dispose:function () {
+	            this.referenceElement_ = this.data_ = this.template_ = undefined;
+	        },
+	        /**
+	         * Gets the reference element
+	         * @return {*}
+	         */
+	        getReferenceElement:function () {
+	            return this.referenceElement_;
+	        },
+	        /**
+	         * Sets the renderer data
+	         * @param {Object} value
+	         * @param {Boolean} [refresh] A value indicating whether a refresh should be performed even if the data has not changed.
+	         */
+	        setData:function (value, refresh) {
+	            if (this.data_ !== value) {
+	                this.data_ = value;
+	                this.onDataChanged();
+	            } else if (refresh) {
+	                this.refresh();
+	            }
+	        },
+	        /**
+	         * Gets the renderer data
+	         * @return {*}
+	         */
+	        getData:function () {
+	            return this.data_;
+	        },
+	        /**
+	         * Called when the renderer data has changed
+	         * @protected
+	         */
+	        onDataChanged:function () {
 	            this.refresh();
+	        },
+	        /**
+	         * Refreshes the rendered view
+	         * @public
+	         */
+	        refresh:function () {
 	        }
-	    },
-	    getData:function () {
-	        return this.data_;
-	    },
-	    onDataChanged : function() {
-	       this.refresh();
-	    },
-	    /**
-	     * @protected
-	     */
-	    refresh:function () {
-	    }
-	});
-	
+	    });
 	photon.templating.ConditionalRenderer = function (referenceElement, renderTarget, template) {
 	    photon.templating.ConditionalRenderer.base(this, referenceElement, renderTarget, template);
 	}
 	
 	photon.defineType(photon.templating.ConditionalRenderer,
 	    photon.templating.Renderer,
+	    /**
+	     * @lends photon.templating.Renderer.prototype
+	     */
 	    {
 	        refresh:function () {
 	            var renderedNodes = this.renderedNodes_, referenceElement = this.referenceElement_;
@@ -4749,7 +4769,6 @@
 	            }
 	        }
 	    });
-	
 	photon.templating.ItemsRenderer = function (referenceElement, renderTarget, template) {
 	    photon.templating.ItemsRenderer.base(this, referenceElement, renderTarget, template);
 	};

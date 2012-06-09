@@ -6,7 +6,7 @@
     });
 
     DefineTestSuite("FlowBinding.DataContext", {
-            "When if1 is true and if2 is true":{
+            "When if1 is true and child if2 is true":{
                 requiredHtmlResources:"IfInIf",
                 becauseOf:function () {
                     photon.binding.applyBindings(new IfInIfModel({
@@ -38,7 +38,7 @@
                         "test", this.elements_.value.innerText);
                 }
             },
-            "When if1 is true and if2 is false then if2 becomes true":{
+            "When if1 is true and child if2 is false then if2 becomes true":{
                 requiredHtmlResources:"IfInIf",
                 becauseOf:function () {
                     var model = new IfInIfModel({condition1:true, condition2:false});
@@ -160,5 +160,4 @@
                 }
             }
         });
-
 })();

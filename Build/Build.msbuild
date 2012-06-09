@@ -91,6 +91,8 @@
     <Compile Include="Templating\Template.js" />
     <Compile Include="Templating\FlowTemplate.js" />
     <Compile Include="Templating\TemplatePool.js" />
+    <Compile Include="Templating\Renderer.js" />
+    <Compile Include="Templating\ConditionalRenderer.js" />
     <Compile Include="Templating\ItemsRenderer.js" />
     <Compile Include="Templating\RenderTarget.js" />
 
