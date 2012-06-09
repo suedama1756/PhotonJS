@@ -56,6 +56,10 @@ provide("photon.binding");
                 }
             },
             updateBindings:function (element) {
+                if (!photon.isDocumentOrElement(element)) {
+                    return;
+                }
+
                 var bindingContext = photon.binding.BindingContext.getInstance();
 
                 photon.templating.prepareFlowTemplates(element);

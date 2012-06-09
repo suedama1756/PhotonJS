@@ -127,5 +127,26 @@ provide("photon.templating",
             }
 
             return result;
+        },
+        insertBefore : function(parentElement, newElement, referenceElement) {
+            var nodes = [];
+            if (newElement.nodeType === 11) {
+                var childNodes = newElement.childNodes;
+                for (var i= 0, n=childNodes.length; i<n; i++) {
+                    nodes[i] = childNodes[i];
+                }
+            } else {
+                nodes[0] = newElement;
+            }
+            parentElement.insertBefore(newElement, referenceElement);
+
+            // need to apply bindings after we've been attached to the dom, this is still inefficient when we have multiple levels of flow, need
+            // to work on a post apply tree callback mechanism
+            photon.array.forEach(nodes, function(node) {
+                photon.binding.updateBindings(node);
+            });
+
+            photon.templating.afterRender(nodes);
+            return nodes;
         }
     });

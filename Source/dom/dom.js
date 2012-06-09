@@ -148,8 +148,9 @@ photon.dom.hasFocus = function (element, value) {
     };
 
     photon.dom.remove = function(node) {
-        if (node.parentNode) {
-            node.parentNode.removeChild(node);
+        var parentNode = node.parentNode;
+        if (parentNode) {
+            parentNode.removeChild(node);
         }
     };
 

@@ -167,6 +167,7 @@ We need to seperate the binding tree creation from the actual initialization. Id
     through a dispatcher.
 18. Determine what to do about NULL data contexts.
 19. A mechanism for manually updating a binding
+20. In each renderer should be able to set data context without re-applying all bindings.
 
 
 

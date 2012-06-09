@@ -1136,8 +1136,9 @@
 	    };
 	
 	    photon.dom.remove = function(node) {
-	        if (node.parentNode) {
-	            node.parentNode.removeChild(node);
+	        var parentNode = node.parentNode;
+	        if (parentNode) {
+	            parentNode.removeChild(node);
 	        }
 	    };
 	
@@ -2085,6 +2086,10 @@
 	                }
 	            },
 	            updateBindings:function (element) {
+	                if (!photon.isDocumentOrElement(element)) {
+	                    return;
+	                }
+	
 	                var bindingContext = photon.binding.BindingContext.getInstance();
 	
 	                photon.templating.prepareFlowTemplates(element);
@@ -3325,22 +3330,6 @@
 	            return result;
 	        },
 	
-	        insertEachBefore:function (parentElement, newElement, referenceElement,
-	            data, parentDataContext)
-	        {
-	            var nodesAppended = [];
-	            var fragment = document.createDocumentFragment();
-	            photon.array.forEach(photon.observable.unwrap(data), function (item, index, data) {
-	                var contentToAppend = (index < data.length - 1) ?
-	                    newElement.cloneNode(true) :
-	                    newElement;
-	                nodesAppended = nodesAppended.concat(
-	                    this.insertBefore(fragment, contentToAppend, null, item, parentDataContext));
-	            }, this);
-	            parentElement.insertBefore(fragment, referenceElement);
-	            return nodesAppended;
-	        },
-	
 	        insertBefore : function(parentElement, newElement, referenceElement,
 	            data, parentDataContext) {
 	            var nodesAppended = [];
@@ -3365,33 +3354,6 @@
 	            photon.templating.afterRender(nodesAppended);
 	            return nodesAppended;
 	        },
-	
-	        insertBefore2 : function(parentElement, newElement, referenceElement) {
-	            var nodesAppended = [];
-	            if (newElement.nodeType === 11) {
-	                var childNodes = newElement.childNodes;
-	                for (var i= 0, n=childNodes.length; i<n; i++) {
-	                    nodesAppended.push(childNodes[i]);
-	                }
-	            } else {
-	                nodesAppended.push(newElement);
-	            }
-	            parentElement.insertBefore(newElement, referenceElement);
-	
-	            // need to apply bindings after we've been attached to the dom, this is still inefficient when we have multiple levels of flow, need
-	            // to work on a post apply tree callback mechanism
-	            photon.array.forEach(nodesAppended, function(node) {
-	                if (node.nodeType === 1) {
-	                    photon.binding.updateBindings(node);
-	                }
-	            });
-	
-	            photon.templating.afterRender(nodesAppended);
-	            return nodesAppended;
-	        },
-	
-	
-	
 	        collectionChanged:function (event) {
 	            this.setValue(event.data, true);
 	        },
@@ -4056,6 +4018,27 @@
 	            }
 	
 	            return result;
+	        },
+	        insertBefore : function(parentElement, newElement, referenceElement) {
+	            var nodes = [];
+	            if (newElement.nodeType === 11) {
+	                var childNodes = newElement.childNodes;
+	                for (var i= 0, n=childNodes.length; i<n; i++) {
+	                    nodes[i] = childNodes[i];
+	                }
+	            } else {
+	                nodes[0] = newElement;
+	            }
+	            parentElement.insertBefore(newElement, referenceElement);
+	
+	            // need to apply bindings after we've been attached to the dom, this is still inefficient when we have multiple levels of flow, need
+	            // to work on a post apply tree callback mechanism
+	            photon.array.forEach(nodes, function(node) {
+	                photon.binding.updateBindings(node);
+	            });
+	
+	            photon.templating.afterRender(nodes);
+	            return nodes;
 	        }
 	    });
 	photon.defineType(
@@ -4470,6 +4453,9 @@
 	
 	            // always return a copy
 	            return this.fragment_.cloneNode(true);
+	        },
+	        insertBefore : function(parentElement, referenceElement) {
+	            return photon.templating.insertBefore(parentElement, this.getFragment(), referenceElement);
 	        }
 	    });
 	/**
@@ -4756,11 +4742,9 @@
 	                if (renderedNodes) {
 	                    return;
 	                }
-	
-	                var fragment = this.template_.getFragment();
 	                this.renderedNodes_ = this.renderTarget_ === photon.templating.RenderTarget.Child ?
-	                    photon.binding.data.properties["data.template"].insertBefore2(referenceElement, fragment, null) :
-	                    photon.binding.data.properties["data.template"].insertBefore2(referenceElement.parentNode, fragment, referenceElement.nextSibling);
+	                    this.template_.insertBefore(referenceElement, null) :
+	                    this.template_.insertBefore(referenceElement.parentNode, referenceElement.nextSibling);
 	            }
 	            else if (renderedNodes) {
 	                photon.array.forEach(renderedNodes,
