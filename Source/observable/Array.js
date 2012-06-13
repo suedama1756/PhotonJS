@@ -183,8 +183,10 @@ photon.defineType(
             return photon.array.remove(this.subscribers_, subscriber);
         },
         notifyChanged:function (lengthChanged) {
-            if (this.subscribers_) {
-                photon.array.forEach(this.subscribers_, function (item) {
+            var subscribers = this.subscribers_;
+            if (subscribers) {
+                subscribers = subscribers.slice(0);
+                photon.array.forEach(subscribers, function (item) {
                     if (!item.propertyName() || (lengthChanged && item.propertyName() === 'length')) {
                         item.notify({ data:{}}); // TODO: Why are we passing data here?
                     }
