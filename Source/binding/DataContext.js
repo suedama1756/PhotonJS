@@ -17,7 +17,6 @@ photon.defineType(
                 if (parent.children_.length === 0) {
                     delete parent.children_;
                 }
-
             }
         },
         setParent:function (value) {
@@ -62,8 +61,10 @@ photon.defineType(
         setValue:function (value) {
             if (this.value_ !== value) {
                 this.value_ = value;
-                if (this.subscribers_) {
-                    photon.array.forEach(this.subscribers_, this.notifyValueChanged, this);
+                var subscribers = this.subscribers_;
+                if (subscribers) {
+                    subscribers = subscribers.slice(0);
+                    photon.array.forEach(subscribers, this.notifyValueChanged, this);
                 }
             }
         },
@@ -100,6 +101,7 @@ photon.defineType(
                     delete this.subscribers_;
                 }
             }
+
             return result;
         },
         notifyValueChanged:function (subscriber) {

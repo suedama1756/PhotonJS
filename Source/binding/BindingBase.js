@@ -7,6 +7,10 @@ photon.defineType(
      * @lends photon.binding.BindingBase.prototype
      */
     {
+        dispose : function() {
+            this.target_ = null;
+            this.setDataContext(null);
+        },
         getTarget:function () {
             return this.target_;
         },
@@ -57,10 +61,12 @@ photon.defineType(
             }
         },
         updateDataSource:function () {
-            var newValue = null;
-            if (this.dataContext_) {
-                newValue = this.dataContext_.getValue();
+            // if the data context is null then the binding is either not initialized, or disposed.
+            if (this.dataContext_ === null) {
+                return;
             }
+
+            var newValue = this.dataContext_.getValue();
             if (newValue !== this.dataSource_) {
                 this.dataSource_ = newValue;
                 this.dataSourceChanged();

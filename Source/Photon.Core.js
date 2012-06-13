@@ -25,18 +25,19 @@ photon.provide = provide;
     //noinspection JSValidateTypes
     var fnTest = /xyz/.test(function () {
         var xyz;
-    }) ? /\bsuperType\b/ : /.*/;
+    }) ? /\bbase\b/ : /.*/;
 
-    function createDescendantFunction(fn, superType) {
+    function createDescendantFunction(fn, superFn) {
+        //var args = fn.toString().match (/function\s+\w*\s*\((.*?)\)/)[1].split (/\s*,\s*/);
+
         return function () {
-            var oldSuperType = this.superType;
-
-            this.superType = superType;
+            var oldBase = this.base;
+            this.base = superFn;
             try {
                 return fn.apply(this, arguments);
             }
             finally {
-                this.superType = oldSuperType;
+                this.base = oldBase;
             }
         };
     }
@@ -77,9 +78,9 @@ photon.provide = provide;
                 type.superType.constructor.apply(instance, arrayNativePrototype.slice.call(arguments, 1));
             }
         };
+        type.prototype.superType = superType;
 
         if (instanceProperties) {
-
             // Copy the properties over onto the new prototype
             photon.extend(type.prototype, instanceProperties,
                 photon.extend.filterHasOwnProperty, function (source, propertyName) {
@@ -87,7 +88,7 @@ photon.provide = provide;
                     var isFunctionThatCallsSuper = ancestor && photon.isFunction(propertyValue) &&
                         fnTest.test(propertyValue);
                     return isFunctionThatCallsSuper ?
-                        createDescendantFunction(propertyValue, superType) :
+                        createDescendantFunction(propertyValue, superType[propertyName]) :
                         propertyValue;
                 });
         }

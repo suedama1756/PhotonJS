@@ -41,18 +41,19 @@
 	    //noinspection JSValidateTypes
 	    var fnTest = /xyz/.test(function () {
 	        var xyz;
-	    }) ? /\bsuperType\b/ : /.*/;
+	    }) ? /\bbase\b/ : /.*/;
 	
-	    function createDescendantFunction(fn, superType) {
+	    function createDescendantFunction(fn, superFn) {
+	        //var args = fn.toString().match (/function\s+\w*\s*\((.*?)\)/)[1].split (/\s*,\s*/);
+	
 	        return function () {
-	            var oldSuperType = this.superType;
-	
-	            this.superType = superType;
+	            var oldBase = this.base;
+	            this.base = superFn;
 	            try {
 	                return fn.apply(this, arguments);
 	            }
 	            finally {
-	                this.superType = oldSuperType;
+	                this.base = oldBase;
 	            }
 	        };
 	    }
@@ -93,9 +94,9 @@
 	                type.superType.constructor.apply(instance, arrayNativePrototype.slice.call(arguments, 1));
 	            }
 	        };
+	        type.prototype.superType = superType;
 	
 	        if (instanceProperties) {
-	
 	            // Copy the properties over onto the new prototype
 	            photon.extend(type.prototype, instanceProperties,
 	                photon.extend.filterHasOwnProperty, function (source, propertyName) {
@@ -103,7 +104,7 @@
 	                    var isFunctionThatCallsSuper = ancestor && photon.isFunction(propertyValue) &&
 	                        fnTest.test(propertyValue);
 	                    return isFunctionThatCallsSuper ?
-	                        createDescendantFunction(propertyValue, superType) :
+	                        createDescendantFunction(propertyValue, superType[propertyName]) :
 	                        propertyValue;
 	                });
 	        }
@@ -2126,6 +2127,27 @@
 	                        });
 	                    });
 	            },
+	            applyAllBindings: function(value, nodes, name, parent) {
+	                var sharedDataContext, node, nodeBindingInfo;
+	                for (var i= 0, n=nodes.length; i<n; i++) {
+	                    if (!photon.isDocumentOrElement(node = nodes[i])) {
+	                        continue;
+	                    }
+	
+	                    nodeBindingInfo = photon.binding.NodeBindingInfo.getOrCreateForElement(node);
+	                    var dataContext = nodeBindingInfo.getOrCreateDataContext(sharedDataContext);
+	                    if (dataContext !== sharedDataContext) {
+	                        if (!sharedDataContext) {
+	                            sharedDataContext = dataContext;
+	                        }
+	                        dataContext.setParent(parent ||
+	                            photon.binding.DataContext.getForElement(node.parentNode));
+	                        dataContext.setValue(value);
+	                        dataContext.setName(name);
+	                    }
+	                    photon.binding.updateBindings(node);
+	                }
+	            },
 	            // TODO: We use the parentDataContext in the template for-each to save looking it up, but why do we bother looking up parents
 	            // for explicit data contexts, AH, so we can access them in the things!!
 	            applyBindings:function (data, element, name, parentDataContext) {
@@ -2155,14 +2177,6 @@
 	                dataContext.setName(name);
 	
 	                photon.binding.updateBindings(element);
-	            },
-	
-	            applyDataContext:function (data, element) {
-	                var dataContext = photon.binding.DataContext.getLocalForElement(element);
-	                if (!dataContext) {
-	                    throw new Error("Data context values can only be changed for node that have previously been bound using ApplyBindings.");
-	                }
-	                dataContext.setValue(data);
 	            },
 	
 	            registerImport : function(name, value) {
@@ -2210,6 +2224,10 @@
 	     * @lends photon.binding.BindingBase.prototype
 	     */
 	    {
+	        dispose : function() {
+	            this.target_ = null;
+	            this.setDataContext(null);
+	        },
 	        getTarget:function () {
 	            return this.target_;
 	        },
@@ -2260,10 +2278,12 @@
 	            }
 	        },
 	        updateDataSource:function () {
-	            var newValue = null;
-	            if (this.dataContext_) {
-	                newValue = this.dataContext_.getValue();
+	            // if the data context is null then the binding is either not initialized, or disposed.
+	            if (this.dataContext_ === null) {
+	                return;
 	            }
+	
+	            var newValue = this.dataContext_.getValue();
 	            if (newValue !== this.dataSource_) {
 	                this.dataSource_ = newValue;
 	                this.dataSourceChanged();
@@ -3571,7 +3591,7 @@
 	     */
 	    {
 	        dispose:function () {
-	            this.setDataContext(null);
+	            this.base();
 	            if (this.renderer_) {
 	                this.renderer_.dispose();
 	                this.renderer_ = null;
@@ -3996,7 +4016,7 @@
 	        },
 	        insertBefore : function(parentElement, newElement, referenceElement) {
 	            var nodes = [];
-	            if (newElement.nodeType === 11) {
+	            if (photon.isDocumentFragment(newElement)) {
 	                var childNodes = newElement.childNodes;
 	                for (var i= 0, n=childNodes.length; i<n; i++) {
 	                    nodes[i] = childNodes[i];
@@ -4017,7 +4037,7 @@
 	        },
 	        insertBeforeAndApplyBindings : function(parentElement, newElement, referenceElement, data, parentDataContext) {
 	            var nodesAppended = [];
-	            if (newElement.nodeType === 11) {
+	            if (photon.isDocumentFragment(newElement)) {
 	                var childNodes = newElement.childNodes;
 	                for (var i= 0, n=childNodes.length; i<n; i++) {
 	                    nodesAppended.push(childNodes[i]);
@@ -4029,11 +4049,7 @@
 	
 	            // need to apply bindings after we've been attached to the dom, this is still inefficient when we have multiple levels of flow, need
 	            // to work on a post apply tree callback mechanism
-	            photon.array.forEach(nodesAppended, function(node) {
-	                if (node.nodeType === 1) {
-	                    photon.binding.applyBindings(data, node, parentDataContext);
-	                }
-	            });
+	            photon.binding.applyAllBindings(data, nodesAppended, null, parentDataContext);
 	
 	            photon.templating.afterRender(nodesAppended);
 	            return nodesAppended;
@@ -4838,9 +4854,13 @@
 	
 	                // apply set operations
 	                for (var setIndex = 0; setIndex < setLength; setIndex++) {
-	                    nodeSet = nodeSets[startA++];
-	                    for (var nodeIndex = 0, nodeCount = nodeSet.length; nodeIndex < nodeCount; nodeIndex++) {
-	                        photon.binding.applyBindings(newItems[diff.startB + setIndex], nodeSet[nodeIndex], dataContext);
+	                    var nodeSet = nodeSets[startA++];
+	                    var node = photon.array.find(nodeSet, function(node) {
+	                        return photon.binding.DataContext.getLocalForElement(node) != null
+	                    })
+	                    if (node) {
+	                        var dataContext = photon.binding.DataContext.getLocalForElement(node);
+	                        dataContext.setValue(newItems[diff.startB + setIndex]);
 	                    }
 	                }
 	
@@ -4907,7 +4927,6 @@
 	                if (parent.children_.length === 0) {
 	                    delete parent.children_;
 	                }
-	
 	            }
 	        },
 	        setParent:function (value) {
@@ -4952,8 +4971,10 @@
 	        setValue:function (value) {
 	            if (this.value_ !== value) {
 	                this.value_ = value;
-	                if (this.subscribers_) {
-	                    photon.array.forEach(this.subscribers_, this.notifyValueChanged, this);
+	                var subscribers = this.subscribers_;
+	                if (subscribers) {
+	                    subscribers = subscribers.slice(0);
+	                    photon.array.forEach(subscribers, this.notifyValueChanged, this);
 	                }
 	            }
 	        },
@@ -4990,6 +5011,7 @@
 	                    delete this.subscribers_;
 	                }
 	            }
+	
 	            return result;
 	        },
 	        notifyValueChanged:function (subscriber) {
@@ -5048,21 +5070,30 @@
 	            return null;
 	        }
 	    });
+	/**
+	 * Stores binding information relating to a node
+	 * @class
+	 */
+	photon.binding.NodeBindingInfo = function () {
+	};
+	
 	photon.defineType(
+	    photon.binding.NodeBindingInfo,
 	    /**
-	     * Stores binding information relating to a node
-	     * @class
-	     */
-	    photon.binding.NodeBindingInfo = function () {
-	    },
-	    /**
-	     * @lends photon.binding.NodeBindingInfo
+	     * @lends photon.binding.NodeBindingInfo.prototype
 	     */
 	    {
 	        dispose : function() {
 	            if (this.dataContext_) {
 	                this.dataContext_.dispose();
 	                this.dataContext = null;
+	            }
+	            if (this.bindings_) {
+	                // TODO: for now the NodeBindingInfo class is the only thing that disposes of bindings, if that changes this will NOT work.
+	                photon.array.forEach(this.bindings_, function(binding) {
+	                    binding.dispose();
+	                });
+	                this.bindings_ = null;
 	            }
 	        },
 	        getBindingCount:function () {
@@ -5111,8 +5142,8 @@
 	         *
 	         * @return {photon.binding.DataContext}
 	         */
-	        getOrCreateDataContext:function () {
-	            return this.dataContext_ ? this.dataContext_ : (this.dataContext_ = new photon.binding.DataContext());
+	        getOrCreateDataContext:function (dataContext) {
+	            return this.dataContext_ ? this.dataContext_ : (this.dataContext_ = dataContext || new photon.binding.DataContext());
 	        }
 	    },
 	    /* static members */

@@ -2,7 +2,23 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="12b894be-7c6b-4b2d-aae8-2c4fccad1ed9" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Source/binding/data/properties/DataTemplateProperty.js" afterPath="$PROJECT_DIR$/Source/binding/data/properties/DataTemplateProperty.js" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Source/Tests/defineType.tests.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Build/Temp/photon.temp" afterPath="$PROJECT_DIR$/Build/Temp/photon.temp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/misc.xml" afterPath="$PROJECT_DIR$/.idea/misc.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Examples/FlowTemplates.html" afterPath="$PROJECT_DIR$/Examples/FlowTemplates.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Notes.txt" afterPath="$PROJECT_DIR$/Notes.txt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Output/Photon-debug.js" afterPath="$PROJECT_DIR$/Output/Photon-debug.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Output/Photon-min.js" afterPath="$PROJECT_DIR$/Output/Photon-min.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Source/Photon.Core.js" afterPath="$PROJECT_DIR$/Source/Photon.Core.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Source/Tests/binding/flow/FlowBinding.DataContext.js" afterPath="$PROJECT_DIR$/Source/Tests/binding/flow/FlowBinding.DataContext.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Source/Tests/jsTestDriver.conf" afterPath="$PROJECT_DIR$/Source/Tests/jsTestDriver.conf" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Source/Tests/observable/ModelInheritanceTests.js" afterPath="$PROJECT_DIR$/Source/Tests/observable/ModelInheritanceTests.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Source/binding/BindingBase.js" afterPath="$PROJECT_DIR$/Source/binding/BindingBase.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Source/binding/DataContext.js" afterPath="$PROJECT_DIR$/Source/binding/DataContext.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Source/binding/NodeBindingInfo.js" afterPath="$PROJECT_DIR$/Source/binding/NodeBindingInfo.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Source/binding/binding.js" afterPath="$PROJECT_DIR$/Source/binding/binding.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Source/binding/flow/FlowBinding.js" afterPath="$PROJECT_DIR$/Source/binding/flow/FlowBinding.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Source/templating/ItemsRenderer.js" afterPath="$PROJECT_DIR$/Source/templating/ItemsRenderer.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Source/templating/templating.js" afterPath="$PROJECT_DIR$/Source/templating/templating.js" />
     </list>
@@ -26,65 +42,8 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="ItemsRenderer.js" pinned="false" current="true" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/Source/templating/ItemsRenderer.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="117" column="51" selection-start="4871" selection-end="4871" vertical-scroll-proportion="1.2804123">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file leaf-file-name="ConditionalRenderer.js" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Source/templating/ConditionalRenderer.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="22" column="42" selection-start="1022" selection-end="1022" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="dom.js" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Source/dom/dom.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="149" column="62" selection-start="4194" selection-end="4235" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="DataTemplateProperty.js" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Source/binding/data/properties/DataTemplateProperty.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="30" column="50" selection-start="995" selection-end="995" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="FlowBinding.If.ExpressionChanged.js" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Source/Tests/binding/flow/FlowBinding.If.ExpressionChanged.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="18" column="16" selection-start="763" selection-end="763" vertical-scroll-proportion="0.0">
-              <folding>
-                <marker date="1338486881336" expanded="true" signature="1764:1960" placeholder="..." />
-                <marker date="1338486881336" expanded="true" signature="1825:1936" placeholder="..." />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Template.js" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Source/templating/Template.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="116" column="35" selection-start="3223" selection-end="3223" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="jsTestDriver.conf" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Source/Tests/jsTestDriver.conf">
           <provider selected="true" editor-type-id="text-editor">
             <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
               <folding />
@@ -92,28 +51,82 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Photon-debug.js" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Output/Photon-debug.js">
+      <file leaf-file-name="ItemsRenderer.js" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Source/templating/ItemsRenderer.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="4747" column="31" selection-start="166517" selection-end="166517" vertical-scroll-proportion="0.0">
+            <state line="13" column="17" selection-start="430" selection-end="430" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="templating.js" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Source/templating/templating.js">
+      <file leaf-file-name="defineType.tests.js" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Source/Tests/defineType.tests.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="151" column="24" selection-start="5134" selection-end="5134" vertical-scroll-proportion="0.0">
+            <state line="20" column="29" selection-start="645" selection-end="645" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="binding.js" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Source/binding/binding.js">
+      <file leaf-file-name="Selector.js" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Source/ui/Selector.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="57" column="12" selection-start="1928" selection-end="1928" vertical-scroll-proportion="0.0">
+            <state line="179" column="20" selection-start="6070" selection-end="6070" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Photon.Core.js" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Source/Photon.Core.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="35" column="16" selection-start="1106" selection-end="1106" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Photon.Testing.js" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Source/Tests/Photon.Testing.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="176" column="47" selection-start="5384" selection-end="5384" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="FlowBinding.Disposing.js" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Source/Tests/binding/flow/FlowBinding.Disposing.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="8" column="13" selection-start="328" selection-end="328" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="FlowBinding.js" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/Source/binding/flow/FlowBinding.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="37" column="17" selection-start="1120" selection-end="1120" vertical-scroll-proportion="0.030965392">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Build.xml" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Build/Build.xml">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="1" column="18" selection-start="58" selection-end="58" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="FlowTemplate.js" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Source/templating/FlowTemplate.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="97" column="17" selection-start="2432" selection-end="2432" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -137,30 +150,30 @@
   <component name="IdeDocumentHistory">
     <option name="changedFiles">
       <list>
-        <option value="$PROJECT_DIR$/Source/binding/flow/FlowBinding.js" />
         <option value="$PROJECT_DIR$/Output/Photon-debug.js" />
-        <option value="$PROJECT_DIR$/Source/Photon.Core.js" />
-        <option value="$PROJECT_DIR$/Source/Tests/Photon.Testing.js" />
-        <option value="$PROJECT_DIR$/Source/Tests/binding/flow/FlowBinding.DataContext.js" />
-        <option value="$PROJECT_DIR$/Source/Tests/binding/flow/FlowBinding.If.ExpressionChanged.js" />
-        <option value="$PROJECT_DIR$/Source/templating/Renderer.js" />
-        <option value="$PROJECT_DIR$/Build/Build.msbuild" />
-        <option value="$PROJECT_DIR$/Notes.txt" />
         <option value="$PROJECT_DIR$/Source/binding/binding.js" />
-        <option value="$PROJECT_DIR$/Source/templating/Template.js" />
-        <option value="$PROJECT_DIR$/Source/templating/ConditionalRenderer.js" />
-        <option value="$PROJECT_DIR$/Source/dom/dom.js" />
         <option value="$PROJECT_DIR$/Source/templating/templating.js" />
-        <option value="$PROJECT_DIR$/Source/binding/data/properties/DataTemplateProperty.js" />
+        <option value="$PROJECT_DIR$/Source/Disposable.js" />
+        <option value="$PROJECT_DIR$/Source/binding/DataContext.js" />
+        <option value="$PROJECT_DIR$/Source/binding/NodeBindingInfo.js" />
+        <option value="$PROJECT_DIR$/Source/binding/BindingBase.js" />
+        <option value="$PROJECT_DIR$/Source/Tests/binding/flow/FlowBinding.DataContext.js" />
+        <option value="$PROJECT_DIR$/Notes.txt" />
+        <option value="$PROJECT_DIR$/Source/Tests/jsTestDriver.conf" />
+        <option value="$PROJECT_DIR$/Source/Tests/observable/ModelInheritanceTests.js" />
+        <option value="$PROJECT_DIR$/Source/Tests/defineType.tests.js" />
+        <option value="$PROJECT_DIR$/Examples/FlowTemplates.html" />
         <option value="$PROJECT_DIR$/Source/templating/ItemsRenderer.js" />
+        <option value="$PROJECT_DIR$/Source/Photon.Core.js" />
+        <option value="$PROJECT_DIR$/Source/binding/flow/FlowBinding.js" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="6" />
-    <option name="y" value="1" />
-    <option name="width" value="1905" />
-    <option name="height" value="1043" />
+    <option name="x" value="-8" />
+    <option name="y" value="-8" />
+    <option name="width" value="1382" />
+    <option name="height" value="754" />
   </component>
   <component name="ProjectInspectionProfilesVisibleTreeState">
     <entry key="Project Default">
@@ -269,72 +282,6 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="Tests" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Photon.Web" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Photon.Web" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Source" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Tests" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="templating" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Photon.Web" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Photon.Web" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Source" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Tests" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="observable" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Photon.Web" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Photon.Web" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Source" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Tests" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
               <option name="myItemId" value="binding" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
@@ -349,63 +296,7 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="Source" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Tests" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="binding" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="flow" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Photon.Web" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Photon.Web" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Source" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Tests" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="binding" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="data" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Photon.Web" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Photon.Web" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Source" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="templating" />
+              <option name="myItemId" value="Examples" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -460,7 +351,7 @@
       <recent name="D:\Work\Photon.Web\Source\Tests\templating" />
     </key>
   </component>
-  <component name="RunManager" selected="JsTestDriver.All">
+  <component name="RunManager" selected="JsTestDriver.Method">
     <configuration default="false" name="jsTestDriver.conf" type="JSTestDriver:ConfigurationType" factoryName="JsTestDriver" temporary="true">
       <setting name="configLocationType" value="CONFIG_FILE" />
       <setting name="settingsFile" value="$PROJECT_DIR$/Source/Tests/jsTestDriver.conf" />
@@ -533,9 +424,9 @@
     <configuration default="false" name="Method" type="JSTestDriver:ConfigurationType" factoryName="JsTestDriver">
       <setting name="configLocationType" value="TEST_METHOD" />
       <setting name="configType" value="FILE_PATH" />
-      <setting name="settingsFile" value="D:\Work\Photon.Web\Source\Tests\jsTestDriver.conf" />
-      <setting name="jsFile" value="D:\Work\Photon.Web\Source\templating\ItemsRenderer.js" />
-      <setting name="testCase" value="FlowBinding.If.ExpressionChanged:*" />
+      <setting name="settingsFile" value="D:\Photon.Web\Source\Tests\jsTestDriver.conf" />
+      <setting name="jsFile" value="D:\Photon.Web\Source\Tests\binding\flow\FlowBinding.Disposing.js" />
+      <setting name="testCase" value="FlowBinding.Disposing: *" />
       <setting name="testMethod" value="*" />
       <setting name="serverType" value="INTERNAL" />
       <RunnerSettings RunnerId="JsTestDriverClientRunner" />
@@ -550,10 +441,22 @@
       <ConfigurationWrapper RunnerId="JsTestDriverClientRunner" />
       <method />
     </configuration>
-    <list size="3">
+    <configuration default="false" name="Case" type="JSTestDriver:ConfigurationType" factoryName="JsTestDriver">
+      <setting name="configLocationType" value="TEST_CASE" />
+      <setting name="configType" value="FILE_PATH" />
+      <setting name="settingsFile" value="D:\Photon.Web\Source\Tests\jsTestDriver.conf" />
+      <setting name="jsFile" value="D:\Photon.Web\Source\Tests\binding\flow\FlowBinding.DataContext.js" />
+      <setting name="testCase" value="*" />
+      <setting name="serverType" value="INTERNAL" />
+      <RunnerSettings RunnerId="JsTestDriverClientRunner" />
+      <ConfigurationWrapper RunnerId="JsTestDriverClientRunner" />
+      <method />
+    </configuration>
+    <list size="4">
       <item index="0" class="java.lang.String" itemvalue="JsTestDriver.jsTestDriver.conf" />
       <item index="1" class="java.lang.String" itemvalue="JsTestDriver.Method" />
       <item index="2" class="java.lang.String" itemvalue="JsTestDriver.All" />
+      <item index="3" class="java.lang.String" itemvalue="JsTestDriver.Case" />
     </list>
   </component>
   <component name="ShelveChangesManager" show_recycled="false" />
@@ -589,26 +492,26 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="6" y="1" width="1905" height="1043" extended-state="0" />
+    <frame x="-8" y="-8" width="1382" height="754" extended-state="6" />
     <editor active="false" />
     <layout>
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.14949037" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Phing Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.17308736" sideWeight="0.61494905" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.42695355" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="12" side_tool="true" content_ui="tabs" />
-      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
-      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3295583" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.2797282" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="Regex Tester" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
+      <window_info id="Phing Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.17272727" sideWeight="0.46127945" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="true" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.31633207" sideWeight="0.61494905" order="0" side_tool="false" content_ui="combo" />
-      <window_info id="Run" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.38505095" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="JsTestDriver Server" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3272933" sideWeight="0.5" order="11" side_tool="false" content_ui="tabs" />
+      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.25454545" sideWeight="0.46127945" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="12" side_tool="true" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.53872055" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="JsTestDriver Server" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32659933" sideWeight="0.5" order="11" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3295583" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4074074" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.2777778" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.17651515" sideWeight="0.6700337" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
@@ -670,119 +573,88 @@
     <breakpoint-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/Source/templating/Renderer.js">
+    <entry file="file://$PROJECT_DIR$/Source/binding/BindingBase.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="52" column="29" selection-start="1529" selection-end="1529" vertical-scroll-proportion="0.0">
+        <state line="18" column="31" selection-start="478" selection-end="478" vertical-scroll-proportion="0.0" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Source/templating/Template.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="5" column="57" selection-start="173" selection-end="173" vertical-scroll-proportion="0.0" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Source/templating/templating.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="11" column="26" selection-start="312" selection-end="312" vertical-scroll-proportion="0.0" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Examples/FlowTemplates.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="25" column="16" selection-start="887" selection-end="887" vertical-scroll-proportion="-16.346153" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Source/observable/model.types.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="3" column="0" selection-start="91" selection-end="91" vertical-scroll-proportion="0.0" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Examples/NamedTemplates.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="45" column="7" selection-start="1556" selection-end="1556" vertical-scroll-proportion="-16.192308" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Source/templating/ConditionalRenderer.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Source/templating/ItemsRenderer.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="13" column="17" selection-start="430" selection-end="430" vertical-scroll-proportion="0.0" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Source/Tests/defineType.tests.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="20" column="29" selection-start="645" selection-end="645" vertical-scroll-proportion="0.0" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Source/ui/Selector.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="179" column="20" selection-start="6070" selection-end="6070" vertical-scroll-proportion="0.0" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Source/Photon.Core.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="35" column="16" selection-start="1106" selection-end="1106" vertical-scroll-proportion="0.0" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Source/Tests/Photon.Testing.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="176" column="47" selection-start="5384" selection-end="5384" vertical-scroll-proportion="0.0" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Source/Tests/binding/flow/FlowBinding.Disposing.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="8" column="13" selection-start="328" selection-end="328" vertical-scroll-proportion="0.0" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Source/binding/flow/FlowBinding.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="37" column="17" selection-start="1120" selection-end="1120" vertical-scroll-proportion="0.030965392">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Build/Build.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="1" column="18" selection-start="58" selection-end="58" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/Source/templating/FlowTemplate.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="12" column="31" selection-start="201" selection-end="201" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Source/templating/RenderTarget.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Build/Build.msbuild">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="95" column="53" selection-start="4136" selection-end="4136" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Notes.txt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="169" column="89" selection-start="9281" selection-end="9281" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Scripts/DataTables-1.9.0/media/js/jquery.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="3" column="2437" selection-start="67664" selection-end="67664" vertical-scroll-proportion="0.10515464">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Source/binding/binding.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="57" column="12" selection-start="1928" selection-end="1928" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Source/Tests/binding/flow/FlowBinding.If.ExpressionChanged.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="18" column="16" selection-start="763" selection-end="763" vertical-scroll-proportion="0.0">
-          <folding>
-            <marker date="1338486881336" expanded="true" signature="1764:1960" placeholder="..." />
-            <marker date="1338486881336" expanded="true" signature="1825:1936" placeholder="..." />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Source/Tests/jsTestDriver.conf">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Output/Photon-debug.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="4747" column="31" selection-start="166517" selection-end="166517" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Source/templating/ConditionalRenderer.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="22" column="42" selection-start="1022" selection-end="1022" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Source/dom/dom.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="149" column="62" selection-start="4194" selection-end="4235" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Source/templating/Template.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="116" column="35" selection-start="3223" selection-end="3223" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Source/templating/templating.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="151" column="24" selection-start="5134" selection-end="5134" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Source/binding/data/properties/DataTemplateProperty.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="30" column="50" selection-start="995" selection-end="995" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Source/templating/ItemsRenderer.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="117" column="51" selection-start="4871" selection-end="4871" vertical-scroll-proportion="1.2804123">
-          <folding />
-        </state>
+        <state line="97" column="17" selection-start="2432" selection-end="2432" vertical-scroll-proportion="0.0" />
       </provider>
     </entry>
   </component>
