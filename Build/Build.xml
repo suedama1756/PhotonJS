@@ -9,7 +9,7 @@
         <property name="MSBuild" value="C:\Windows\Microsoft.NET\Framework\v4.0.30319\MSBuild.exe"/>
         <property name="MSBuildProject" file="Build.msbuild" value="Build.msbuild"/>
 
-        <exec command="${MSBuild} ${MSBuildProject} /p:IncludeDataTable=true /p:IncludeJQueryUI=true /p:IncludeValidation=true"
+        <exec command="${MSBuild} ${MSBuildProject} /p:IncludeSlickGrid=true /p:IncludeJQueryUI=true /p:IncludeValidation=true"
               logoutput="true"/>
     </target>
 </project>

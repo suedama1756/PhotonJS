@@ -1905,8 +1905,10 @@
 	            return photon.array.remove(this.subscribers_, subscriber);
 	        },
 	        notifyChanged:function (lengthChanged) {
-	            if (this.subscribers_) {
-	                photon.array.forEach(this.subscribers_, function (item) {
+	            var subscribers = this.subscribers_;
+	            if (subscribers) {
+	                subscribers = subscribers.slice(0);
+	                photon.array.forEach(subscribers, function (item) {
 	                    if (!item.propertyName() || (lengthChanged && item.propertyName() === 'length')) {
 	                        item.notify({ data:{}}); // TODO: Why are we passing data here?
 	                    }
@@ -3347,7 +3349,7 @@
 	            var parentDataContext = photon.binding.DataContext.getForElement(target);
 	            if (newValue.each) {
 	                // TODO: If the template has changed we will need to re-render everything!!
-	                if (!this.renderer_) {
+	                if (!this.renderer_ || !this.renderer_.getReferenceElement()) {
 	                    this.renderer_ = new photon.templating.ItemsRenderer(
 	                        target, photon.templating.RenderTarget.NextSibling, photon.templating.getCache().getTemplate(newValue.name)
 	                    );
@@ -4009,8 +4011,10 @@
 	            // need to apply bindings after we've been attached to the dom, this is still inefficient when we have multiple levels of flow, need
 	            // to work on a post apply tree callback mechanism
 	            photon.array.forEach(nodes, function(node) {
-	                node.parentDataContextNode = dataContextParentElement;
-	                photon.binding.updateBindings(node);
+	                if (photon.isDocumentOrElement(node)) {
+	                    node.parentDataContextNode = dataContextParentElement;
+	                    photon.binding.updateBindings(node);
+	                }
 	            });
 	
 	            photon.templating.afterRender(nodes);
@@ -5367,6 +5371,684 @@
 	photon.binding.data.properties["select.items"] = new photon.ui.SelectorItemsProperty();
 	photon.binding.data.properties["select.value"] = new photon.ui.SelectorValueProperty();
 	photon.binding.data.properties["select.display"] = new photon.ui.SelectorDisplayProperty();
+	photon.slickGrid = photon.slickGrid || {};
+	
+	photon.slickGrid.create = function (container, data, columns, options) {
+	    return (new photon.slickGrid.Control(container, data, columns, options)).grid_;
+	};
+	
+	photon.slickGrid.dataItemColumnValueExtractor = function (item, column) {
+	    return column.bindingExpression ? column.bindingExpression.getGetter()(item) : item[column.field];
+	};
+	
+	photon.slickGrid.defaultEditor = function (args) {
+	    var $input;
+	    var defaultValue;
+	
+	    this.init = function () {
+	        $input = $("<INPUT type=text class='editor-text' />");
+	
+	        $input.bind("keydown.nav", function (e) {
+	            if (e.keyCode === $.ui.keyCode.LEFT || e.keyCode === $.ui.keyCode.RIGHT) {
+	                e.stopImmediatePropagation();
+	            }
+	        });
+	
+	        $input.appendTo(args.container);
+	        $input.focus().select();
+	    };
+	
+	    this.destroy = function () {
+	        $input.remove();
+	    };
+	
+	    this.focus = function () {
+	        $input.focus();
+	    };
+	
+	    this.loadValue = function (item) {
+	        defaultValue = args.column.bindingExpression.getGetter()(item);
+	        $input.val(defaultValue);
+	        $input[0].defaultValue = defaultValue;
+	        $input.select();
+	    };
+	
+	    this.serializeValue = function () {
+	        return $input.val();
+	    };
+	
+	    this.applyValue = function (item, state) {
+	        args.column.bindingExpression.getSetter()(item, state);
+	    };
+	
+	    this.isValueChanged = function () {
+	        return (!($input.val() === "" && defaultValue === null)) && ($input.val() !== defaultValue);
+	    };
+	
+	    this.validate = function () {
+	        return {valid:true};
+	    };
+	
+	    this.init();
+	};
+	
+	photon.slickGrid.defaultMultiColumnSort = function (e, args) {
+	    var cols = args.sortCols;
+	    var extractor = args.grid.getOptions().dataItemColumnValueExtractor;
+	    if (!extractor) {
+	        extractor = function (item, column) {
+	            return item[column.field];
+	        };
+	    }
+	
+	    args.grid.getData().sort(function (dataRow1, dataRow2) {
+	        for (var i = 0, l = cols.length; i < l; i++) {
+	            var sign = cols[i].sortAsc ? 1 : -1;
+	            var value1 = extractor(dataRow1, cols[i].sortCol);
+	            var value2 = extractor(dataRow2, cols[i].sortCol);
+	            var result = (value1 === value2 ? 0 : (value1 > value2 ? 1 : -1)) * sign;
+	            if (result !== 0) {
+	                return result;
+	            }
+	        }
+	        return 0;
+	    });
+	    args.grid.invalidate();
+	    args.grid.render();
+	};
+	
+	photon.slickGrid.ItemsProperty = function () {
+	};
+	
+	photon.defineType(
+	    photon.slickGrid.ItemsProperty,
+	    photon.binding.data.Property,
+	    {
+	        getValue:function (binding) {
+	            var slickGrid = binding.getTarget().slickGrid;
+	            return slickGrid ? slickGrid.getData() : null;
+	        },
+	        setValue:function (binding) {
+	            var slickGrid = binding.getTarget().slickGrid;
+	            if (!slickGrid) {
+	                return;
+	            }
+	            var newValue = binding.getSourceValue(),
+	                oldData = slickGrid.getData(),
+	                newData = photon.observable.unwrap(newValue);
+	
+	            if (oldData !== newData) {
+	                if (binding.subscriber_) {
+	                    binding.subscriber_.dispose();
+	                    binding.subscriber = null;
+	                }
+	
+	                if (newValue && newValue.subscribe) {
+	                    binding.subscriber_ = newValue.subscribe(function () {
+	                        this.onItemsChanged_(binding);
+	                    }, this);
+	                }
+	
+	                setTimeout(function () {
+	                    slickGrid.setData(newData);
+	                    slickGrid.render();
+	                }, 0);
+	
+	            }
+	        },
+	        onItemsChanged_:function (binding) {
+	            var slickGrid = binding.getTarget().slickGrid;
+	            if (slickGrid) {
+	                var newData = photon.observable.unwrap(binding.getSourceValue());
+	                if (slickGrid.getData() !== newData) {
+	                    slickGrid.setData(newData || []);
+	                }
+	                slickGrid.invalidate();
+	            }
+	        }
+	    });
+	
+	photon.slickGrid.SelectedItemProperty = function () {
+	};
+	
+	photon.defineType(
+	    photon.slickGrid.SelectedItemProperty,
+	    photon.binding.data.Property, {
+	        getDefaultBindingMode:function () {
+	            return photon.binding.data.DataBindingMode.TwoWay;
+	        },
+	        bindUpdateSourceTriggers:function () {
+	
+	        },
+	        ensureInitialized_:function (binding) {
+	            if (!binding.isInit_) {
+	                binding.isInit_ = true;
+	                var slickGrid = binding.getTarget().slickGrid;
+	                if (!slickGrid.getSelectionModel()) {
+	                    slickGrid.setSelectionModel(new Slick.RowSelectionModel());
+	                }
+	
+	                slickGrid.onSelectedRowsChanged.subscribe(function () {
+	                    binding.updateSource();
+	                });
+	            }
+	        },
+	        getValue:function (binding) {
+	            this.ensureInitialized_(binding);
+	            var slickGrid = binding.getTarget().slickGrid, rows = slickGrid.getSelectedRows();
+	            return rows.length > 0 ? slickGrid.getDataItem(rows[0]) : null;
+	        },
+	        setValue:function (binding) {
+	            this.ensureInitialized_(binding);
+	            var slickGrid = binding.getTarget().slickGrid;
+	            var value = binding.getSourceValue();
+	            if (value === null) {
+	                slickGrid.setSelectedRows([]);
+	            }
+	            else {
+	                for (var i = 0, n = slickGrid.getDataLength(); i < n; i++) {
+	                    var item = slickGrid.getDataItem(i);
+	                    if (item === value) {
+	                        slickGrid.setSelectedRows([i]);
+	                    }
+	                }
+	            }
+	        }
+	    });
+	
+	
+	photon.binding.data.properties["slick.items"] = new photon.slickGrid.ItemsProperty();
+	photon.binding.data.properties["slick.selectedItem"] = new photon.slickGrid.SelectedItemProperty();
+	
+	photon.slickGrid.Control = function (container, data, columns, options) {
+	    var bindingContext = photon.binding.BindingContext.getInstance(), self = this;
+	    for (var i = 0; i < columns.length; i++) {
+	        var column = columns[i];
+	
+	        if (column.binding) {
+	            // setup default editor if no other formatter has been explicitly set
+	            if (column.editable && !column.editor) {
+	                column.editor = photon.slickGrid.defaultEditor;
+	            }
+	
+	            options.dataItemColumnValueExtractor = options.dataItemColumnValueExtractor ||
+	                photon.slickGrid.dataItemColumnValueExtractor;
+	
+	            if (!column.bindingExpression) {
+	                column.bindingExpression = bindingContext.parseBindingExpressions("data-bind", "null:" + column.binding)[0];
+	            }
+	        }
+	
+	        if (column.bindingTemplate) {
+	            // setup default formatter if no other formatter has been explicitly set
+	            if (!column.formatter) {
+	                column.formatter = this.createTemplateFormatter_(options.enableAsyncPostRender);
+	            }
+	
+	            if (!column.binding && !column.bindingExpression) {
+	                column.bindingExpression = photon.templating.getPrimaryDataBindingExpressionFromHtml(
+	                    column.bindingTemplate);
+	            }
+	
+	            if (options.enableAsyncPostRender) {
+	                column.asyncPostRender = function (node, row, data, column) {
+	                    self.postRender_(node, row, data, column);
+	                }
+	            }
+	        }
+	    }
+	
+	    this.nodeCleaner_ = new photon.dom.NodeGarbageCollector();
+	
+	    this.grid_ = $(container)[0].slickGrid = new Slick.Grid(container, data, columns, options);
+	};
+	
+	photon.defineType(photon.slickGrid.Control,
+	    {
+	        postRender_:function (node, row, data, column) {
+	            photon.binding.applyBindings(data, node);
+	            this.nodeCleaner_.monitor(node);
+	            this.nodeCleaner_.postCollect();
+	        },
+	        createTemplateFormatter_:function (usePostRender) {
+	            var self = this;
+	            if (usePostRender) {
+	                return function (row, cell, value, column) {
+	                    return column.bindingTemplate;
+	                }
+	            }
+	            return function (row, cell, value, column) {
+	                var result = column.bindingTemplate;
+	                self.enqueueBinding_({
+	                    row:row,
+	                    cell:cell
+	                });
+	                return result;
+	            };
+	        },
+	        applyBindings_:function () {
+	            var bindings = this.pendingBindings_, grid = this.grid_;
+	            this.pendingBindings_ = null;
+	            for (var i = 0, n = bindings.length; i < n; i++) {
+	                var binding = bindings[i];
+	                var node = grid.getCellNode(binding.row, binding.cell);
+	                if (node) {
+	                    photon.binding.applyBindings(grid.getDataItem(binding.row), node);
+	                    this.nodeCleaner_.monitor(node);
+	                    this.nodeCleaner_.postCollect();
+	                }
+	            }
+	        },
+	        enqueueBinding_:function (cell) {
+	            if (this.pendingBindings_) {
+	                this.pendingBindings_.push(cell);
+	            }
+	            else {
+	                this.pendingBindings_ = [cell];
+	                var self = this;
+	                setTimeout(function () {
+	                    self.applyBindings_();
+	                }, 0);
+	            }
+	        }
+	    });
+	
+	
+	photon.dom.NodeGarbageCollector = function () {
+	    this.nodes_ = [];
+	};
+	
+	photon.defineType(
+	    photon.dom.NodeGarbageCollector,
+	    {
+	        monitor:function (node) {
+	            if (photon.array.indexOf(this.nodes_, node) === -1) {
+	                this.nodes_.push(node);
+	            }
+	        },
+	        postCollect:function () {
+	            if (this.collectPending_) {
+	                return;
+	            }
+	            this.collectPending_ = true;
+	
+	            var self = this;
+	            setTimeout(function () {
+	                try {
+	                    self.collect();
+	                }
+	                finally {
+	                    self.collectPending_ = false;
+	                }
+	            }, 0);
+	        },
+	        collect:function () {
+	            var nodesIn = this.nodes_, nodesOut = [], nodesOutIndex = 0;
+	            for (var i = 0, n = nodesIn.length; i < n; i++) {
+	                var node = nodesIn[i];
+	                if (!document.body.contains(node)) {
+	                    photon.dom.cleanNode(node);
+	                } else {
+	                    nodesOut[nodesOutIndex++] = node;
+	                }
+	            }
+	            this.nodes_ = nodesOut;
+	        }
+	    });
+	/** @namespace "photon.jQuery.ui" */
+	photon.provide("photon.jQuery.ui");
+	
+	photon.defineType(
+	
+	    photon.jQuery.ui.AutoCompleteOptionsProperty = function () {
+	
+	    },
+	    photon.binding.data.Property,
+	    {
+	        adjustOptions:function (x, y) {
+	
+	        },
+	        replaceMethod:function (autoComplete, methodName, newFn) {
+	            var oldFn = autoComplete[methodName];
+	            if (oldFn !== newFn && !oldFn.originalFn_) {
+	                autoComplete[methodName] = newFn;
+	                autoComplete.originalFn_ = newFn;
+	            }
+	        },
+	        resetMethod:function (autoComplete, methodName) {
+	            var fn = autoComplete[methodName];
+	            if (fn.originalFn_) {
+	                autoComplete[methodName] = fn.originalFn_;
+	            }
+	        },
+	        getValue:function (binding) {
+	            return binding.options;
+	        },
+	        setValue:function (binding) {
+	            var newValue = binding.getSourceValue();
+	            var oldValue = binding.options;
+	            if (!photon.object.equals(oldValue, newValue)) {
+	                binding.options = newValue;
+	
+	                var target = $(binding.getTarget());
+	                var autoComplete = $(target).autocomplete(newValue)
+	                    .data("autocomplete");
+	
+	                var originalSuggest = autoComplete._suggest;
+	                this.replaceMethod(autoComplete, "_suggest",
+	                    function (items) {
+	                        if (!binding.selectionExecuted) {
+	                            originalSuggest.call(autoComplete, items);
+	                        }
+	                    });
+	
+	                this.replaceMethod(autoComplete, "_resizeMenu",
+	                    function () {
+	                        var ul = autoComplete.menu.element;
+	                        ul.outerWidth(target.outerWidth());
+	                    });
+	
+	                if (newValue.menuTemplate && newValue.itemTemplate) {
+	                    throw new Error("Cannot specify both menuTemplate and itemTemplate.");
+	                }
+	
+	                if (newValue.menuTemplate) {
+	                    this.replaceMethod(autoComplete, "_renderMenu",
+	                        function (ul, item) {
+	                            applyTemplateText(ul, binding.getDataContext().getValue(), newValue.menuTemplate);
+	                            return ul;
+	                        });
+	                }
+	                else {
+	                    this.resetMethod(autoComplete, "_renderMenu");
+	                }
+	
+	                if (newValue.itemTemplate) {
+	                    this.replaceMethod(autoComplete, "_renderItem",
+	                        function (ul, item) {
+	                            applyTemplateText(ul, item, newValue.itemTemplate);
+	                            return ul;
+	                        });
+	                }
+	                else {
+	                    this.resetMethod(autoComplete, "_renderItem");
+	                }
+	
+	                if (newValue.submit) {
+	                    target.bind("keydown.autocomplete", function (event) {
+	                        var keyCode = $.ui.keyCode;
+	                        if (event.keyCode === keyCode.ENTER || event.keyCode === keyCode.NUMPAD_ENTER) {
+	                            newValue.submit(target.val());
+	                            target.autocomplete("widget").hide();
+	                            binding.selectionExecuted = true;
+	                        }
+	                        else {
+	                            binding.selectionExecuted = false;
+	                        }
+	                    });
+	                }
+	            }
+	        }
+	    })
+	;
+	
+	photon.defineType(photon.jQuery.ui.AutoCompleteItemProperty = function () {
+	
+	},
+	    photon.binding.data.Property,
+	    {
+	        getValue:function (binding) {
+	            return $(binding.getTarget()).data("item.autocomplete");
+	        },
+	        setValue:function (binding) {
+	            $(binding.getTarget()).data("item.autocomplete", binding.getSourceValue());
+	        }
+	    });
+	
+	photon.binding.data.properties["autoComplete.options"] = new photon.jQuery.ui.AutoCompleteOptionsProperty();
+	photon.binding.data.properties["autoComplete.item"] = new photon.jQuery.ui.AutoCompleteItemProperty();
+	
+	function applyTemplate(element, data, template) {
+	    $(photon.string.trim(template)).appendTo(element)
+	        .each(function (i, x) {
+	            if (x.nodeType === 1) {
+	                photon.binding.applyBindings(data, x);
+	            }
+	        });
+	}
+	
+	function applyTemplateText(element, data, template) {
+	    if (photon.isString(template)) {
+	        applyTemplate(element, data, template);
+	    }
+	    else {
+	        photon.templating.getHtml(template, function (args) {
+	            applyTemplate(element, data, args.template);
+	        });
+	    }
+	}
+	/** @namespace photon.validation */
+	photon.provide("photon.validation");
+	
+	/**
+	 * Creates a new instance of the photon.validation.ValidationExtension type
+	 * @constructor
+	 * @extends photon.observable.model.Extension
+	 */
+	photon.validation.ValidationExtension = function () {
+	    photon.validation.ValidationExtension.base(this);
+	};
+	
+	photon.defineType(
+	    /**
+	     * Constructor
+	     */
+	    photon.validation.ValidationExtension,
+	    /**
+	     * Ancestor
+	     */
+	    photon.observable.model.Extension,
+	    /**
+	     * @lends photon.validation.ValidationExtension.prototype
+	     */
+	    {
+	        define:function (definition) {
+	            // add errors collection
+	            var self = this;
+	            photon.extend(definition,
+	                {
+	                    errors:{
+	                        type:'ObservableArray'
+	                    },
+	                    validate : function() {
+	                        if (this.onValidate) {
+	                            this.onValidate();
+	                        }
+	                        self.validateModel(this);
+	                    }
+	                });
+	
+	            photon.object.forEachOwnProperty(definition, function (propertyName) {
+	                var member = definition[propertyName];
+	                if (member && typeof member === "object") {
+	                    var validationRules = member.validationRules;
+	                    if (!validationRules) {
+	                        return;
+	                    }
+	
+	                    var rules = [];
+	                    photon.object.forEachOwnProperty(validationRules, function (ruleName) {
+	                        var ruleType = photon.assert(photon.validation.rules[ruleName],
+	                            "Unknown rule type {0}.", ruleName);
+	                        rules.push(new ruleType(validationRules[ruleName]));
+	                    });
+	
+	                    definition[propertyName].validationRules = rules;
+	                }
+	            });
+	
+	        },
+	        findRuleError:function (model, rule) {
+	            var errors = model.errors().unwrap();
+	            return photon.array.findIndex(errors, function (error) {
+	                return error.getRule() === rule;
+	            });
+	        },
+	        afterChange:function (model, property, oldValue, newValue) {
+	             this.validateProperty(model, property, newValue);
+	        },
+	        validateModel : function(model) {
+	            var definition = model.definition_;
+	            photon.object.forEachOwnProperty(definition.properties, function(propertyName) {
+	                var property = definition.properties[propertyName];
+	                if (property.validationRules) {
+	                    this.validateProperty(model, property, model.get(propertyName));
+	                }
+	            }, this);
+	        },
+	        validateProperty : function(model, property, value) {
+	            var rules = property.validationRules;
+	            if (rules) {
+	                for (var i = 0, n = rules.length; i < n; i++) {
+	                    var rule = rules[i];
+	                    var index = this.findRuleError(model, rule);
+	                    var error = rule.validate(model, property, value);
+	                    if (error) {
+	                        if (index === -1) {
+	                            model.errors().push(error);
+	                        }
+	                    } else {
+	                        if (index !== -1) {
+	                            model.errors().splice(index, 1);
+	                        }
+	                    }
+	                }
+	            }
+	        }
+	    });
+	
+	/**
+	 * Register the validation extension
+	 * @type {photon.validation.ValidationExtension}
+	 */
+	photon.observable.model.extensions.validation = new photon.validation.ValidationExtension();
+	
+	/**
+	 * Creates a new instance of the photon.validation.Rule type
+	 * @param definition
+	 * @constructor
+	 */
+	photon.validation.Rule = function (definition) {
+	    photon.extend(this, definition);
+	};
+	
+	photon.defineType(photon.validation.Rule,
+	    {
+	        validate:function (model, property, value) {
+	            if (!this.isValid(model, property, value)) {
+	                return new photon.validation.Error(this, property, this.formatError(model, property, value));
+	            }
+	            return null;
+	        },
+	        isValid:function (model, property, value) {
+	            return true;
+	        },
+	        formatError:function (model, property, value) {
+	            var self = this;
+	            return this.message.replace(/\{\{|\}\}|\{(\w+(\.\w+)*)\}/gi, function (m, n) {
+	                if (m === "{{") {
+	                    return "{";
+	                }
+	                if (m === "}}") {
+	                    return "}";
+	                }
+	
+	                var parts = n.split('.');
+	                if (parts.length === 1) {
+	                    if (parts[0] === 'value') {
+	                        return value;
+	                    }
+	                } else if (parts[0] === 'property') {
+	                    var metaDataValue = property.metaData[parts[1]];
+	                    if (metaDataValue.isPropertyAccessor) {
+	                        return property.metaData[parts[1]]();
+	                    }
+	                    return metaDataValue;
+	                } else if (parts[0] === 'rule') {
+	                    return self[parts[1]];
+	                }
+	                return '';
+	            });
+	        }
+	    });
+	
+	photon.validation.rules = {};
+	
+	photon.validation.Error = function (rule, property, message) {
+	    this.rule_ = rule;
+	    this.property_ = property;
+	    this.message_ = message;
+	};
+	
+	photon.defineType(photon.validation.Error,
+	    {
+	        getProperty:function () {
+	            return this.property_;
+	        },
+	        getMessage:function () {
+	            return this.message_;
+	        },
+	        getRule:function () {
+	            return this.rule_;
+	        }
+	    });
+	
+	photon.validation.defineRule = function (name, definition) {
+	    var rule = photon.validation.rules[name] = function (ruleDefinition) {
+	        rule.base(this, ruleDefinition);
+	    };
+	
+	    photon.defineType(rule, photon.validation.Rule, definition);
+	};
+	
+	photon.validation.defineRule('length', {
+	    isValid:function (model, property, value) {
+	        return value.length >= this.minLength && value.length <= this.maxLength;
+	    },
+	    message:"'{property.displayName}' must be between {rule.minLength} and {rule.maxLength} characters in length.",
+	    minLength:0,
+	    maxLength:Number.MAX_VALUE
+	});
+	
+	photon.validation.defineRule('required', {
+	    isValid:function (model, property, value) {
+	        return !photon.isNullOrUndefined(value) && value !== '';
+	    },
+	    message:"'{property.displayName}' must have a value."
+	});
+	
+	photon.validation.defineRule('regex', {
+	    isValid:function (model, property, value) {
+	        return value && value.match(this.regex) !== null;
+	    },
+	    regex:undefined,
+	    message:"'{property.displayName}' does not match the expected input format."
+	});
+	
+	photon.validation.defineRule('number', {
+	    isValid:function (model, property, value) {
+	        return !isNaN(Number(value));
+	    },
+	    message:"'{property.displayName}' must be a number."
+	});
+	
+	photon.validation.defineRule('in', {
+	    isValid:function (model, property, value) {
+	        return photon.array.indexOf(this.values, value) !== -1;
+	    },
+	    values:[],
+	    message:"'{property.displayName}' must be one of the following values {rule.values}."
+	});
 
     });
 })(window);

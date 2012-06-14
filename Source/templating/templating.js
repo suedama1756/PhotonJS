@@ -143,8 +143,10 @@ provide("photon.templating",
             // need to apply bindings after we've been attached to the dom, this is still inefficient when we have multiple levels of flow, need
             // to work on a post apply tree callback mechanism
             photon.array.forEach(nodes, function(node) {
-                node.parentDataContextNode = dataContextParentElement;
-                photon.binding.updateBindings(node);
+                if (photon.isDocumentOrElement(node)) {
+                    node.parentDataContextNode = dataContextParentElement;
+                    photon.binding.updateBindings(node);
+                }
             });
 
             photon.templating.afterRender(nodes);

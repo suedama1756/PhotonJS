@@ -46,7 +46,7 @@ photon.defineType(
             var parentDataContext = photon.binding.DataContext.getForElement(target);
             if (newValue.each) {
                 // TODO: If the template has changed we will need to re-render everything!!
-                if (!this.renderer_) {
+                if (!this.renderer_ || !this.renderer_.getReferenceElement()) {
                     this.renderer_ = new photon.templating.ItemsRenderer(
                         target, photon.templating.RenderTarget.NextSibling, photon.templating.getCache().getTemplate(newValue.name)
                     );

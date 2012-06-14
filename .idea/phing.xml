@@ -4,7 +4,7 @@
     <buildFilePaths>
       <buildFile path="file://$PROJECT_DIR$/Build/Build.xml" />
     </buildFilePaths>
-    <phingPath>C:\Programs\Phing\bin\phing.bat</phingPath>
+    <phingPath>C:\Tools\Phing\bin\phing.bat</phingPath>
   </component>
 </project>
 

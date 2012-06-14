@@ -103,7 +103,7 @@
     <Compile Include="ui\ui.js" />
     <Compile Include="ui\Selector.js" />
 
-    <Compile Include="3rdParty/DataTable/Photon.DataTable.js" Condition=" '$(IncludeDataTable)' == 'true' " />
+    <Compile Include="3rdParty/SlickGrid/Photon.SlickGrid.js" Condition=" '$(IncludeSlickGrid)' == 'true' " />
     <Compile Include="3rdParty/jQueryUI/Photon.jQueryUI.js" Condition=" '$(IncludeJQueryUI)' == 'true' " />
     <Compile Include="plugins/validation/validation.js" Condition=" '$(IncludeValidation)' == 'true' " />
 
