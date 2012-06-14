@@ -119,6 +119,7 @@
                     assertEquals(3, items[2].value.innerText);
                 }
             },
+
             "When if1 is an object exists condition and there are child bindings dependent on the objects existence and the condition transitions from exists to not exists":{
                 requiredHtmlResources:"IfObjectExists",
                 becauseOf:function () {
@@ -153,6 +154,21 @@
                 },
                 "Should update correctly":function () {
                     assertEquals('1', $(".value").text());
+
+            "When next sibling if in each":{
+                requiredHtmlResources : "IfInEachNextSibling",
+                becauseOf: function() {
+                    var data = {
+                        items : [{
+                            condition:true,
+                            value:"Correct"
+                        }],
+                        value : "Incorrect"
+                    }
+                    photon.binding.applyBindings(data);
+                },
+                "Should inherit correct data context" : function() {
+                     assertEquals("Correct", $(".value").text());
                 }
             }
         },
@@ -194,10 +210,19 @@
                      </div>
                      */
                 },
+
                 IfObjectExists:function () {
                     /*:DOC +=
                      <div class="if1" data-flow="if:data">
                      <span class="value" data-bind="innerText:data.value" ></span>
+
+                IfInEachNextSibling:function () {
+                    /*:DOC +=
+                     <div id="each1" data-flow="each:items">
+                     <div class="if1" data-flow="if:condition,applyTo:NextSibling">
+                        <span class="value" data-bind="innerText:value" ></span>
+                     </div>
+                     </div>
                      </div>
                      */
                 }

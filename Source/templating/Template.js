@@ -138,7 +138,7 @@ photon.defineType(
             // always return a copy
             return this.fragment_.cloneNode(true);
         },
-        insertBefore : function(parentElement, referenceElement) {
-            return photon.templating.insertBefore(parentElement, this.getFragment(), referenceElement);
+        insertBefore : function(parentElement, referenceElement, dataContextParentElement) {
+            return photon.templating.insertBefore(parentElement, this.getFragment(), referenceElement, dataContextParentElement);
         }
     });

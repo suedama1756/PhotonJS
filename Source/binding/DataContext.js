@@ -141,7 +141,7 @@ photon.defineType(
          * @static
          */
         getForElement:function (element) {
-            for (var current = element; current; current = current.parentNode) {
+            for (var current = element; current; current = current.parentDataContextNode || current.parentNode) {
                 var result = this.getLocalForElement(current);
                 if (result) {
                     return result;

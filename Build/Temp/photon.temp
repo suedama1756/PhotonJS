@@ -1906,8 +1906,10 @@
 	            return photon.array.remove(this.subscribers_, subscriber);
 	        },
 	        notifyChanged:function (lengthChanged) {
-	            if (this.subscribers_) {
-	                photon.array.forEach(this.subscribers_, function (item) {
+	            var subscribers = this.subscribers_;
+	            if (subscribers) {
+	                subscribers = subscribers.slice(0);
+	                photon.array.forEach(subscribers, function (item) {
 	                    if (!item.propertyName() || (lengthChanged && item.propertyName() === 'length')) {
 	                        item.notify({ data:{}}); // TODO: Why are we passing data here?
 	                    }
@@ -3591,7 +3593,7 @@
 	     */
 	    {
 	        dispose:function () {
-	            this.base();
+	            this.superType.dispose.call(this);
 	            if (this.renderer_) {
 	                this.renderer_.dispose();
 	                this.renderer_ = null;
@@ -4014,7 +4016,7 @@
 	
 	            return result;
 	        },
-	        insertBefore : function(parentElement, newElement, referenceElement) {
+	        insertBefore : function(parentElement, newElement, referenceElement, dataContextParentElement) {
 	            var nodes = [];
 	            if (photon.isDocumentFragment(newElement)) {
 	                var childNodes = newElement.childNodes;
@@ -4029,6 +4031,7 @@
 	            // need to apply bindings after we've been attached to the dom, this is still inefficient when we have multiple levels of flow, need
 	            // to work on a post apply tree callback mechanism
 	            photon.array.forEach(nodes, function(node) {
+	                node.parentDataContextNode = dataContextParentElement;
 	                photon.binding.updateBindings(node);
 	            });
 	
@@ -4468,8 +4471,8 @@
 	            // always return a copy
 	            return this.fragment_.cloneNode(true);
 	        },
-	        insertBefore : function(parentElement, referenceElement) {
-	            return photon.templating.insertBefore(parentElement, this.getFragment(), referenceElement);
+	        insertBefore : function(parentElement, referenceElement, dataContextParentElement) {
+	            return photon.templating.insertBefore(parentElement, this.getFragment(), referenceElement, dataContextParentElement);
 	        }
 	    });
 	/**
@@ -4756,9 +4759,9 @@
 	                if (renderedNodes) {
 	                    return;
 	                }
-	                this.renderedNodes_ = this.renderTarget_ === photon.templating.RenderTarget.Child ?
+	                var renderedNodes = this.renderedNodes_ = this.renderTarget_ === photon.templating.RenderTarget.Child ?
 	                    this.template_.insertBefore(referenceElement, null) :
-	                    this.template_.insertBefore(referenceElement.parentNode, referenceElement.nextSibling);
+	                    this.template_.insertBefore(referenceElement.parentNode, referenceElement.nextSibling, referenceElement);
 	            }
 	            else if (renderedNodes) {
 	                photon.array.forEach(renderedNodes,
@@ -5051,7 +5054,7 @@
 	         * @static
 	         */
 	        getForElement:function (element) {
-	            for (var current = element; current; current = current.parentNode) {
+	            for (var current = element; current; current = current.parentDataContextNode || current.parentNode) {
 	                var result = this.getLocalForElement(current);
 	                if (result) {
 	                    return result;
@@ -5397,6 +5400,609 @@
 	photon.binding.data.properties["select.items"] = new photon.ui.SelectorItemsProperty();
 	photon.binding.data.properties["select.value"] = new photon.ui.SelectorValueProperty();
 	photon.binding.data.properties["select.display"] = new photon.ui.SelectorDisplayProperty();
+	photon.dataTable = photon.dataTable || {};
+	
+	photon.dataTable.create = function (container, options) {
+	    var $container = $(container);
+	
+	    var bindingContext = new photon.binding.BindingContext.getInstance();
+	
+	    // ensure we have registered a row binding callback
+	    var originalRowCallback = options.fnRowCallback;
+	    options.fnRowCallback = function (nRow, aData, iDisplayIndex) {
+	        if (originalRowCallback) {
+	            originalRowCallback(nRow, aData, iDisplayIndex);
+	        }
+	
+	        photon.binding.applyBindings(aData, nRow,
+	            photon.binding.DataContext.getForElement($container[0]));
+	
+	        $(nRow).bind('click', {
+	            container:$container,
+	            row:nRow,
+	            rowData:aData
+	        }, function (event) {
+	            var data = event.data;
+	
+	            // notify the
+	            var nodeBindingInfo = photon.binding.NodeBindingInfo.getForElement(container);
+	            if (nodeBindingInfo) {
+	                var binding = nodeBindingInfo.findBinding(function (binding) {
+	                    return binding.getExpression().getPropertyHandler() instanceof photon.dataTable.SelectedItemProperty;
+	                });
+	
+	                if (binding) {
+	                    if (binding.selectedRowElement) {
+	                        $(binding.selectedRowElement).toggleClass('selected');
+	                        delete binding.selectedRowElement;
+	                    }
+	
+	                    $(data.row).toggleClass('selected');
+	
+	                    binding.selectedRowElement = data.row;
+	                    binding.selectedItem_ = data.rowData;
+	                    binding.updateSource();
+	                }
+	            }
+	        });
+	
+	
+	        $(nRow).bind('dblclick', {
+	            container:$container,
+	            row:nRow,
+	            rowData:aData
+	        }, function (event) {
+	            var data = event.data;
+	
+	            var nodeBindingInfo = photon.binding.NodeBindingInfo.getForElement($(data.container)[0]);
+	            var optionsBinding = nodeBindingInfo.findBinding(function (binding) {
+	                return binding.getExpression().getPropertyHandler() instanceof photon.dataTable.OptionsProperty;
+	            });
+	
+	            if(optionsBinding && optionsBinding.options_){
+	                var options = optionsBinding.options_;
+	                if(options.fnRowDoubleClickCallback){
+	                    options.fnRowDoubleClickCallback(data.rowData);
+	                }
+	            }
+	        });
+	
+	    };
+	
+	    if (options.aoColumns) {
+	        var dataContext = new photon.binding.DataContext();
+	        photon.array.forEach(options.aoColumns, function (column) {
+	            if (column.bindingTemplate) {
+	                if (!column.binding) {
+	                    column.bindingExpression = photon.templating.getPrimaryDataBindingExpressionFromHtml(
+	                        column.bindingTemplate);
+	                }
+	            }
+	            if (column.binding) {
+	                if (!column.bindingExpression) {
+	                    column.bindingExpression = bindingContext.parseBindingExpressions("data-bind", "null:" + column.binding)[0];
+	                }
+	            }
+	
+	            if (column.binding || column.bindingTemplate) {
+	                column.mDataProp = function (obj, type, value) {
+	                    switch (type) {
+	                        case "display":
+	                            return column.bindingTemplate ?
+	                                column.bindingTemplate :
+	                                column.bindingExpression.getGetter()(obj);
+	                        case "set":
+	                            column.bindingExpression.getSetter()(obj, value);
+	                            break;
+	                        default:
+	                            return column.bindingExpression ? column.bindingExpression.getGetter()(obj) : null;
+	                    }
+	                };
+	            }
+	        });
+	    }
+	
+	    var result = $container.dataTable(options);
+	
+	    // remove copies of data-bind attribute that get cloned all over the place!!!
+	    $(".dataTable[data-bind]").filter(
+	        function (i, x) {
+	            return x !== $container[0];
+	        }).removeAttr("data-bind");
+	
+	    // return
+	    return result;
+	};
+	
+	photon.defineType(photon.dataTable.DataProperty = function () {
+	
+	},
+	    photon.binding.data.Property,
+	    {
+	        dataChanged:function (event) {
+	            this.updateData($(event.data.getTarget()).dataTable(), event.data.getSourceValue());
+	        },
+	        updateData:function (dataTable, data) {
+	            data = photon.observable.unwrap(data);
+	            if (dataTable) {
+	                dataTable.fnClearTable();
+	                dataTable.fnAddData(data);
+	            }
+	        },
+	        getValue:function (binding) {
+	            return binding.data_;
+	        },
+	        setValue:function (binding) {
+	            if (!binding.isInitialized) {
+	                binding.isInitialized = true;
+	                var target = binding.getTarget(), dataTable = $(target).dataTable();
+	                var newValue = binding.getSourceValue();
+	                var oldValue = binding.data_;
+	                if (newValue !== oldValue) {
+	                    if (binding.dataSubscriber_) {
+	                        binding.dataSubscriber_.dispose();
+	                        delete binding.dataSubscriber_;
+	                    }
+	                    binding.data_ = newValue;
+	                    if (newValue && newValue.subscribe) {
+	                        binding.dataSubscriber_ = newValue.subscribe(this.dataChanged, this, binding);
+	                    }
+	                    this.updateData(dataTable, newValue);
+	                }
+	            }
+	
+	        }
+	    });
+	
+	photon.defineType(photon.dataTable.OptionsProperty = function () {
+	},
+	    photon.binding.data.Property,
+	    {
+	        getValue:function (binding) {
+	            return binding.options_;
+	        },
+	        setValue:function (binding) {
+	            if (binding.options_) {
+	                return;
+	            }
+	            binding.options_ = binding.getSourceValue();
+	            photon.dataTable.create(binding.getTarget(), binding.options_);
+	        }
+	    });
+	
+	photon.defineType(photon.dataTable.SelectedItemProperty = function () {
+	},
+	    photon.binding.data.Property,
+	    {
+	        getValue:function (binding) {
+	            return binding.selectedItem_;
+	        },
+	        setValue:function (binding) {
+	            binding.selectedItem_ = binding.getSourceValue();
+	        }
+	    }
+	);
+	
+	photon.defineType(photon.dataTable.HiddenColumnsProperty = function () {
+	},
+	    photon.binding.data.Property,
+	    {
+	        getDefaultBindingMode:function () {
+	            return photon.binding.data.DataBindingMode.OneWay;
+	        },
+	        getValue:function (binding) {
+	            return binding.hiddenColumns;
+	        },
+	        setValue:function (binding) {
+	            if (!binding.isInitialized) {
+	                binding.isInitialized = true;
+	                var target = binding.getTarget(), dataTable = $(target).dataTable();
+	                var newValue = binding.getSourceValue();
+	                var oldValue = binding.data_;
+	                if (newValue !== oldValue) {
+	                    if (binding.dataSubscriber_) {
+	                        binding.dataSubscriber_.dispose();
+	                        delete binding.dataSubscriber_;
+	                    }
+	                    binding.data_ = newValue;
+	                    if (newValue && newValue.subscribe) {
+	                        binding.dataSubscriber_ = newValue.subscribe(this.dataChanged, this, binding);
+	                    }
+	                    this.updateData(dataTable, newValue);
+	                }
+	            }
+	        },
+	        dataChanged:function (event) {
+	            this.updateData($(event.data.getTarget()).dataTable(), event.data.getSourceValue());
+	        },
+	        updateData:function (dataTable, data) {
+	            var hiddenColumns = photon.observable.unwrap(data);
+	            if (dataTable) {
+	                var columns = dataTable.fnSettings().aoColumns;
+	                var aoColumnMap = {};
+	
+	                var isMatchingColumn = function (c) {
+	                    return c === this.sName;
+	                };
+	
+	                for (var i = 0, n = columns.length; i < n; i++) {
+	                    var column = columns[i];
+	                    aoColumnMap[column.sName] = {column:column, index:i};
+	                    var index = photon.array.findIndex(hiddenColumns, isMatchingColumn, column);
+	                    if (index < 0) {
+	                        dataTable.fnSetColumnVis(i, true);
+	                    }
+	                }
+	
+	                for (var j = 0, m = hiddenColumns.length; j < m; j++) {
+	                    var hiddenColumn = hiddenColumns[j];
+	                    if (aoColumnMap.hasOwnProperty(hiddenColumn)) {
+	                        dataTable.fnSetColumnVis(aoColumnMap[hiddenColumn].index, false);
+	                    }
+	                }
+	            }
+	        }
+	    }
+	);
+	
+	photon.binding.data.properties["dataTable.data"] = new photon.dataTable.DataProperty();
+	photon.binding.data.properties["dataTable.options"] = new photon.dataTable.OptionsProperty();
+	photon.binding.data.properties["dataTable.selectedItem"] = new photon.dataTable.SelectedItemProperty();
+	photon.binding.data.properties["dataTable.hiddenColumns"] = new photon.dataTable.HiddenColumnsProperty();
+	/** @namespace "photon.jQuery.ui" */
+	photon.provide("photon.jQuery.ui");
+	
+	photon.defineType(
+	
+	    photon.jQuery.ui.AutoCompleteOptionsProperty = function () {
+	
+	    },
+	    photon.binding.data.Property,
+	    {
+	        adjustOptions:function (x, y) {
+	
+	        },
+	        replaceMethod:function (autoComplete, methodName, newFn) {
+	            var oldFn = autoComplete[methodName];
+	            if (oldFn !== newFn && !oldFn.originalFn_) {
+	                autoComplete[methodName] = newFn;
+	                autoComplete.originalFn_ = newFn;
+	            }
+	        },
+	        resetMethod:function (autoComplete, methodName) {
+	            var fn = autoComplete[methodName];
+	            if (fn.originalFn_) {
+	                autoComplete[methodName] = fn.originalFn_;
+	            }
+	        },
+	        getValue:function (binding) {
+	            return binding.options;
+	        },
+	        setValue:function (binding) {
+	            var newValue = binding.getSourceValue();
+	            var oldValue = binding.options;
+	            if (!photon.object.equals(oldValue, newValue)) {
+	                binding.options = newValue;
+	
+	                var target = $(binding.getTarget());
+	                var autoComplete = $(target).autocomplete(newValue)
+	                    .data("autocomplete");
+	
+	                var originalSuggest = autoComplete._suggest;
+	                this.replaceMethod(autoComplete, "_suggest",
+	                    function (items) {
+	                        if (!binding.selectionExecuted) {
+	                            originalSuggest.call(autoComplete, items);
+	                        }
+	                    });
+	
+	                this.replaceMethod(autoComplete, "_resizeMenu",
+	                    function () {
+	                        var ul = autoComplete.menu.element;
+	                        ul.outerWidth(target.outerWidth());
+	                    });
+	
+	                if (newValue.menuTemplate && newValue.itemTemplate) {
+	                    throw new Error("Cannot specify both menuTemplate and itemTemplate.");
+	                }
+	
+	                if (newValue.menuTemplate) {
+	                    this.replaceMethod(autoComplete, "_renderMenu",
+	                        function (ul, item) {
+	                            applyTemplateText(ul, binding.getDataContext().getValue(), newValue.menuTemplate);
+	                            return ul;
+	                        });
+	                }
+	                else {
+	                    this.resetMethod(autoComplete, "_renderMenu");
+	                }
+	
+	                if (newValue.itemTemplate) {
+	                    this.replaceMethod(autoComplete, "_renderItem",
+	                        function (ul, item) {
+	                            applyTemplateText(ul, item, newValue.itemTemplate);
+	                            return ul;
+	                        });
+	                }
+	                else {
+	                    this.resetMethod(autoComplete, "_renderItem");
+	                }
+	
+	                if (newValue.submit) {
+	                    target.bind("keydown.autocomplete", function (event) {
+	                        var keyCode = $.ui.keyCode;
+	                        if (event.keyCode === keyCode.ENTER || event.keyCode === keyCode.NUMPAD_ENTER) {
+	                            newValue.submit(target.val());
+	                            target.autocomplete("widget").hide();
+	                            binding.selectionExecuted = true;
+	                        }
+	                        else {
+	                            binding.selectionExecuted = false;
+	                        }
+	                    });
+	                }
+	            }
+	        }
+	    })
+	;
+	
+	photon.defineType(photon.jQuery.ui.AutoCompleteItemProperty = function () {
+	
+	},
+	    photon.binding.data.Property,
+	    {
+	        getValue:function (binding) {
+	            return $(binding.getTarget()).data("item.autocomplete");
+	        },
+	        setValue:function (binding) {
+	            $(binding.getTarget()).data("item.autocomplete", binding.getSourceValue());
+	        }
+	    });
+	
+	photon.binding.data.properties["autoComplete.options"] = new photon.jQuery.ui.AutoCompleteOptionsProperty();
+	photon.binding.data.properties["autoComplete.item"] = new photon.jQuery.ui.AutoCompleteItemProperty();
+	
+	function applyTemplate(element, data, template) {
+	    $(photon.string.trim(template)).appendTo(element)
+	        .each(function (i, x) {
+	            if (x.nodeType === 1) {
+	                photon.binding.applyBindings(data, x);
+	            }
+	        });
+	}
+	
+	function applyTemplateText(element, data, template) {
+	    if (photon.isString(template)) {
+	        applyTemplate(element, data, template);
+	    }
+	    else {
+	        photon.templating.getHtml(template, function (args) {
+	            applyTemplate(element, data, args.template);
+	        });
+	    }
+	}
+	/** @namespace photon.validation */
+	photon.provide("photon.validation");
+	
+	/**
+	 * Creates a new instance of the photon.validation.ValidationExtension type
+	 * @constructor
+	 * @extends photon.observable.model.Extension
+	 */
+	photon.validation.ValidationExtension = function () {
+	    photon.validation.ValidationExtension.base(this);
+	};
+	
+	photon.defineType(
+	    /**
+	     * Constructor
+	     */
+	    photon.validation.ValidationExtension,
+	    /**
+	     * Ancestor
+	     */
+	    photon.observable.model.Extension,
+	    /**
+	     * @lends photon.validation.ValidationExtension.prototype
+	     */
+	    {
+	        define:function (definition) {
+	            // add errors collection
+	            var self = this;
+	            photon.extend(definition,
+	                {
+	                    errors:{
+	                        type:'ObservableArray'
+	                    },
+	                    validate : function() {
+	                        if (this.onValidate) {
+	                            this.onValidate();
+	                        }
+	                        self.validateModel(this);
+	                    }
+	                });
+	
+	            photon.object.forEachOwnProperty(definition, function (propertyName) {
+	                var member = definition[propertyName];
+	                if (member && typeof member === "object") {
+	                    var validationRules = member.validationRules;
+	                    if (!validationRules) {
+	                        return;
+	                    }
+	
+	                    var rules = [];
+	                    photon.object.forEachOwnProperty(validationRules, function (ruleName) {
+	                        var ruleType = photon.assert(photon.validation.rules[ruleName],
+	                            "Unknown rule type {0}.", ruleName);
+	                        rules.push(new ruleType(validationRules[ruleName]));
+	                    });
+	
+	                    definition[propertyName].validationRules = rules;
+	                }
+	            });
+	
+	        },
+	        findRuleError:function (model, rule) {
+	            var errors = model.errors().unwrap();
+	            return photon.array.findIndex(errors, function (error) {
+	                return error.getRule() === rule;
+	            });
+	        },
+	        afterChange:function (model, property, oldValue, newValue) {
+	             this.validateProperty(model, property, newValue);
+	        },
+	        validateModel : function(model) {
+	            var definition = model.definition_;
+	            photon.object.forEachOwnProperty(definition.properties, function(propertyName) {
+	                var property = definition.properties[propertyName];
+	                if (property.validationRules) {
+	                    this.validateProperty(model, property, model.get(propertyName));
+	                }
+	            }, this);
+	        },
+	        validateProperty : function(model, property, value) {
+	            var rules = property.validationRules;
+	            if (rules) {
+	                for (var i = 0, n = rules.length; i < n; i++) {
+	                    var rule = rules[i];
+	                    var index = this.findRuleError(model, rule);
+	                    var error = rule.validate(model, property, value);
+	                    if (error) {
+	                        if (index === -1) {
+	                            model.errors().push(error);
+	                        }
+	                    } else {
+	                        if (index !== -1) {
+	                            model.errors().splice(index, 1);
+	                        }
+	                    }
+	                }
+	            }
+	        }
+	    });
+	
+	/**
+	 * Register the validation extension
+	 * @type {photon.validation.ValidationExtension}
+	 */
+	photon.observable.model.extensions.validation = new photon.validation.ValidationExtension();
+	
+	/**
+	 * Creates a new instance of the photon.validation.Rule type
+	 * @param definition
+	 * @constructor
+	 */
+	photon.validation.Rule = function (definition) {
+	    photon.extend(this, definition);
+	};
+	
+	photon.defineType(photon.validation.Rule,
+	    {
+	        validate:function (model, property, value) {
+	            if (!this.isValid(model, property, value)) {
+	                return new photon.validation.Error(this, property, this.formatError(model, property, value));
+	            }
+	            return null;
+	        },
+	        isValid:function (model, property, value) {
+	            return true;
+	        },
+	        formatError:function (model, property, value) {
+	            var self = this;
+	            return this.message.replace(/\{\{|\}\}|\{(\w+(\.\w+)*)\}/gi, function (m, n) {
+	                if (m === "{{") {
+	                    return "{";
+	                }
+	                if (m === "}}") {
+	                    return "}";
+	                }
+	
+	                var parts = n.split('.');
+	                if (parts.length === 1) {
+	                    if (parts[0] === 'value') {
+	                        return value;
+	                    }
+	                } else if (parts[0] === 'property') {
+	                    var metaDataValue = property.metaData[parts[1]];
+	                    if (metaDataValue.isPropertyAccessor) {
+	                        return property.metaData[parts[1]]();
+	                    }
+	                    return metaDataValue;
+	                } else if (parts[0] === 'rule') {
+	                    return self[parts[1]];
+	                }
+	                return '';
+	            });
+	        }
+	    });
+	
+	photon.validation.rules = {};
+	
+	photon.validation.Error = function (rule, property, message) {
+	    this.rule_ = rule;
+	    this.property_ = property;
+	    this.message_ = message;
+	};
+	
+	photon.defineType(photon.validation.Error,
+	    {
+	        getProperty:function () {
+	            return this.property_;
+	        },
+	        getMessage:function () {
+	            return this.message_;
+	        },
+	        getRule:function () {
+	            return this.rule_;
+	        }
+	    });
+	
+	photon.validation.defineRule = function (name, definition) {
+	    var rule = photon.validation.rules[name] = function (ruleDefinition) {
+	        rule.base(this, ruleDefinition);
+	    };
+	
+	    photon.defineType(rule, photon.validation.Rule, definition);
+	};
+	
+	photon.validation.defineRule('length', {
+	    isValid:function (model, property, value) {
+	        return value.length >= this.minLength && value.length <= this.maxLength;
+	    },
+	    message:"'{property.displayName}' must be between {rule.minLength} and {rule.maxLength} characters in length.",
+	    minLength:0,
+	    maxLength:Number.MAX_VALUE
+	});
+	
+	photon.validation.defineRule('required', {
+	    isValid:function (model, property, value) {
+	        return !photon.isNullOrUndefined(value) && value !== '';
+	    },
+	    message:"'{property.displayName}' must have a value."
+	});
+	
+	photon.validation.defineRule('regex', {
+	    isValid:function (model, property, value) {
+	        return value && value.match(this.regex) !== null;
+	    },
+	    regex:undefined,
+	    message:"'{property.displayName}' does not match the expected input format."
+	});
+	
+	photon.validation.defineRule('number', {
+	    isValid:function (model, property, value) {
+	        return !isNaN(Number(value));
+	    },
+	    message:"'{property.displayName}' must be a number."
+	});
+	
+	photon.validation.defineRule('in', {
+	    isValid:function (model, property, value) {
+	        return photon.array.indexOf(this.values, value) !== -1;
+	    },
+	    values:[],
+	    message:"'{property.displayName}' must be one of the following values {rule.values}."
+	});
 
     });
 })(window);
