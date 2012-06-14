@@ -3994,7 +3994,7 @@
 	
 	            return result;
 	        },
-	        insertBefore : function(parentElement, newElement, referenceElement) {
+	        insertBefore : function(parentElement, newElement, referenceElement, dataContextParentElement) {
 	            var nodes = [];
 	            if (newElement.nodeType === 11) {
 	                var childNodes = newElement.childNodes;
@@ -4009,6 +4009,7 @@
 	            // need to apply bindings after we've been attached to the dom, this is still inefficient when we have multiple levels of flow, need
 	            // to work on a post apply tree callback mechanism
 	            photon.array.forEach(nodes, function(node) {
+	                node.parentDataContextNode = dataContextParentElement;
 	                photon.binding.updateBindings(node);
 	            });
 	
@@ -4452,8 +4453,8 @@
 	            // always return a copy
 	            return this.fragment_.cloneNode(true);
 	        },
-	        insertBefore : function(parentElement, referenceElement) {
-	            return photon.templating.insertBefore(parentElement, this.getFragment(), referenceElement);
+	        insertBefore : function(parentElement, referenceElement, dataContextParentElement) {
+	            return photon.templating.insertBefore(parentElement, this.getFragment(), referenceElement, dataContextParentElement);
 	        }
 	    });
 	/**
@@ -4740,9 +4741,9 @@
 	                if (renderedNodes) {
 	                    return;
 	                }
-	                this.renderedNodes_ = this.renderTarget_ === photon.templating.RenderTarget.Child ?
+	                var renderedNodes = this.renderedNodes_ = this.renderTarget_ === photon.templating.RenderTarget.Child ?
 	                    this.template_.insertBefore(referenceElement, null) :
-	                    this.template_.insertBefore(referenceElement.parentNode, referenceElement.nextSibling);
+	                    this.template_.insertBefore(referenceElement.parentNode, referenceElement.nextSibling, referenceElement);
 	            }
 	            else if (renderedNodes) {
 	                photon.array.forEach(renderedNodes,
@@ -5029,7 +5030,7 @@
 	         * @static
 	         */
 	        getForElement:function (element) {
-	            for (var current = element; current; current = current.parentNode) {
+	            for (var current = element; current; current = current.parentDataContextNode || current.parentNode) {
 	                var result = this.getLocalForElement(current);
 	                if (result) {
 	                    return result;

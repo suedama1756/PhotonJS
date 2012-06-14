@@ -14,9 +14,9 @@ photon.defineType(photon.templating.ConditionalRenderer,
                 if (renderedNodes) {
                     return;
                 }
-                this.renderedNodes_ = this.renderTarget_ === photon.templating.RenderTarget.Child ?
+                var renderedNodes = this.renderedNodes_ = this.renderTarget_ === photon.templating.RenderTarget.Child ?
                     this.template_.insertBefore(referenceElement, null) :
-                    this.template_.insertBefore(referenceElement.parentNode, referenceElement.nextSibling);
+                    this.template_.insertBefore(referenceElement.parentNode, referenceElement.nextSibling, referenceElement);
             }
             else if (renderedNodes) {
                 photon.array.forEach(renderedNodes,
