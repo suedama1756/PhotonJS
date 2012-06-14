@@ -1,18 +1,27 @@
+/**
+ * Stores binding information relating to a node
+ * @class
+ */
+photon.binding.NodeBindingInfo = function () {
+};
+
 photon.defineType(
+    photon.binding.NodeBindingInfo,
     /**
-     * Stores binding information relating to a node
-     * @class
-     */
-    photon.binding.NodeBindingInfo = function () {
-    },
-    /**
-     * @lends photon.binding.NodeBindingInfo
+     * @lends photon.binding.NodeBindingInfo.prototype
      */
     {
         dispose : function() {
             if (this.dataContext_) {
                 this.dataContext_.dispose();
                 this.dataContext = null;
+            }
+            if (this.bindings_) {
+                // TODO: for now the NodeBindingInfo class is the only thing that disposes of bindings, if that changes this will NOT work.
+                photon.array.forEach(this.bindings_, function(binding) {
+                    binding.dispose();
+                });
+                this.bindings_ = null;
             }
         },
         getBindingCount:function () {
@@ -61,8 +70,8 @@ photon.defineType(
          *
          * @return {photon.binding.DataContext}
          */
-        getOrCreateDataContext:function () {
-            return this.dataContext_ ? this.dataContext_ : (this.dataContext_ = new photon.binding.DataContext());
+        getOrCreateDataContext:function (dataContext) {
+            return this.dataContext_ ? this.dataContext_ : (this.dataContext_ = dataContext || new photon.binding.DataContext());
         }
     },
     /* static members */

@@ -137,10 +137,6 @@ We need to seperate the binding tree creation from the actual initialization. Id
 
 
 1.  Should protect against having multiple flow bindings on a single element!
-2.  Nested flow bindings will cause fragments to be created and BOUND within fragments, at the point of binding the
-    parent root data context is not available so binding fails. To over come this at the moment we copy the data
-    context down, this is the wrong solution as it creates too many data contexts, it also means we have to keep those
-    contexts in sync as changes are made (see if binding hack for details).
 3.  Each item in a flow binding may be made up from multiple nodes, in this case we currently create multiple data
     contexts and rebind whenever the data changes. There should be no need for this, we should share a single data
     context, and simply update it via a call to setValue.
@@ -183,6 +179,36 @@ We need to seperate the binding tree creation from the actual initialization. Id
         </div>
     </div>
 
+21. Consolidate disposable system, create addNodeDisposable, disposeAll, methods etc.
+22. Multiple bindings on the same target can share data context information (Would this help, reduce memory overhead? create a
+    symetrical link back to the NOdeBindingInfo object for cleaner disposal?
+23. Inheritance probably doesn't need to set/clear super type for each method as we don't set super to be the supertype method, we set
+    it to the actual type. For this to work though we must verify our inheritance structure works in the way we think it does,
+    e.g. calling base when the immediate base doesn't support the method, but its base does.
+
+21. When re-applying bindings to elements whose data contexts are not inherited from their visual parents
+    things should work correctly!!!
+
+22. When rendering to NextSibling we break the ancestor chain for finding data contexts. The elements rendered should
+    still get their data contexts from the element they are defined within, not from where they sit
+    in the visual tree. In affect these elements are blockers....
+
+    <div id="root">
+        <div data-flow:"each:items">
+           <div data-flow:"if:condition, applyTo:NextSibling">
+              <span>Text<span>
+           </div>
+        </div>
+    </div>
+
+DONE
+
+2.  Nested flow bindings will cause fragments to be created and BOUND within fragments, at the point of binding the
+    parent root data context is not available so binding fails. To over come this at the moment we copy the data
+    context down, this is the wrong solution as it creates too many data contexts, it also means we have to keep those
+    contexts in sync as changes are made (see if binding hack for details).
+
+    This was highlighted by the IF binding, and no longer seems to apply.
 
 
 

@@ -35,7 +35,7 @@ photon.defineType(
      */
     {
         dispose:function () {
-            this.setDataContext(null);
+            this.superType.dispose.call(this);
             if (this.renderer_) {
                 this.renderer_.dispose();
                 this.renderer_ = null;

@@ -96,6 +96,27 @@ provide("photon.binding");
                         });
                     });
             },
+            applyAllBindings: function(value, nodes, name, parent) {
+                var sharedDataContext, node, nodeBindingInfo;
+                for (var i= 0, n=nodes.length; i<n; i++) {
+                    if (!photon.isDocumentOrElement(node = nodes[i])) {
+                        continue;
+                    }
+
+                    nodeBindingInfo = photon.binding.NodeBindingInfo.getOrCreateForElement(node);
+                    var dataContext = nodeBindingInfo.getOrCreateDataContext(sharedDataContext);
+                    if (dataContext !== sharedDataContext) {
+                        if (!sharedDataContext) {
+                            sharedDataContext = dataContext;
+                        }
+                        dataContext.setParent(parent ||
+                            photon.binding.DataContext.getForElement(node.parentNode));
+                        dataContext.setValue(value);
+                        dataContext.setName(name);
+                    }
+                    photon.binding.updateBindings(node);
+                }
+            },
             // TODO: We use the parentDataContext in the template for-each to save looking it up, but why do we bother looking up parents
             // for explicit data contexts, AH, so we can access them in the things!!
             applyBindings:function (data, element, name, parentDataContext) {
@@ -125,14 +146,6 @@ provide("photon.binding");
                 dataContext.setName(name);
 
                 photon.binding.updateBindings(element);
-            },
-
-            applyDataContext:function (data, element) {
-                var dataContext = photon.binding.DataContext.getLocalForElement(element);
-                if (!dataContext) {
-                    throw new Error("Data context values can only be changed for node that have previously been bound using ApplyBindings.");
-                }
-                dataContext.setValue(data);
             },
 
             registerImport : function(name, value) {

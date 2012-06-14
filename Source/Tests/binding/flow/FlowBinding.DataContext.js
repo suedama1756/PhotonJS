@@ -74,7 +74,7 @@
                         "test", this.elements_.value.innerText);
                 }
             },
-            "When if in if in each":{
+            "When each has child if1 and if1 has child if2":{
                 requiredHtmlResources:"IfInEach",
                 becauseOf:function () {
                     photon.binding.applyBindings({
@@ -119,6 +119,42 @@
                     assertEquals(3, items[2].value.innerText);
                 }
             },
+
+            "When if1 is an object exists condition and there are child bindings dependent on the objects existence and the condition transitions from exists to not exists":{
+                requiredHtmlResources:"IfObjectExists",
+                becauseOf:function () {
+                    photon.binding.applyBindings({
+                        data:{
+                            value:1
+                        }
+                    });
+
+                    // verify our assumption
+                    assertEquals(1, $(".value").length);
+
+                    // apply bindings
+                    photon.binding.applyBindings({
+                        data:undefined
+                    })
+                },
+                "Should update correctly":function () {
+                    assertEquals(0, $(".value").length);
+                }
+            },
+            "When if1 is an object exists condition and there are child bindings dependent on the objects existence and the condition transitions from not exists to exists":{
+                requiredHtmlResources:"IfObjectExists",
+                becauseOf:function () {
+                    photon.binding.applyBindings({ data:undefined });
+                    assertEquals(0, $(".value").length);
+                    photon.binding.applyBindings({
+                        data:{
+                            value:1
+                        }
+                    });
+                },
+                "Should update correctly":function () {
+                    assertEquals('1', $(".value").text());
+
             "When next sibling if in each":{
                 requiredHtmlResources : "IfInEachNextSibling",
                 becauseOf: function() {
@@ -140,7 +176,7 @@
             tearDown:function () {
                 photon.dom.cleanNode(document);
             },
-            getEachInIfElements:function (items) {
+            getEachInIfElements:function () {
                 var result = assertElements({
                     each1:null
                 });
@@ -174,6 +210,12 @@
                      </div>
                      */
                 },
+
+                IfObjectExists:function () {
+                    /*:DOC +=
+                     <div class="if1" data-flow="if:data">
+                     <span class="value" data-bind="innerText:data.value" ></span>
+
                 IfInEachNextSibling:function () {
                     /*:DOC +=
                      <div id="each1" data-flow="each:items">

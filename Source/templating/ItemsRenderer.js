@@ -85,9 +85,13 @@ photon.defineType(
 
                 // apply set operations
                 for (var setIndex = 0; setIndex < setLength; setIndex++) {
-                    nodeSet = nodeSets[startA++];
-                    for (var nodeIndex = 0, nodeCount = nodeSet.length; nodeIndex < nodeCount; nodeIndex++) {
-                        photon.binding.applyBindings(newItems[diff.startB + setIndex], nodeSet[nodeIndex], dataContext);
+                    var nodeSet = nodeSets[startA++];
+                    var node = photon.array.find(nodeSet, function(node) {
+                        return photon.binding.DataContext.getLocalForElement(node) != null
+                    })
+                    if (node) {
+                        var dataContext = photon.binding.DataContext.getLocalForElement(node);
+                        dataContext.setValue(newItems[diff.startB + setIndex]);
                     }
                 }
 

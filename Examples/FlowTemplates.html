@@ -22,7 +22,9 @@
             type:2,
             firstName:null,
             lastName:null,
-            isExpanded:{type:'Boolean'},
+            isExpanded:{
+                type:'Boolean'
+            },
             manages:{
                 type:'ObservableArray'
             }
@@ -75,7 +77,6 @@
     <div data-flow="if:type() === 2">
         <span style="background: #528CE0">Manager: <span
                 data-bind="innerText:firstName() + ' ' + lastName()"></span></span>
-
         <p></p>
         <button style="width:22px;height:22px" data-bind="innerText:isExpanded() ? '-' : '+'"
                 data-action="isExpanded(!isExpanded())"></button>
