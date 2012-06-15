@@ -75,7 +75,7 @@
                 }
             },
             "When each has child if1 and if1 has child if2":{
-                requiredHtmlResources:"IfInEach",
+                requiredHtmlResources:"IfInIfInEach",
                 becauseOf:function () {
                     photon.binding.applyBindings({
                         items:[
@@ -119,7 +119,6 @@
                     assertEquals(3, items[2].value.innerText);
                 }
             },
-
             "When if1 is an object exists condition and there are child bindings dependent on the objects existence and the condition transitions from exists to not exists":{
                 requiredHtmlResources:"IfObjectExists",
                 becauseOf:function () {
@@ -154,21 +153,52 @@
                 },
                 "Should update correctly":function () {
                     assertEquals('1', $(".value").text());
-
-            "When next sibling if in each":{
-                requiredHtmlResources : "IfInEachNextSibling",
-                becauseOf: function() {
-                    var data = {
-                        items : [{
-                            condition:true,
-                            value:"Correct"
-                        }],
-                        value : "Incorrect"
-                    }
-                    photon.binding.applyBindings(data);
                 },
-                "Should inherit correct data context" : function() {
-                     assertEquals("Correct", $(".value").text());
+                "When next sibling if in each":{
+                    requiredHtmlResources:"IfInEachNextSibling",
+                    becauseOf:function () {
+                        var data = {
+                            items:[
+                                {
+                                    condition:true,
+                                    value:"Correct"
+                                }
+                            ],
+                            value:"Incorrect"
+                        }
+                        photon.binding.applyBindings(data);
+                    },
+                    "Should inherit correct data context":function () {
+                        assertEquals("Correct", $(".value").text());
+                    }
+                }
+            },
+            "When item is recycled" : {
+                requiredHtmlResources:"Each",
+                becauseOf: function() {
+                    var Model = photon.observable.model.define({
+                        items : {
+                            type : 'ObservableArray'
+                        }
+                    });
+                    var model = new Model({
+                        items : [{
+                            value : 1
+                        }, {
+                            value : 2
+                        }, {
+                            value : 3
+                        }]
+                    });
+                    photon.binding.applyBindings(model);
+
+                    var items = model.items().unwrap().slice(0);
+                    items.push(items[0]);
+                    items.splice(0, 1);
+                    model.items(items);
+                },
+                "Should configure data context correctly" : function() {
+                    assertEquals(true, true);
                 }
             }
         },
@@ -199,7 +229,7 @@
                      </div>
                      */
                 },
-                IfInEach:function () {
+                IfInIfInEach:function () {
                     /*:DOC +=
                      <div id="each1" data-flow="each:items">
                      <div class="if1" data-flow="if:condition1">
@@ -210,22 +240,34 @@
                      </div>
                      */
                 },
-
+                Each : function() {
+                    /*:DOC +=
+                    <div id="each" data-flow="each:items">
+                        <span data-bind="innerText:value"></span>
+                    </div>
+                    */
+                },
                 IfObjectExists:function () {
                     /*:DOC +=
                      <div class="if1" data-flow="if:data">
                      <span class="value" data-bind="innerText:data.value" ></span>
+                     */
+                },
 
                 IfInEachNextSibling:function () {
                     /*:DOC +=
                      <div id="each1" data-flow="each:items">
                      <div class="if1" data-flow="if:condition,applyTo:NextSibling">
-                        <span class="value" data-bind="innerText:value" ></span>
+                     <span class="value" data-bind="innerText:value" ></span>
                      </div>
                      </div>
                      </div>
                      */
                 }
+
+
             }
-        });
+        }
+    )
+    ;
 })();

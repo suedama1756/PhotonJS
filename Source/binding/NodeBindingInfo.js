@@ -70,8 +70,8 @@ photon.defineType(
          *
          * @return {photon.binding.DataContext}
          */
-        getOrCreateDataContext:function (dataContext) {
-            return this.dataContext_ ? this.dataContext_ : (this.dataContext_ = dataContext || new photon.binding.DataContext());
+        getOrCreateDataContext:function () {
+            return this.dataContext_ ? this.dataContext_ : (this.dataContext_ = new photon.binding.DataContext());
         }
     },
     /* static members */
