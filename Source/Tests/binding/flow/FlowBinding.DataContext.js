@@ -172,34 +172,6 @@
                         assertEquals("Correct", $(".value").text());
                     }
                 }
-            },
-            "When item is recycled" : {
-                requiredHtmlResources:"Each",
-                becauseOf: function() {
-                    var Model = photon.observable.model.define({
-                        items : { type : 'ObservableArray' }
-                    });
-                    var model = new Model({
-                        items : [
-                            { value : 1 },
-                            { value : 2 },
-                            { value : 3 }
-                        ]
-                    });
-                    photon.binding.applyBindings(model);
-
-                    var items = model.items().unwrap().slice(0);
-                    items.push(items[0]);
-                    items.splice(0, 1);
-                    model.items(items);
-                },
-                "Should configure data context correctly" : function() {
-                    var dataContexts = photon.array.map($(".value"),
-                        function(item) {
-                            return photon.binding.DataContext.getForElement(item);
-                        });
-                    assertEquals([{value: 2}, {value:3}, {value:1}], data);
-                }
             }
         },
         {
