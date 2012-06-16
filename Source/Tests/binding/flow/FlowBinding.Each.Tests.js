@@ -240,6 +240,7 @@ var itemsRendererTests = {
                 data[i] = i;
             }
             this.bindMs = timeCall(this.bind, this, [data]);
+            data = data.slice(0);
             for (i = 0; i < 250; i++) {
                 switch (this.randomInt(3)) {
                     case 0:
@@ -254,7 +255,11 @@ var itemsRendererTests = {
                 }
             }
 
-            this.updateMs = timeCall(this.systemUnderTest_.refresh, this.systemUnderTest_);
+            this.updateMs = timeCall(function() {
+                photon.binding.DataContext.getForElement(this.flowElement_)
+                    .setValue(data);
+                this.dataContexts_.push(data);
+            }, this);
         },
         "Should perform":function () {
             jstestdriver.console.log(this.bindMs);
@@ -266,16 +271,7 @@ var itemsRendererTests = {
 var itemsRendererTestPrototype = {
     defaultInitialData:[1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
     createSystemUnderTest:function () {
-        var flowElement = $("#flow")[0];
-
-        photon.binding.NodeBindingInfo.getOrCreateForElement(flowElement).getOrCreateDataContext()
-            .setValue("root");
-
-        var template = new photon.templating.Template(null, "key");
-        template.setTemplate("<span class='item' data-bind='innerText:$data' ></span>");
-
-        return new photon.templating.ItemsRenderer(
-            flowElement, this.renderTarget_, template);
+        this.flowElement_ = $("#flow")[0];
     },
     tearDown:function () {
         photon.dom.cleanNode(document);
@@ -283,12 +279,13 @@ var itemsRendererTestPrototype = {
     bind:function (data) {
         this.dataContexts_ = this.dataContexts_ || [];
         this.dataContexts_.push(data);
-        this.systemUnderTest_.setData(data);
+        photon.binding.applyBindings(data)
     },
     rebind:function (data, mutator) {
         data = data.slice(0);
         mutator.call(this, data);
-        this.systemUnderTest_.setData(data);
+        photon.binding.DataContext.getForElement(this.flowElement_)
+            .setValue(data);
         this.dataContexts_.push(data);
     },
     randomInt:function (max) {
@@ -310,13 +307,15 @@ var itemsRendererTestPrototype = {
     htmlResources:{
         eachChild:function () {
             /*:DOC +=
-             <div id="flow" data-flow="each:$data"></div>
+             <div id="flow" data-flow="each:$data">
+                <span class='item' data-bind='innerText:$data' ></span>
+             </div>
              */
         }
     }
 };
 
-DefineTestSuite("ItemsRenderer.RenderTarget.Child",
+DefineTestSuite("FlowBinding.Each.Child",
     itemsRendererTests,
     photon.extend(
         itemsRendererTestPrototype,
@@ -326,7 +325,7 @@ DefineTestSuite("ItemsRenderer.RenderTarget.Child",
     )
 );
 
-DefineTestSuite("ItemsRenderer.RenderTarget.NextSibling",
+DefineTestSuite("FlowBinding.Each.NextSibling",
     itemsRendererTests,
     photon.extend(
         itemsRendererTestPrototype,

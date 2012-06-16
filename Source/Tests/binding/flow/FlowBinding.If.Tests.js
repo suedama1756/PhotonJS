@@ -1,4 +1,4 @@
-DefineTestSuite("FlowBinding.If.ExpressionChanged",
+DefineTestSuite("FlowBinding.If",
     {
         "When data context changes but condition remains true":{
             requiredHtmlResources:"singleIfFlowBinding",
