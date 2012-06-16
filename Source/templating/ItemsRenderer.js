@@ -90,6 +90,8 @@ photon.defineType(
                         return photon.binding.DataContext.getLocalForElement(node) != null
                     })
                     if (node) {
+//                        dataContext = photon.binding.DataContext.getLocalForElement(node);
+//                        dataContext.setValue(newItems[diff.startB + setIndex]);
                         photon.binding.DataContext.getLocalForElement(node).setValue(newItems[diff.startB + setIndex]);
                     }
                 }

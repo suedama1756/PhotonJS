@@ -177,18 +177,14 @@
                 requiredHtmlResources:"Each",
                 becauseOf: function() {
                     var Model = photon.observable.model.define({
-                        items : {
-                            type : 'ObservableArray'
-                        }
+                        items : { type : 'ObservableArray' }
                     });
                     var model = new Model({
-                        items : [{
-                            value : 1
-                        }, {
-                            value : 2
-                        }, {
-                            value : 3
-                        }]
+                        items : [
+                            { value : 1 },
+                            { value : 2 },
+                            { value : 3 }
+                        ]
                     });
                     photon.binding.applyBindings(model);
 
@@ -198,7 +194,11 @@
                     model.items(items);
                 },
                 "Should configure data context correctly" : function() {
-                    assertEquals(true, true);
+                    var dataContexts = photon.array.map($(".value"),
+                        function(item) {
+                            return photon.binding.DataContext.getForElement(item);
+                        });
+                    assertEquals([{value: 2}, {value:3}, {value:1}], data);
                 }
             }
         },
@@ -243,7 +243,7 @@
                 Each : function() {
                     /*:DOC +=
                     <div id="each" data-flow="each:items">
-                        <span data-bind="innerText:value"></span>
+                        <span class="value" data-bind="innerText:value"></span>
                     </div>
                     */
                 },

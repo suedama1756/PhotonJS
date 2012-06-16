@@ -41,6 +41,25 @@ function setupMutatorTest(arrayMutator, nodeMutator, initialData) {
             for (var i = 0, n = expected.length; i < n; i++) {
                 assertSame(photon.string.format("Array differ at index {0}, expectedHTML:{1}, actualHTML:{2}", i, expected[i].innerHTML, actual[i].innerHTML), expected[i], actual[i]);
             }
+        },
+        "Should maintain correct data context hierarchy" : function() {
+            var dataContexts = photon.array.map(this.extractItemNodes(),
+                function(node) {
+                    return photon.binding.DataContext.getForElement(node);
+                });
+            function dataContextDepth(dataContext) {
+                var depth = -1;
+                while (dataContext) {
+                    dataContext = dataContext.getParent();
+                    depth++;
+                }
+                return depth;
+            }
+
+            photon.array.forEach(dataContexts, function(dataContext) {
+                assertEquals(1, dataContextDepth(dataContext));
+                //assertSame(photon.binding.DataContext.getForElement($("#flow")[0]), dataContext.getParent());
+            });
         }
     };
 }
@@ -241,12 +260,6 @@ var itemsRendererTests = {
             jstestdriver.console.log(this.bindMs);
             jstestdriver.console.log(this.updateMs);
         }
-    },
-    "When non-observable array is edited in place":{
-        "Should support manual update mechanism":function () {
-        },
-        "Should make copy of data for differencing":function () {
-        }
     }
 }
 
@@ -254,6 +267,9 @@ var itemsRendererTestPrototype = {
     defaultInitialData:[1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
     createSystemUnderTest:function () {
         var flowElement = $("#flow")[0];
+
+        photon.binding.NodeBindingInfo.getOrCreateForElement(flowElement).getOrCreateDataContext()
+            .setValue("root");
 
         var template = new photon.templating.Template(null, "key");
         template.setTemplate("<span class='item' data-bind='innerText:$data' ></span>");
