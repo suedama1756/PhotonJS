@@ -47,19 +47,28 @@ function setupMutatorTest(arrayMutator, nodeMutator, initialData) {
                 function(node) {
                     return photon.binding.DataContext.getForElement(node);
                 });
-            function dataContextDepth(dataContext) {
-                var depth = -1;
+
+            function getDataContextHierarchy(dataContext) {
+                var result = [];
                 while (dataContext) {
+                    result.push(dataContext);
                     dataContext = dataContext.getParent();
-                    depth++;
                 }
-                return depth;
+                return result;
             }
 
             photon.array.forEach(dataContexts, function(dataContext) {
-                assertEquals(1, dataContextDepth(dataContext));
-                //assertSame(photon.binding.DataContext.getForElement($("#flow")[0]), dataContext.getParent());
-            });
+                var hierarchy = getDataContextHierarchy(dataContext);
+                assertEquals(2, hierarchy.length);
+
+                // verify we haven't been cloned (this was happening!!, BUG)
+                assertNotSame(hierarchy[0], hierarchy[1]);
+
+                // verify we are parented correctly
+                assertSame(photon.binding.DataContext.getForElement(
+                    this.flowElement_), hierarchy[1]);
+
+            }, this);
         }
     };
 }
@@ -164,7 +173,7 @@ var itemsRendererTests = {
             data.splice(0, 3, 0, 9, 6, 6);
         },
         function (nodes) {
-            var originalNodes = nodes.splice(0);
+            var originalNodes = nodes.slice(0);
             nodes[0] = originalNodes[1];
             nodes[1] = originalNodes[2];
             nodes[2] = originalNodes[0];
