@@ -210,5 +210,38 @@ DONE
 
     This was highlighted by the IF binding, and no longer seems to apply.
 
+DataContexts:
+
+Need a full set of tests for data contexts, covering the following 3 scenarios:
+
+1.  Explicit data context
+2.  Explicit data context with a binding (e.g. an each where the root element has a data-context binding)
+3.  Inherited data context with a binding, inherit source
+    contexts can only occur with binding.
+
+When testing each of these we need to ensure that we work with nested object paths, e.g. prop.prop.prop.
+Without this we cannot be sure that bindings and evaluations are applied at the correct times (e.g. .prop could
+evaluate to undefined quite happily)
+
+1.  Should verify the behavior of rebinding, both through applyBindings, and updateBindings.
+
+2.  Should work at multiple nested levels.
+
+3.  We need to remember that data-context expression may also contain references to parent data contexts, and so have
+to be evaluated at the correct level.
+
+<div data-flow="each:items" >
+    <div data-bind="data-context:$data.Path" > source:item, value:item.Path
+    </div>
+</div>
+
+$data is dataContext(0) so we must ensure that this is consistent, so in this case $data is the item, so this means that
+we really do need to operate the _value switch mechanism we are employing!!
+
+4.  We need to verify what the behavior is when an inherited data context with a binding, becomes a direct data context.
+
+
+
+
 
 

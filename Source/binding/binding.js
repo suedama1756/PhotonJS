@@ -121,7 +121,7 @@ provide("photon.binding");
                     .getOrCreateDataContext();
                 dataContext.setParent(parentDataContext ||
                     photon.binding.DataContext.getForElement(element.parentNode));
-                dataContext.setValue(data);
+                dataContext.setSource(data);
                 dataContext.setName(name);
 
                 photon.binding.updateBindings(element);

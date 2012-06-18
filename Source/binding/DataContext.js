@@ -49,23 +49,58 @@ photon.defineType(
         getChild:function (index) {
             return this.children_ ? this.children_[index] : null;
         },
+        getSource:function () {
+            return this.source_;
+        },
+        setSource:function (value) {
+            if (this.source_ != value) {
+                this.source_ = value;
+                this.updateValue_();
+            }
+        },
+        setBinding : function(value) {
+            if (this.binding_ != value) {
+                this.binding_ =  value;
+                this.updateValue_();
+            }
+        },
+        getBinding : function() {
+           return this.binding_;
+        },
+        updateValue_ : function() {
+            var source = this.source_;
+            if (this.binding_) {
+                // backup the current value
+                var oldValue = this.value_;
+
+                // set to source for the purposes of the evaluation (other options are too expensive)
+                this.value_ = source;
+
+                // evaluate
+                var newValue = this.value_ = this.binding_.getExpression().getSourceValue(this);
+                if (oldValue !== newValue) {
+                    this.onValueChanged_();
+                }
+            }
+            else if (this.value_ !== source) {
+                this.value_ = source;
+                this.onValueChanged_();
+            }
+        },
         getValue:function () {
             return this.value_;
         },
-        setName:function(value) {
+        setName:function (value) {
             this.name_ = value;
         },
-        getName:function() {
+        getName:function () {
             return this.name_;
         },
-        setValue:function (value) {
-            if (this.value_ !== value) {
-                this.value_ = value;
-                var subscribers = this.subscribers_;
-                if (subscribers) {
-                    subscribers = subscribers.slice(0);
-                    photon.array.forEach(subscribers, this.notifyValueChanged, this);
-                }
+        onValueChanged_:function () {
+            var subscribers = this.subscribers_;
+            if (subscribers) {
+                subscribers = subscribers.slice(0);
+                photon.array.forEach(subscribers, this.notifyValueChanged, this);
             }
         },
         /**
@@ -119,7 +154,7 @@ photon.defineType(
 
             // TODO: find efficient way to add parents as dependencies
             var current = this;
-            if(photon.isString(indexOrName)) {
+            if (photon.isString(indexOrName)) {
                 while (current && current.getName() !== indexOrName) {
                     current = current.parent_;
                 }
@@ -149,7 +184,7 @@ photon.defineType(
             }
             return null;
         },
-        getLocalForElement : function(element) {
+        getLocalForElement:function (element) {
             var nodeBindingInfo = photon.binding.NodeBindingInfo.getForElement(element);
             if (nodeBindingInfo) {
                 var dataContext = nodeBindingInfo.getDataContext();

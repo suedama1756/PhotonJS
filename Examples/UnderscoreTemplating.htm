@@ -93,7 +93,7 @@
             $("#templatePlaceHolder *[data-context-id]").each(function(i, node) {
                 var dataContext = photon.binding.NodeBindingInfo.getOrCreateForElement(node)
                         .getOrCreateDataContext();
-                dataContext.setValue(bindingContext.lookup(
+                dataContext.setSource(bindingContext.lookup(
                         node.getAttribute("data-context-id")
                 ));
                 node.removeAttribute("data-context-id");

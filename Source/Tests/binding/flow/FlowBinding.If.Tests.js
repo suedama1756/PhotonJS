@@ -18,7 +18,7 @@ DefineTestSuite("FlowBinding.If",
                 var binding = photon.binding.NodeBindingInfo.getForElement(flowElement)
                     .getBindingByExpression(flowElement.getAttribute("data-flow"));
                 binding.getDataContext()
-                    .setValue({
+                    .setSource({
                         condition:1, // use another different truthy value to verify correct handling
                         value:'Test Changed'
                     });

@@ -2153,7 +2153,7 @@
 	                    .getOrCreateDataContext();
 	                dataContext.setParent(parentDataContext ||
 	                    photon.binding.DataContext.getForElement(element.parentNode));
-	                dataContext.setValue(data);
+	                dataContext.setSource(data);
 	                dataContext.setName(name);
 	
 	                photon.binding.updateBindings(element);
@@ -2925,17 +2925,27 @@
 	        bind:function () {
 	            this.ensureInitialized();
 	
-	            // TDO: this has bitten once, really need to look into it
+	            // TODO: this has bitten once, really need to look into it
 	            var expression = this.getExpression();
 	            if (expression.getPropertyType() === "data" && expression.getPropertyName() === "context") {
 	                var target = this.getTarget();
-	                // it is important we create the target data context before we set our data context, as changes
-	                // to our data context will cause the target to be updated, and if its not there!!!
-	                var targetDataContext = photon.binding.NodeBindingInfo.getOrCreateForElement(target)
-	                    .getOrCreateDataContext();
-	                targetDataContext.setName(this.getExpression().getName());
-	                this.setDataContext(photon.binding.DataContext.getForElement(target.parentNode));
-	                targetDataContext.setParent(this.getDataContext());
+	
+	                var localDataContext = photon.binding.DataContext.getLocalForElement(target);
+	                if (localDataContext && !localDataContext.isInherited) {
+	                    localDataContext.setName(expression.getName());
+	                    localDataContext.setBinding(this);
+	                }
+	                else {
+	                    localDataContext = photon.binding.NodeBindingInfo.getOrCreateForElement(target)
+	                        .getOrCreateDataContext();
+	                    localDataContext.setName(expression.getName());
+	                    localDataContext.setParent(
+	                        photon.binding.DataContext.getForElement(target.parentNode));
+	                    localDataContext.isInherited = true;
+	
+	                    // track the parent data context, when it changes update the binding
+	                    this.setDataContext(localDataContext.getParent());
+	                }
 	            }
 	            else {
 	                this.updateDataContext();
@@ -3274,10 +3284,10 @@
 	    photon.binding.data.Property,
 	    {
 	        getValue:function (binding) {
-	            return photon.binding.DataContext.getForElement(binding.getTarget()).getValue();
+	            return photon.binding.DataContext.getForElement(binding.getTarget()).getSource();
 	        },
 	        setValue:function (binding) {
-	            photon.binding.DataContext.getForElement(binding.getTarget()).setValue(
+	            photon.binding.DataContext.getForElement(binding.getTarget()).setSource(
 	                binding.getSourceValue());
 	        }
 	    });
@@ -4848,7 +4858,7 @@
 	                    if (node) {
 	//                        dataContext = photon.binding.DataContext.getLocalForElement(node);
 	//                        dataContext.setValue(newItems[diff.startB + setIndex]);
-	                        photon.binding.DataContext.getLocalForElement(node).setValue(newItems[diff.startB + setIndex]);
+	                        photon.binding.DataContext.getLocalForElement(node).setSource(newItems[diff.startB + setIndex]);
 	                    }
 	                }
 	
@@ -4947,23 +4957,58 @@
 	        getChild:function (index) {
 	            return this.children_ ? this.children_[index] : null;
 	        },
+	        getSource:function () {
+	            return this.source_;
+	        },
+	        setSource:function (value) {
+	            if (this.source_ != value) {
+	                this.source_ = value;
+	                this.updateValue_();
+	            }
+	        },
+	        setBinding : function(value) {
+	            if (this.binding_ != value) {
+	                this.binding_ =  value;
+	                this.updateValue_();
+	            }
+	        },
+	        getBinding : function() {
+	           return this.binding_;
+	        },
+	        updateValue_ : function() {
+	            var source = this.source_;
+	            if (this.binding_) {
+	                // backup the current value
+	                var oldValue = this.value_;
+	
+	                // set to source for the purposes of the evaluation (other options are too expensive)
+	                this.value_ = source;
+	
+	                // evaluate
+	                var newValue = this.value_ = this.binding_.getExpression().getSourceValue(this);
+	                if (oldValue !== newValue) {
+	                    this.onValueChanged_();
+	                }
+	            }
+	            else if (this.value_ !== source) {
+	                this.value_ = source;
+	                this.onValueChanged_();
+	            }
+	        },
 	        getValue:function () {
 	            return this.value_;
 	        },
-	        setName:function(value) {
+	        setName:function (value) {
 	            this.name_ = value;
 	        },
-	        getName:function() {
+	        getName:function () {
 	            return this.name_;
 	        },
-	        setValue:function (value) {
-	            if (this.value_ !== value) {
-	                this.value_ = value;
-	                var subscribers = this.subscribers_;
-	                if (subscribers) {
-	                    subscribers = subscribers.slice(0);
-	                    photon.array.forEach(subscribers, this.notifyValueChanged, this);
-	                }
+	        onValueChanged_:function () {
+	            var subscribers = this.subscribers_;
+	            if (subscribers) {
+	                subscribers = subscribers.slice(0);
+	                photon.array.forEach(subscribers, this.notifyValueChanged, this);
 	            }
 	        },
 	        /**
@@ -5017,7 +5062,7 @@
 	
 	            // TODO: find efficient way to add parents as dependencies
 	            var current = this;
-	            if(photon.isString(indexOrName)) {
+	            if (photon.isString(indexOrName)) {
 	                while (current && current.getName() !== indexOrName) {
 	                    current = current.parent_;
 	                }
@@ -5047,7 +5092,7 @@
 	            }
 	            return null;
 	        },
-	        getLocalForElement : function(element) {
+	        getLocalForElement:function (element) {
 	            var nodeBindingInfo = photon.binding.NodeBindingInfo.getForElement(element);
 	            if (nodeBindingInfo) {
 	                var dataContext = nodeBindingInfo.getDataContext();
@@ -5177,7 +5222,7 @@
 	            if (!evaluationDataContext) {
 	                evaluationDataContext = this.evaluationDataContext_;
 	                evaluationDataContext.setParent(photon.binding.DataContext.getForElement(this.target_));
-	                evaluationDataContext.setValue(data);
+	                evaluationDataContext.setSource(data);
 	            }
 	            try {
 	                return photon.binding.evaluateInContext(
@@ -5186,7 +5231,7 @@
 	            finally {
 	                if (!dataContext) {
 	                    evaluationDataContext.setParent(null);
-	                    evaluationDataContext.setValue(null);
+	                    evaluationDataContext.setSource(null);
 	                }
 	            }
 	        },

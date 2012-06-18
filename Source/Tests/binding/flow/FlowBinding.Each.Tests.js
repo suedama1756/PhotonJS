@@ -266,7 +266,7 @@ var itemsRendererTests = {
 
             this.updateMs = timeCall(function() {
                 photon.binding.DataContext.getForElement(this.flowElement_)
-                    .setValue(data);
+                    .setSource(data);
                 this.dataContexts_.push(data);
             }, this);
         },
@@ -294,7 +294,7 @@ var itemsRendererTestPrototype = {
         data = data.slice(0);
         mutator.call(this, data);
         photon.binding.DataContext.getForElement(this.flowElement_)
-            .setValue(data);
+            .setSource(data);
         this.dataContexts_.push(data);
     },
     randomInt:function (max) {

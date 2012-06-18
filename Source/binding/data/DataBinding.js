@@ -91,17 +91,27 @@ photon.defineType(
         bind:function () {
             this.ensureInitialized();
 
-            // TDO: this has bitten once, really need to look into it
+            // TODO: this has bitten once, really need to look into it
             var expression = this.getExpression();
             if (expression.getPropertyType() === "data" && expression.getPropertyName() === "context") {
                 var target = this.getTarget();
-                // it is important we create the target data context before we set our data context, as changes
-                // to our data context will cause the target to be updated, and if its not there!!!
-                var targetDataContext = photon.binding.NodeBindingInfo.getOrCreateForElement(target)
-                    .getOrCreateDataContext();
-                targetDataContext.setName(this.getExpression().getName());
-                this.setDataContext(photon.binding.DataContext.getForElement(target.parentNode));
-                targetDataContext.setParent(this.getDataContext());
+
+                var localDataContext = photon.binding.DataContext.getLocalForElement(target);
+                if (localDataContext && !localDataContext.isInherited) {
+                    localDataContext.setName(expression.getName());
+                    localDataContext.setBinding(this);
+                }
+                else {
+                    localDataContext = photon.binding.NodeBindingInfo.getOrCreateForElement(target)
+                        .getOrCreateDataContext();
+                    localDataContext.setName(expression.getName());
+                    localDataContext.setParent(
+                        photon.binding.DataContext.getForElement(target.parentNode));
+                    localDataContext.isInherited = true;
+
+                    // track the parent data context, when it changes update the binding
+                    this.setDataContext(localDataContext.getParent());
+                }
             }
             else {
                 this.updateDataContext();

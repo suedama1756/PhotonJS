@@ -19,7 +19,7 @@ DefineTestSuite("FlowBindingExpression.Parsing",
             },
             "Should compile correct source value function":function () {
                 var dataContext = new photon.binding.DataContext();
-                dataContext.setValue({expression:"true"});
+                dataContext.setSource({expression:"true"});
                 assertEquals("true", this.expression_.getFlowData(
                     dataContext
                 ));

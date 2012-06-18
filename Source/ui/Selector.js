@@ -17,7 +17,7 @@ photon.defineType(
             if (!evaluationDataContext) {
                 evaluationDataContext = this.evaluationDataContext_;
                 evaluationDataContext.setParent(photon.binding.DataContext.getForElement(this.target_));
-                evaluationDataContext.setValue(data);
+                evaluationDataContext.setSource(data);
             }
             try {
                 return photon.binding.evaluateInContext(
@@ -26,7 +26,7 @@ photon.defineType(
             finally {
                 if (!dataContext) {
                     evaluationDataContext.setParent(null);
-                    evaluationDataContext.setValue(null);
+                    evaluationDataContext.setSource(null);
                 }
             }
         },
