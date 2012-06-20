@@ -3595,7 +3595,7 @@
 	            if (!this.isInitialized_) {
 	                this.dependencyTracker_ = new photon.observable.DependencyTracker(
 	                    function () {
-	                        this.updateFlowData(null);
+	                        this.updateFlowData(this.dependencyTracker_);
 	                    }, this);
 	                photon.addDisposable(this.target_, this.dependencyTracker_);
 	
