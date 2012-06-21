@@ -1,0 +1,41 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html xmlns:photon>
+<head>
+    <title></title>
+    <script src="../Scripts/jquery-1.7.2.js" type="text/javascript"></script>
+    <script src="../Output/Photon-debug.js" type="text/javascript"></script>
+    <script type="text/html" id="template">
+        <span data-bind="innerText:value"></span>
+    </script>
+    <script>
+        var RootModel = photon.observable.model.define({
+            condition:false,
+            model:null
+        });
+
+        var Model = photon.observable.model.define({
+            value:null
+        });
+
+        $(function () {
+            var rootModel = new RootModel();
+            rootModel.condition(true);
+            rootModel.model(new Model());
+            rootModel.model().value("Test Value");
+            photon.binding.applyBindings(rootModel);
+
+        });
+    </script>
+</head>
+<body>
+<!--<photon:flow data-flow="if:condition() && model()">-->
+<div data-bind="{data-context: model()}">
+    <div  data-bind="
+            {data-template: { name: 'template' }}
+            ">
+    </div>
+</div>
+<!--</photon:flow>-->
+</body>
+</html>

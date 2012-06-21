@@ -256,6 +256,6 @@ For this to work we must prioritise as follows:
 
 
 
-
+BUG: When using data-template, if data: option is not set then the data context is not inherited correctly.
 
 
