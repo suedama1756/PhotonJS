@@ -103,8 +103,8 @@ photon.defineType(
 
             if (this.renderTarget_ === photon.templating.RenderTarget.NextSibling) {
                 if (nodeSets.length > 0) {
-                    var nodeSet = nodeSets[nodeSets.length - 1],
-                        defaultReferenceNode = nodeSet[nodeSet.length - 1].nextSibling;
+                    var nodeSet = nodeSets[nodeSets.length - 1];
+                    defaultReferenceNode = nodeSet[nodeSet.length - 1].nextSibling;
                 }
                 else {
                     defaultReferenceNode = referenceElement.nextSibling;
