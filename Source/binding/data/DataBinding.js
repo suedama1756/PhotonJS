@@ -107,6 +107,9 @@ photon.defineType(
                     localDataContext.setName(expression.getName());
                     localDataContext.setParent(
                         photon.binding.DataContext.getForElement(target.parentNode));
+
+                    // TODO: Hacky, should be able to set whether the value is inherited as part of setting options
+                    // on a data context. Should also look at setting options on a data context atomically.
                     localDataContext.isInherited = true;
 
                     // track the parent data context, when it changes update the binding

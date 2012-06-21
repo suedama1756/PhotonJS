@@ -240,6 +240,20 @@ we really do need to operate the _value switch mechanism we are employing!!
 
 4.  We need to verify what the behavior is when an inherited data context with a binding, becomes a direct data context.
 
+5.  We need to ensure that other bindings on the data context node use the correct data context value.
+
+Delayed Updates
+
+With delayed updates we need to work on how we prioritize updates, for example: applying updates to elements that will
+be removed as part of a flow binding change will be waste-full, and could even cause exceptions to be thrown if the
+child expressions are not valid.
+
+For this to work we must prioritise as follows:
+
+    Flow control bindings rank higher than simple data bindings.
+    Flow control bindings at higher levels should be handled before lower levels, but what about cascade affects? For example,
+    a change that triggers child bindings to be updated that are about to be invalided? SHouldn't matter....
+
 
 
 

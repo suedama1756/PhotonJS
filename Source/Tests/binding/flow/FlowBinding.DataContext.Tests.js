@@ -153,24 +153,45 @@
                 },
                 "Should update correctly":function () {
                     assertEquals('1', $(".value").text());
-                },
-                "When next sibling if in each":{
-                    requiredHtmlResources:"IfInEachNextSibling",
-                    becauseOf:function () {
-                        var data = {
-                            items:[
-                                {
-                                    condition:true,
-                                    value:"Correct"
-                                }
-                            ],
-                            value:"Incorrect"
-                        }
-                        photon.binding.applyBindings(data);
-                    },
-                    "Should inherit correct data context":function () {
-                        assertEquals("Correct", $(".value").text());
+                }
+            },
+            "When next sibling if in each":{
+                requiredHtmlResources:"IfInEachNextSibling",
+                becauseOf:function () {
+                    var data = {
+                        items:[
+                            {
+                                condition:true,
+                                value:"Correct"
+                            }
+                        ],
+                        value:"Incorrect"
                     }
+                    photon.binding.applyBindings(data);
+                },
+                "Should inherit correct data context":function () {
+                    assertEquals("Correct", $(".value").text());
+                }
+            },
+            /**
+             * Bug: Issue was due to an 'optimization' which prevented the if expression from being evaluated with a
+             * dependency tracked when evaluated as the result of a change trigger.
+             */
+            "When if is a composite AND condition that incrementally evaluates its parts to true due to shortcut evaluation":{
+                requiredHtmlResources:"IfWithCompositeAndCondition",
+                becauseOf:function () {
+                    var Model = photon.observable.model.define({
+                        a: false, b: false
+                    });
+                    var model = new Model();
+                    photon.binding.applyBindings(model);
+
+                    // update incrementally
+                    model.a(true);
+                    model.b(true);
+                },
+                "Should render content":function () {
+                    assertEquals(1, $("#content").length);
                 }
             }
         },
@@ -212,12 +233,12 @@
                      </div>
                      */
                 },
-                Each : function() {
+                Each:function () {
                     /*:DOC +=
-                    <div id="each" data-flow="each:items">
-                        <span class="value" data-bind="innerText:value"></span>
-                    </div>
-                    */
+                     <div id="each" data-flow="each:items">
+                     <span class="value" data-bind="innerText:value"></span>
+                     </div>
+                     */
                 },
                 IfObjectExists:function () {
                     /*:DOC +=
@@ -235,11 +256,17 @@
                      </div>
                      </div>
                      */
+                },
+                IfWithCompositeAndCondition:function () {
+                    /*:DOC +=
+                     <div id="if" data-flow="if:a() && b()">
+                        <span id="content">Content</span>
+                     </div>
+                     */
                 }
-
-
             }
         }
     )
     ;
-})();
+})
+    ();
