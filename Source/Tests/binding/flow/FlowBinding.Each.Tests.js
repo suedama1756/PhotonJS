@@ -335,7 +335,31 @@ DefineTestSuite("FlowBinding.Each.Child",
 );
 
 DefineTestSuite("FlowBinding.Each.NextSibling",
-    itemsRendererTests,
+    photon.extend(itemsRendererTests,
+        {
+            "When there is a static next sibling" : {
+                becauseOf : function() {
+                    /*:DOC +=
+                     <div id="flow" data-flow="each:$data, applyTo:NextSibling">
+                     <span class='item' data-bind='innerText:$data' ></span>
+                     </div>
+                     <div id="nextSibling">
+                     Some content
+                     </div>
+                     */
+
+                    var items = [1, 2, 3];
+                    photon.binding.applyBindings(items);
+                },
+                "Should render in the correct position" : function() {
+                    var lastItem = $(".item")[2];
+                    assertNotNullOrUndefined(
+                        lastItem.nextSibling);
+                    assertSame(lastItem.nextSibling,
+                        $("#nextSibling")[0]);
+                }
+            }
+        }),
     photon.extend(
         itemsRendererTestPrototype,
         {
