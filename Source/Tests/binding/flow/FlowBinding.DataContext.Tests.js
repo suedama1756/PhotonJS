@@ -119,6 +119,9 @@
                     assertEquals(3, items[2].value.innerText);
                 }
             },
+            /**
+             * Verify we are evaluating falsy/truthy values correctly
+             */
             "When if1 is an object exists condition and there are child bindings dependent on the objects existence and the condition transitions from exists to not exists":{
                 requiredHtmlResources:"IfObjectExists",
                 becauseOf:function () {
@@ -140,6 +143,9 @@
                     assertEquals(0, $(".value").length);
                 }
             },
+            /**
+             * Verify we are evaluating falsy/truthy values correctly
+             */
             "When if1 is an object exists condition and there are child bindings dependent on the objects existence and the condition transitions from not exists to exists":{
                 requiredHtmlResources:"IfObjectExists",
                 becauseOf:function () {
@@ -173,11 +179,12 @@
                     assertEquals("Correct", $(".value").text());
                 }
             },
+
             /**
              * Bug: Issue was due to an 'optimization' which prevented the if expression from being evaluated with a
              * dependency tracked when evaluated as the result of a change trigger.
              */
-            "When if is a composite AND condition that incrementally evaluates its parts to true due to shortcut evaluation":{
+            "When if1 is a composite AND condition that incrementally evaluates its parts to true due to shortcut evaluation":{
                 requiredHtmlResources:"IfWithCompositeAndCondition",
                 becauseOf:function () {
                     var Model = photon.observable.model.define({
@@ -194,6 +201,7 @@
                     assertEquals(1, $("#content").length);
                 }
             }
+
         },
         {
             tearDown:function () {
@@ -259,7 +267,7 @@
                 },
                 IfWithCompositeAndCondition:function () {
                     /*:DOC +=
-                     <div id="if" data-flow="if:a() && b()">
+                     <div id="if1" data-flow="if:a() && b()">
                         <span id="content">Content</span>
                      </div>
                      */
