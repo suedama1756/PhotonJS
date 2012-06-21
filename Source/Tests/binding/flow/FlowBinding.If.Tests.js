@@ -34,6 +34,7 @@ DefineTestSuite("FlowBinding.If",
                 assertEquals(1, $(".testValue").length);
             }
         }
+
     },
     {
         htmlResources:{

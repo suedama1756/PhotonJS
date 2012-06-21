@@ -90,8 +90,6 @@ photon.defineType(
                         return photon.binding.DataContext.getLocalForElement(node) != null
                     })
                     if (node) {
-//                        dataContext = photon.binding.DataContext.getLocalForElement(node);
-//                        dataContext.setValue(newItems[diff.startB + setIndex]);
                         photon.binding.DataContext.getLocalForElement(node).setSource(newItems[diff.startB + setIndex]);
                     }
                 }
@@ -103,9 +101,14 @@ photon.defineType(
                 diff.deletedA = 0;
             }
 
-            if (this.renderTarget_ === photon.templating.RenderTarget.NextSibling && nodeSets.length > 0) {
-                var nodeSet = nodeSets[nodeSets.length - 1],
+            if (this.renderTarget_ === photon.templating.RenderTarget.NextSibling) {
+                if (nodeSets.length > 0) {
+                    var nodeSet = nodeSets[nodeSets.length - 1];
                     defaultReferenceNode = nodeSet[nodeSet.length - 1].nextSibling;
+                }
+                else {
+                    defaultReferenceNode = referenceElement.nextSibling;
+                }
             }
 
             // process inserts
