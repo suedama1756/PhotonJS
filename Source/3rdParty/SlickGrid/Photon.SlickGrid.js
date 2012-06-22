@@ -218,10 +218,15 @@ photon.slickGrid.Control = function (container, data, columns, options) {
             }
 
             if (options.enableAsyncPostRender) {
+                var originalAsyncPostRender = column.asyncPostRender;
                 column.asyncPostRender = function (node, row, data, column) {
                     self.postRender_(node, row, data, column);
+                    if (originalAsyncPostRender) {
+                        originalAsyncPostRender(node, row, data, column);
+                    }
                 }
             }
+
         }
     }
 
