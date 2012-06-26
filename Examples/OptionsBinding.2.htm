@@ -1,0 +1,74 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title></title>
+    <script src="../Scripts/jquery-1.7.2.js" type="text/javascript"></script>
+    <script src="../Output/Photon-debug.js" type="text/javascript"></script>
+
+    <script type="text/javascript">
+
+        ViewModel = photon.observable.model.define({
+            options:[],
+            name:"Sample Model",
+            selectItem:function (itemId) {
+                this.selectedItem(itemId);
+                this.anotherSelectedItem(itemId);
+            },
+
+            selectedItem:{initialValue:3,type:'Number'},
+            anotherSelectedItem:{initialValue:null,type:'Number'}
+        });
+
+        function bind() {
+            var model = new ViewModel();
+
+            var options = [];
+            for (var i=0;i<1000;i++) {
+                options[i] = { Id:i, DisplayName:i.toString()};
+            }
+            model.options(options);
+
+            photon.binding.applyBindings(model, $("#root")[0], "Root");
+        }
+    </script>
+</head>
+<body>
+<div id="root">
+    <button onclick="bind()">Start</button>
+    <div>
+        <span>The combo boxes are data-bound to the following source data:
+            <br/>
+            <br/>
+            [<br/>
+                    { Id:1, DisplayName:"One"},<br/>
+                    { Id:2, DisplayName:"Two"},<br/>
+                    { Id:3, DisplayName:"Three"},<br/>
+                    { Id:4, DisplayName:"Four"}<br/>
+                ]<br/><br/>
+
+        </span>
+        <span>This combo has an initial value as 3. </span>
+        <select id="selector" style="width:200px" data-bind="
+            {select-items: options()},
+            {select-value:'Id'},
+            {select-selectedItem:selectedItem},
+            {select-display:'$dataContext(1).name() + \' Item - \' + DisplayName'}"></select>
+        <br/>
+        <span>This combo has a null initial value.</span>
+        <select id="selector2" style="width:200px" data-bind="
+            {select-items: options()},
+            {select-value:'Id'},
+            {select-selectedItem:anotherSelectedItem},
+            {select-display:'$dataContext(1).name() + \' Item - \' + DisplayName}'"></select>
+        <br/>
+
+        <span>Enter an Id to select an Item:</span>
+        <input id="idInput" style="width:40px"/>
+        <Button data-action="selectItem($('#idInput')[0].value)">Select</Button>
+    </div>
+    <span>The comboBox1 item Id is <span data-bind="innerText: selectedItem()"></span></span><br/>
+    <span>The comboBox2 item Id is <span data-bind="innerText: anotherSelectedItem()"></span></span>
+</div>
+</body>
+</html>
