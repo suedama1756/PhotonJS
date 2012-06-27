@@ -5295,19 +5295,36 @@
 	            this.update();
 	        },
 	        update:function () {
+	            var self = this;
+	            if (!self.isUpdating_) {
+	               self.isUpdating_ = true;
+	               setTimeout(function() {
+	                  self.updateCore_();
+	               }, 0);
+	           }
+	        },
+	        updateCore_ : function() {
+	            this.isUpdating_ = false;
+	
 	            var target = this.target_;
 	
 	            // must store before clearing the dom
 	            var currentSelectedItem = this.getSelectedItem();
 	
 	            // clear current items
-	            photon.dom.empty(target);
+	            while (target.firstChild) {
+	                target.removeChild(target.firstChild);
+	            }
+	
 	            if (this.items_) {
-	                var items = photon.observable.unwrap(this.items_);
+	                var items = photon.observable.unwrap(this.items_), text = [], i = 0;
 	                photon.array.forEach(items, function (item) {
-	                    var text = "<option>" + this.getDisplay(item) + "</option>";
-	                    photon.binding.applyBindings(item, $(text).appendTo(target)[0]);
+	                    text[i++] = "<option>";
+	                    text[i++] = this.getDisplay(item);
+	                    text[i++] = "</option>";
 	                }, this);
+	
+	                $(text.join('')).appendTo(target);
 	
 	                target.selectedIndex = this.findIndexByValue(currentSelectedItem);
 	            }

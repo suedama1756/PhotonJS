@@ -31,11 +31,19 @@ photon.defineType(
                     errors:{
                         type:'ObservableArray'
                     },
-                    validate : function() {
+                    isValidated:{
+                        isReadOnly:true,
+                        type:'Boolean'
+                    },
+                    validate:function () {
+                        this.set("isValidated", true);
+
                         if (this.onValidate) {
                             this.onValidate();
                         }
+
                         self.validateModel(this);
+                        return this.errors().length() === 0;
                     }
                 });
 
@@ -66,18 +74,22 @@ photon.defineType(
             });
         },
         afterChange:function (model, property, oldValue, newValue) {
-             this.validateProperty(model, property, newValue);
+            var isDeferred = model.getValidationStrategy &&
+                model.getValidationStrategy() === photon.validation.ValidatationStrategy.Deferred;
+            if (model.isValidated() || !isDeferred) {
+                this.validateProperty(model, property, newValue);
+            }
         },
-        validateModel : function(model) {
+        validateModel:function (model) {
             var definition = model.definition_;
-            photon.object.forEachOwnProperty(definition.properties, function(propertyName) {
+            photon.object.forEachOwnProperty(definition.properties, function (propertyName) {
                 var property = definition.properties[propertyName];
                 if (property.validationRules) {
                     this.validateProperty(model, property, model.get(propertyName));
                 }
             }, this);
         },
-        validateProperty : function(model, property, value) {
+        validateProperty:function (model, property, value) {
             var rules = property.validationRules;
             if (rules) {
                 for (var i = 0, n = rules.length; i < n; i++) {
@@ -220,3 +232,8 @@ photon.validation.defineRule('in', {
     values:[],
     message:"'{property.displayName}' must be one of the following values {rule.values}."
 });
+
+photon.validation.ValidatationStrategy = {
+    Default : 0,
+    Deferred   : 1
+};
