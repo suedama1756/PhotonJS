@@ -84,6 +84,17 @@ photon.defineType(
             this.update();
         },
         update:function () {
+            var self = this;
+            if (!self.isUpdating_) {
+               self.isUpdating_ = true;
+               setTimeout(function() {
+                  self.updateCore_();
+               }, 0);
+           }
+        },
+        updateCore_ : function() {
+            this.isUpdating_ = false;
+
             var target = this.target_;
 
             // must store before clearing the dom
@@ -91,7 +102,7 @@ photon.defineType(
 
             // clear current items
             while (target.firstChild) {
-                target.remove(target.firstChild);
+                target.removeChild(target.firstChild);
             }
 
             if (this.items_) {
