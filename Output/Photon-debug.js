@@ -1915,6 +1915,9 @@
 	                });
 	            }
 	        },
+	        forEach : function(callback, thisObj) {
+	           photon.array.forEach(this.array_, callback, thisObj);
+	        },
 	        length:function () {
 	            photon.observable.DependencyTracker.registerDependency(this, "length");
 	            return this.array_.length;
@@ -5295,17 +5298,6 @@
 	            this.update();
 	        },
 	        update:function () {
-	            var self = this;
-	            if (!self.isUpdating_) {
-	               self.isUpdating_ = true;
-	               setTimeout(function() {
-	                  self.updateCore_();
-	               }, 0);
-	           }
-	        },
-	        updateCore_ : function() {
-	            this.isUpdating_ = false;
-	
 	            var target = this.target_;
 	
 	            // must store before clearing the dom

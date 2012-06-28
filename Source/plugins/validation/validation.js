@@ -38,12 +38,12 @@ photon.defineType(
                     validate:function () {
                         this.set("isValidated", true);
 
-                        if (this.onValidate) {
-                            this.onValidate();
-                        }
+                        var isValid = photon.isFunction(this.onValidate) ?
+                            this.onValidate() :
+                            true;
 
                         self.validateModel(this);
-                        return this.errors().length() === 0;
+                        return isValid && this.errors().length() === 0;
                     }
                 });
 
@@ -191,7 +191,13 @@ photon.validation.defineRule = function (name, definition) {
         rule.base(this, ruleDefinition);
     };
 
-    photon.defineType(rule, photon.validation.Rule, definition);
+    photon.defineType(rule, photon.validation.Rule, photon.extend(
+        definition, {
+            getName: function() {
+                return name;
+            }
+        })
+    );
 };
 
 photon.validation.defineRule('length', {

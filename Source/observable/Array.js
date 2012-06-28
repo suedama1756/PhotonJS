@@ -193,6 +193,9 @@ photon.defineType(
                 });
             }
         },
+        forEach : function(callback, thisObj) {
+           photon.array.forEach(this.array_, callback, thisObj);
+        },
         length:function () {
             photon.observable.DependencyTracker.registerDependency(this, "length");
             return this.array_.length;
