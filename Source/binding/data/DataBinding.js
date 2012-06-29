@@ -22,6 +22,16 @@ photon.defineType(
      * @lends photon.binding.data.DataBinding.prototype
      */
     {
+        beginInitialize : function() {
+            photon.binding.data.DataBinding
+                .superType.beginInitialize.call(this);
+           this.getExpression().getPropertyHandler().beginInitialize(this);
+        },
+        endInitialize : function() {
+            photon.binding.data.DataBinding
+                .superType.endInitialize.call(this);
+            this.getExpression().getPropertyHandler().endInitialize(this);
+        },
         bindUpdateSourceEvent:function (eventTypes) {
             if (photon.isArray(eventTypes)) {
                 eventTypes = eventTypes.join(" ");

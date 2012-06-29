@@ -91,8 +91,15 @@ provide("photon.binding");
                         photon.array.forEach(contexts, function (binding) {
                             binding.bind();
                         });
+
+                        photon.array.forEach(bindings, function (binding) {
+                            binding.beginInitialize();
+                        });
                         photon.array.forEach(bindings, function (binding) {
                             binding.bind();
+                        });
+                        photon.array.forEach(bindings, function (binding) {
+                            binding.endInitialize();
                         });
                     });
             },

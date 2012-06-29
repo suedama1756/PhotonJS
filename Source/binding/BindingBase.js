@@ -14,6 +14,12 @@ photon.defineType(
         getTarget:function () {
             return this.target_;
         },
+        beginInitialize:function() {
+            this.isInitializing_ = true;
+        },
+        endInitialize:function() {
+            this.isInitializing_ = false;
+        },
         /**
          *
          * @return {photon.binding.BindingExpression}

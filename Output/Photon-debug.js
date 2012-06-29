@@ -2126,8 +2126,15 @@
 	                        photon.array.forEach(contexts, function (binding) {
 	                            binding.bind();
 	                        });
+	
+	                        photon.array.forEach(bindings, function (binding) {
+	                            binding.beginInitialize();
+	                        });
 	                        photon.array.forEach(bindings, function (binding) {
 	                            binding.bind();
+	                        });
+	                        photon.array.forEach(bindings, function (binding) {
+	                            binding.endInitialize();
 	                        });
 	                    });
 	            },
@@ -2213,6 +2220,12 @@
 	        },
 	        getTarget:function () {
 	            return this.target_;
+	        },
+	        beginInitialize:function() {
+	            this.isInitializing_ = true;
+	        },
+	        endInitialize:function() {
+	            this.isInitializing_ = false;
 	        },
 	        /**
 	         *
@@ -2859,6 +2872,16 @@
 	     * @lends photon.binding.data.DataBinding.prototype
 	     */
 	    {
+	        beginInitialize : function() {
+	            photon.binding.data.DataBinding
+	                .superType.beginInitialize.call(this);
+	           this.getExpression().getPropertyHandler().beginInitialize(this);
+	        },
+	        endInitialize : function() {
+	            photon.binding.data.DataBinding
+	                .superType.endInitialize.call(this);
+	            this.getExpression().getPropertyHandler().endInitialize(this);
+	        },
 	        bindUpdateSourceEvent:function (eventTypes) {
 	            if (photon.isArray(eventTypes)) {
 	                eventTypes = eventTypes.join(" ");
@@ -3219,6 +3242,11 @@
 	     * @lends photon.binding.data.PropertyBase.prototype
 	     */
 	    {
+	        beginInitialize : function(binding) {
+	        },
+	        endInitialize : function(binding) {
+	
+	        },
 	        getDefaultBindingMode:function () {
 	            return photon.binding.data.DataBindingMode.OneWay;
 	        },
@@ -5216,12 +5244,29 @@
 	    photon.ui.Selector = function (target) {
 	        this.target_ = target;
 	        this.items_ = null;
+	        this.initializeCount_ = 0;
 	        this.evaluationDataContext_ = new photon.binding.DataContext();
 	    },
 	    /**
 	     * lends: photon.ui.Selector.prototype
 	     */
 	    {
+	        beginInitialize:function () {
+	            if (++this.initializeCount_ === 1) {
+	                this.initializeStore_ = {
+	                    selectedItem:this.getSelectedItem()
+	
+	                };
+	            }
+	        },
+	        endInitialize:function () {
+	            if (!--this.initializeCount_) {
+	                var store = this.initializeStore_;
+	                this.initializeStore_ = null;
+	                this.update();
+	                this.setSelectedItem(store.selectedItem);
+	            }
+	        },
 	        getItem_:function (index) {
 	            var items = photon.observable.unwrap(this.items_);
 	            return items ? items[index] : undefined;
@@ -5298,6 +5343,10 @@
 	            this.update();
 	        },
 	        update:function () {
+	            if (this.initializeStore_) {
+	                return;
+	            }
+	
 	            var target = this.target_;
 	
 	            // must store before clearing the dom
@@ -5322,6 +5371,10 @@
 	            }
 	        },
 	        getSelectedItem:function () {
+	            if (this.initializeStore_) {
+	                return this.initializeStore_.selectedItem;
+	            }
+	
 	            var index = this.target_.selectedIndex;
 	            if (index === -1) {
 	                return null;
@@ -5335,7 +5388,12 @@
 	                return;
 	            }
 	
-	            this.getTarget().selectedIndex =this.findIndexByValue(value);
+	            if (this.initializeStore_) {
+	                this.initializeStore_.selectedItem = value;
+	            }
+	            else {
+	                this.getTarget().selectedIndex = this.findIndexByValue(value);
+	            }
 	        },
 	        findIndexByValue:function (value) {
 	            if (this.items_) {
@@ -5354,23 +5412,27 @@
 	    },
 	    photon.binding.data.Property,
 	    {
-	        ensureInitialized:function (binding) {
+	        getSelector : function(binding) {
+	            var data = photon.getOrCreateData(binding.getTarget());
+	            return data.control = data.control ||
+	                new photon.ui.Selector(binding.getTarget());
+	        },
+	        beginInitialize:function (binding) {
 	            var target = binding.getTarget();
 	            if (target.tagName !== "SELECT") {
 	                throw new Error("Expected selector");
 	            }
 	
-	            var data = photon.getOrCreateData(target);
-	            if (data.selector) {
-	                return data.selector;
-	            }
-	            return data.selector = new photon.ui.Selector(binding.getTarget());
+	            this.getSelector(binding).beginInitialize();
+	        },
+	        endInitialize:function (binding) {
+	            this.getSelector(binding).endInitialize();
 	        },
 	        getValue:function (binding) {
-	            return this.ensureInitialized(binding)["get" + this.propertyName_]();
+	            return this.getSelector(binding)["get" + this.propertyName_]();
 	        },
 	        setValue:function (binding) {
-	            this.ensureInitialized(binding)["set" + this.propertyName_](binding.getSourceValue());
+	            this.getSelector(binding)["set" + this.propertyName_](binding.getSourceValue());
 	        }
 	    });
 	
@@ -5394,15 +5456,6 @@
 	        },
 	        bindUpdateSourceTriggers:function (binding) {
 	            binding.bindUpdateSourceEvent("change");
-	        },
-	        ensureInitialized:function (binding) {
-	            var selector = photon.ui.SelectorSelectedItemProperty
-	                .superType.ensureInitialized.call(this, binding);
-	            if (!selector.isInit) {
-	                selector.setSelectedItem(binding.getSourceValue());
-	                selector.isInit = true;
-	            }
-	            return selector;
 	        }
 	    }
 	);
@@ -5415,11 +5468,9 @@
 	    {
 	        setValue:function (binding) {
 	            var evaluator = binding.getSourceValue();
-	            var expression = photon.binding.BindingContext.getInstance().parseBindingExpressions("data-bind",
-	                "null:" + evaluator)[0];
-	            return this.ensureInitialized(binding).setDisplayEvaluator(
-	                expression.getGetter()
-	            );
+	            var expression = photon.binding.BindingContext.getInstance().parseBindingExpressions(
+	                "data-bind", "null:" + evaluator)[0];
+	            this.getSelector(binding).setDisplayEvaluator(expression.getGetter());
 	        }
 	    }
 	);
@@ -5434,9 +5485,8 @@
 	            var evaluator = binding.getSourceValue();
 	            var expression = photon.binding.BindingContext.getInstance().parseBindingExpressions("data-bind",
 	                "null:" + evaluator)[0];
-	            return this.ensureInitialized(binding).setValueEvaluator(
-	                expression.getGetter()
-	            );
+	            this.getSelector(binding).setValueEvaluator(expression.getGetter());
+	
 	        }
 	    }
 	);

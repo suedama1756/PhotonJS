@@ -5,6 +5,11 @@ photon.defineType(
      * @lends photon.binding.data.PropertyBase.prototype
      */
     {
+        beginInitialize : function(binding) {
+        },
+        endInitialize : function(binding) {
+
+        },
         getDefaultBindingMode:function () {
             return photon.binding.data.DataBindingMode.OneWay;
         },
