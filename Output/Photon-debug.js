@@ -5255,7 +5255,6 @@
 	            if (++this.initializeCount_ === 1) {
 	                this.initializeStore_ = {
 	                    selectedItem:this.getSelectedItem()
-	
 	                };
 	            }
 	        },
@@ -5270,36 +5269,6 @@
 	        getItem_:function (index) {
 	            var items = photon.observable.unwrap(this.items_);
 	            return items ? items[index] : undefined;
-	        },
-	        getInContext:function (dataContext, fn, data) {
-	            var evaluationDataContext = dataContext;
-	            if (!evaluationDataContext) {
-	                evaluationDataContext = this.evaluationDataContext_;
-	                evaluationDataContext.setParent(photon.binding.DataContext.getForElement(this.target_));
-	                evaluationDataContext.setSource(data);
-	            }
-	            try {
-	                return photon.binding.evaluateInContext(
-	                    evaluationDataContext, fn, null);
-	            }
-	            finally {
-	                if (!dataContext) {
-	                    evaluationDataContext.setParent(null);
-	                    evaluationDataContext.setSource(null);
-	                }
-	            }
-	        },
-	        getDisplay:function (item) {
-	            if (this.displayEvaluator_) {
-	                return this.getInContext(null, this.displayEvaluator_, item);
-	            }
-	            return item ? item.toString() : "";
-	        },
-	        getValue:function (item) {
-	            if (this.valueEvaluator_) {
-	                return this.getInContext(null, this.valueEvaluator_, item);
-	            }
-	            return item;
 	        },
 	        setValueEvaluator:function (value) {
 	            if (this.valueEvaluator_ === value) {

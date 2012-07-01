@@ -1,5 +1,5 @@
 /*!
- * jQuery UI Autocomplete 1.8.19
+ * jQuery UI Autocomplete 1.8.21
  *
  * Copyright 2012, AUTHORS.txt (http://jqueryui.com/about)
  * Dual licensed under the MIT or GPL Version 2 licenses.
@@ -160,7 +160,7 @@ $.widget( "ui.autocomplete", {
 					var item = ui.item.data( "item.autocomplete" );
 					if ( false !== self._trigger( "focus", event, { item: item } ) ) {
 						// use value to match what will end up in the input, if it was a key event
-						if (item && /^key/.test(event.originalEvent.type) ) {
+						if ( /^key/.test(event.originalEvent.type) ) {
 							self.element.val( item.value );
 						}
 					}
@@ -488,8 +488,8 @@ $.widget("ui.menu", {
 	refresh: function() {
 		var self = this;
 
-		// don't refresh list items that re already adapted
-		var items = this.element.find("li:not(.ui-menu-item):has(a)")
+		// don't refresh list items that are already adapted
+		var items = this.element.children("li:not(.ui-menu-item):has(a)")
 			.addClass("ui-menu-item")
 			.attr("role", "menuitem");
 		
