@@ -302,8 +302,10 @@
                 },
                 selection:null,
                 randomizeSelection : function() {
+                    for (var i=0; i<100; i++) {
                     var index = Math.floor(Math.random() * this.countries().length());
                     this.selection(this.countries().getItem(index));
+                    }
                 }
             });
 
@@ -339,8 +341,15 @@
             {comboBox-display:'name + \' (\' + code + \')\''}
             {comboBox-value:'code'}">
         </select>
-        <span style="width: 400px" accesskey=""></span>
-        <span data-bind="innerText:'Selected Code: ' + (selection() ? selection().code : '')"></span>
+        <span style="position:absolute; left: 400px" data-bind="innerText:'Selected Code: ' + (selection() ? selection().code : '')"></span>
+        <p>
+        </p>
+        <select data-bind="
+            {comboBox-selectedItem:selection}
+            {comboBox-items:countries}
+            {comboBox-display:'name + \' (\' + code + \')\''}
+            {comboBox-value:'code'}">
+        </select>
 
 
 

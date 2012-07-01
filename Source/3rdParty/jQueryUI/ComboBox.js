@@ -52,7 +52,7 @@ $.widget("ui.combobox", {
                         var control = self.options.control;
                         control.updateContext();
 
-                        var items = photon.observable.unwrap(self.control.items), item =
+                        var items = photon.observable.unwrap(control.items), item =
                             photon.array.find(items, function(x) {
                                 return control.getDisplay(x).match(matcher);
                             });
