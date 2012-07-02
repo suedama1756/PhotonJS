@@ -61,7 +61,7 @@ photon.defineType(
         getPropertyHandler:function() {
             return this.propertyHandler_;
         },
-        getPropertyType:function() {
+        getPropertyType:function()
             return this.propertyType_;
         },
         getPropertyName:function() {

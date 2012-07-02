@@ -140,12 +140,34 @@ photon.ui.defineControl("comboBox",
             if (item && this.displayEvaluator_) {
                 return this.evaluateInContext(this.displayEvaluator_, item);
             }
-            return item ? item.toString() : "";
+            return item ? item.toString() : '';
         },
         getValue:function (item) {
             return item && this.valueEvaluator_ ?
                 this.evaluateInContext(this.valueEvaluator_, item) :
                 item;
+        },
+        updateSelection_ : function() {
+            var items = photon.observable.unwrap(this.items), selectedValue = this.selectedItem, found = false,
+                text = '';
+
+            if (items) {
+                this.updateContext();
+                for (var i= 0, n=items.length; i<n; i++) {
+                    var item = items[i], found = this.getValue(item) === selectedValue;
+                    if (found) {
+                        text = this.getDisplay(item);
+                        break;
+                    }
+                }
+            }
+
+            if (!found && selectedValue) {
+                this.selectedItem = null;
+                this.notifyPropertyChanged("selectedItem");
+            }
+
+            $(this.comboBox_.input).val(text);
         },
         onInvalidated:function () {
             // create the combo box if we haven't already
@@ -153,8 +175,9 @@ photon.ui.defineControl("comboBox",
                 var $target = $(this.target_), self = this;
                 $target.combobox({
                     selected:function (event, data) {
-                        if (self.selectedItem !== data.item) {
-                            self.selectedItem = data.item;
+                        var value = self.getValue(data.item);
+                        if (self.selectedItem !== value) {
+                            self.selectedItem = value;
                             self.notifyPropertyChanged("selectedItem")
                         }
                     },
@@ -167,8 +190,7 @@ photon.ui.defineControl("comboBox",
             this.displayEvaluator_ = this.createEvaluator_(this.display);
             this.valueEvaluator_ = this.createEvaluator_(this.value);
 
-            $(this.comboBox_.input).val(this.getDisplay(this.selectedItem));
-
+            this.updateSelection_();
         },
         createEvaluator_:function (evaluator) {
             return evaluator ?
