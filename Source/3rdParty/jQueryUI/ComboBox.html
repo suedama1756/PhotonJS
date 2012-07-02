@@ -300,12 +300,21 @@ $(function () {
         countries:{
             type:'ObservableArray'
         },
-        selection:null,
-        randomizeSelection:function () {
-            for (var i = 0; i < 100; i++) {
-                var index = Math.floor(Math.random() * this.countries().length());
-                this.selection(this.countries().getItem(index).code);
-            }
+        selectedCode:null,
+        selectedCountry:null,
+        randomizeSelectedCode:function () {
+            var index = Math.floor(Math.random() * this.countries().length());
+            this.selectedCode(this.countries().getItem(index).code);
+        },
+        clearSelectedCode : function() {
+            this.selectedCode(null);
+        },
+        randomizeSelectedCountry:function () {
+            var index = Math.floor(Math.random() * this.countries().length());
+            this.selectedCountry(this.countries().getItem(index));
+        },
+        clearSelectedCountry : function() {
+            this.selectedCountry(null);
         }
     });
 
@@ -326,35 +335,29 @@ $(function () {
 <div class="demo">
 
     <div class="ui-widget">
-        <!--<select id="testCombo" data-bind="-->
-        <!--{select-selectedItem:selectedItem}-->
-        <!--{select-items:items}-->
-        <!--{select-display:'\'Item \' + id'}-->
-        <!--{select-value:'id'}">-->
-        <!--</select>-->
+        <span data-bind="innerText:'Selected Code: ' + selectedCode()"></span><br>
 
+        <select data-bind="
+            {comboBox-selectedValue:selectedCode}
+            {comboBox-items:countries}
+            {comboBox-display:'name + \' (\' + code + \')\''}
+            {comboBox-value:'code'}">
+        </select><br>
+
+        <button data-action="randomizeSelectedCode()">Randomize</button>
+        <button data-action="clearSelectedCode()">Clear</button>
         <p></p>
+        <span data-bind="innerText:'Selected Code: ' + (selectedCountry() ? selectedCountry().code : '')"></span><br>
 
         <select data-bind="
-            {comboBox-selectedItem:selection}
+            {comboBox-selectedValue:selectedCountry}
             {comboBox-items:countries}
-            {comboBox-display:'name + \' (\' + code + \')\''}
-            {comboBox-value:'code'}">
-        </select>
-        <span style="position:absolute; left: 400px" data-bind="innerText:'Selected Code: ' + selection()"></span>
-
-        <p>
-        </p>
-        <select data-bind="
-            {comboBox-selectedItem:selection}
-            {comboBox-items:countries}
-            {comboBox-display:'name + \' (\' + code + \')\''}
-            {comboBox-value:'code'}">
-        </select>
-
-
+            {comboBox-display:'name + \' (\' + code + \')\''}">
+        </select><br>
+        <button data-action="randomizeSelectedCountry()">Randomize</button>
+        <button data-action="clearSelectedCountry()">Clear</button>
     </div>
-    <button data-action="randomizeSelection()">Randomize</button>
+
 </div>
 </body>
 </html>

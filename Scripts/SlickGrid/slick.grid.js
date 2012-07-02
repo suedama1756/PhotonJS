@@ -2012,8 +2012,8 @@ if (typeof Slick === "undefined") {
     }
 
     function clearTextSelection() {
-      if (document.selection && document.selection.empty) {
-        document.selection.empty();
+      if (document.selectedCode && document.selectedCode.empty) {
+        document.selectedCode.empty();
       } else if (window.getSelection) {
         var sel = window.getSelection();
         if (sel && sel.removeAllRanges) {

@@ -22,11 +22,10 @@ $.widget("ui.combobox", {
                         result = [];
 
                     if (items) {
-                        var control = self.options.control;
-                        control.updateContext();
+                        control.updateContext_();
 
                         for (var i = 0, j = 0, n = items.length; i < n; i++) {
-                            var item = items[i], text = control.getDisplay(item);
+                            var item = items[i], text = control.getDisplay_(item);
                             if (!request.term || matcher.test(text)) {
                                 result[j++] = {
                                     label:text,
@@ -50,11 +49,11 @@ $.widget("ui.combobox", {
                         var $this = $(this), matcher = new RegExp("^" + $.ui.autocomplete.escapeRegex($this.val()) + "$", "i");
 
                         var control = self.options.control;
-                        control.updateContext();
+                        control.updateContext_();
 
                         var items = photon.observable.unwrap(control.items), item =
                             photon.array.find(items, function(x) {
-                                return control.getDisplay(x).match(matcher);
+                                return control.getDisplay_(x).match(matcher);
                             });
 
                         if (!item) {
@@ -122,49 +121,49 @@ photon.ui.defineControl("comboBox",
     photon.ui.Control,
     {
         properties:{
-            selectedItem:null,
+            selectedValue:null,
             items:null,
             value:null,
             display:null
         },
-        updateContext:function () {
+        updateContext_:function () {
             this.dataContext_.setParent(
                 photon.binding.DataContext.getForElement(this.target_));
         },
-        evaluateInContext:function (fn, data) {
+        evaluateInContext_:function (fn, data) {
             var dataContext = this.dataContext_;
             dataContext.setSource(data);
             return photon.binding.evaluateInContext(dataContext, fn);
         },
-        getDisplay:function (item) {
+        getDisplay_:function (item) {
             if (item && this.displayEvaluator_) {
-                return this.evaluateInContext(this.displayEvaluator_, item);
+                return this.evaluateInContext_(this.displayEvaluator_, item);
             }
             return item ? item.toString() : '';
         },
-        getValue:function (item) {
+        getValue_:function (item) {
             return item && this.valueEvaluator_ ?
-                this.evaluateInContext(this.valueEvaluator_, item) :
+                this.evaluateInContext_(this.valueEvaluator_, item) :
                 item;
         },
         updateSelection_ : function() {
-            var items = photon.observable.unwrap(this.items), selectedValue = this.selectedItem, found = false,
+            var items = photon.observable.unwrap(this.items), selectedValue = this.selectedValue, found = false,
                 text = '';
 
             if (items) {
-                this.updateContext();
+                this.updateContext_();
                 for (var i= 0, n=items.length; i<n; i++) {
-                    var item = items[i], found = this.getValue(item) === selectedValue;
-                    if (found) {
-                        text = this.getDisplay(item);
+                    var item = items[i];
+                    if (found = this.getValue_(item) === selectedValue) {
+                        text = this.getDisplay_(item);
                         break;
                     }
                 }
             }
 
             if (!found && selectedValue) {
-                this.selectedItem = null;
-                this.notifyPropertyChanged("selectedItem");
+                this.selectedValue = null;
+                this.notifyPropertyChanged("selectedValue");
             }
 
             $(this.comboBox_.input).val(text);
@@ -175,10 +174,10 @@ photon.ui.defineControl("comboBox",
                 var $target = $(this.target_), self = this;
                 $target.combobox({
                     selected:function (event, data) {
-                        var value = self.getValue(data.item);
-                        if (self.selectedItem !== value) {
-                            self.selectedItem = value;
-                            self.notifyPropertyChanged("selectedItem")
+                        var value = self.getValue_(data.item);
+                        if (self.selectedValue !== value) {
+                            self.selectedValue = value;
+                            self.notifyPropertyChanged("selectedValue")
                         }
                     },
                     control:this
