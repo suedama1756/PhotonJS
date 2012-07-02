@@ -104,11 +104,15 @@
     <Compile Include="ui\Selector.js" />
 
     <Compile Include="3rdParty/SlickGrid/Photon.SlickGrid.js" Condition=" '$(IncludeSlickGrid)' == 'true' " />
-    <Compile Include="3rdParty/jQueryUI/Photon.jQueryUI.js" Condition=" '$(IncludeJQueryUI)' == 'true' " />
     <Compile Include="plugins/validation/validation.js" Condition=" '$(IncludeValidation)' == 'true' " />
-
   </ItemGroup>
 
+    <ItemGroup Condition=" '$(IncludeJQueryUI)' == 'true' " >
+        <Compile Include="3rdParty/jQueryUI/jQueryUI.js" />
+        <Compile Include="3rdParty/jQueryUI/Controls.js" />
+        <Compile Include="3rdParty/jQueryUI/ComboBox.js" />
+        <Compile Include="3rdParty/jQueryUI/AutoComplete.js" />
+    </ItemGroup>
   <ItemGroup>
     <TempFile Include="$(BuildTempPath)*"></TempFile>
   </ItemGroup>
