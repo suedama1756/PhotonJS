@@ -1,16 +1,8 @@
-/** @namespace "photon.jQuery.ui" */
-photon.provide("photon.jQuery.ui");
-
 photon.defineType(
-
     photon.jQuery.ui.AutoCompleteOptionsProperty = function () {
-
     },
     photon.binding.data.Property,
     {
-        adjustOptions:function (x, y) {
-
-        },
         replaceMethod:function (autoComplete, methodName, newFn) {
             var oldFn = autoComplete[methodName];
             if (oldFn !== newFn && !oldFn.originalFn_) {
