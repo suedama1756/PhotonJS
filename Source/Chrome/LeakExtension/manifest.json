@@ -1,0 +1,7 @@
+{
+  "name": "Leak Detection",
+  "version": "0.1",
+  "description": "Detects Leaks in jQuery and Photon.",
+  "devtools_page": "LeakDetection.html",
+  "manifest_version": 2
+}
