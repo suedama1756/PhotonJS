@@ -58,8 +58,13 @@
                         var ctrl = new ctor(target);
                         photon.addDisposable(target,
                             data.control = ctrl);
+                    }
+                    if (!binding.isSubscribed_)
+                    {
+                        binding.isSubscribed_ = true;
+
                         var self = this;
-                        ctrl.subscribe(function (propertyName) {
+                        data.control.subscribe(function (propertyName) {
                             if (self.propertyName_ === propertyName) {
                                 binding.updateSource();
                             }

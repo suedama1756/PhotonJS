@@ -22,6 +22,13 @@ photon.defineType(
      * @lends photon.binding.data.DataBinding.prototype
      */
     {
+        dispose : function() {
+            this.superType.dispose.call(this);
+            if (this.dependencyTracker_) {
+                this.dependencyTracker_.dispose();
+                this.dependencyTracker_ = null;
+            }
+        },
         beginInitialize : function() {
             photon.binding.data.DataBinding
                 .superType.beginInitialize.call(this);

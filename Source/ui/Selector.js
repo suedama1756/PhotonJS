@@ -1,6 +1,8 @@
 photon.defineType(
     photon.ui.Selector = function (target) {
-        this.target_ = target;
+        photon.addDisposable(
+            this.target_ = target, this);
+
         this.items_ = null;
         this.initializeCount_ = 0;
         this.evaluationDataContext_ = new photon.binding.DataContext();
@@ -9,6 +11,16 @@ photon.defineType(
      * lends: photon.ui.Selector.prototype
      */
     {
+        dispose:function () {
+            this.disposeSubscriber_();
+        },
+        disposeSubscriber_:function () {
+            var subscriber = this.subscriber_;
+            if (subscriber) {
+                subscriber.dispose();
+                this.subscriber_ = null;
+            }
+        },
         beginInitialize:function () {
             if (++this.initializeCount_ === 1) {
                 this.initializeStore_ = {
@@ -88,10 +100,8 @@ photon.defineType(
                 return;
             }
 
-            if (this.subscriber_) {
-                this.subscriber_.dispose();
-                delete this.subscriber_;
-            }
+            this.disposeSubscriber_();
+
             this.items_ = value;
             if (value && value.isObservable) {
                 this.subscriber_ = value.subscribe(this.update, this);
@@ -110,9 +120,7 @@ photon.defineType(
             var currentSelectedItem = this.getSelectedItem();
 
             // clear current items
-            while (target.firstChild) {
-                target.removeChild(target.firstChild);
-            }
+            photon.dom.empty(this.target_);
 
             if (this.items_) {
                 var items = photon.observable.unwrap(this.items_), text = [], i = 0;
@@ -169,7 +177,7 @@ photon.defineType(
     },
     photon.binding.data.Property,
     {
-        getSelector : function(binding) {
+        getSelector:function (binding) {
             var data = photon.getOrCreateData(binding.getTarget());
             return data.control = data.control ||
                 new photon.ui.Selector(binding.getTarget());
@@ -243,7 +251,6 @@ photon.defineType(
             var expression = photon.binding.BindingContext.getInstance().parseBindingExpressions("data-bind",
                 "null:" + evaluator)[0];
             this.getSelector(binding).setValueEvaluator(expression.getGetter());
-
         }
     }
 );

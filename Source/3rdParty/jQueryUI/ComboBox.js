@@ -14,6 +14,7 @@ if ($.widget) {
                 .appendTo(wrapper)
                 .val(value)
                 .addClass("ui-state-default ui-combobox-input")
+                .css('width', this.element.width())
                 .autocomplete({
                     delay:0,
                     minLength:0,
@@ -115,6 +116,7 @@ if ($.widget) {
 
     photon.jQuery.ui.ComboBox = function (target) {
         photon.jQuery.ui.ComboBox.base(this, target);
+        this.isValid = true;
         this.dataContext_ = new photon.binding.DataContext();
     };
 
@@ -127,7 +129,7 @@ if ($.widget) {
                 items:null,
                 value:null,
                 display:null,
-                isInvalid:null
+                isValid:null
             },
             updateContext_:function () {
                 this.dataContext_.setParent(
@@ -191,6 +193,12 @@ if ($.widget) {
                 // update display/value evaluators
                 this.displayEvaluator_ = this.createEvaluator_(this.display);
                 this.valueEvaluator_ = this.createEvaluator_(this.value);
+
+                if (this.isValid) {
+                    this.comboBox_.wrapper.removeClass("ui-combobox-error");
+                } else {
+                    this.comboBox_.wrapper.addClass("ui-combobox-error");
+                }
 
                 this.updateSelection_();
             },

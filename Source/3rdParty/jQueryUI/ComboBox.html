@@ -335,15 +335,16 @@ $(function () {
         <span data-bind="innerText:'Selected Code: ' + selectedCode()"></span><br>
 
         <select data-bind="
-            {comboBox-selectedValue:selectedCode}
             {comboBox-items:countries}
             {comboBox-display:'name + \' (\' + code + \')\''}
+            {comboBox-selectedValue:selectedCode}
             {comboBox-value:'code'}">
         </select><br>
 
         <button data-action="randomizeSelectedCode()">Randomize</button>
         <button data-action="clearSelectedCode()">Clear</button>
         <p></p>
+
         <span data-bind="innerText:'Selected Code: ' + (selectedCountry() ? selectedCountry().code : '')"></span><br>
 
         <select data-bind="
