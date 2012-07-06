@@ -3,35 +3,42 @@
 <html>
 <head>
     <title></title>
+    <link rel="stylesheet" href="../Scripts/Highlight/styles/vs.css" type="text/javascript">
+    <link rel="stylesheet" href="../Styles/bootstrap.css" type="text/javascript">
     <script src="../Scripts/jquery-1.7.2.js" type="text/javascript"></script>
     <script src="../Output/Photon-debug.js" type="text/javascript"></script>
+    <script src="../Scripts/Highlight/highlight.pack.js" type="text/javascript"></script>
+    <script src="../Scripts/beautify.js"></script>
+    <script src="../Scripts/beautify-html.js"></script>
+    <script src="Gadget.js"></script>
 
     <script type="text/javascript">
+        function example(photon) {
+            var ViewModel = photon.observable.model.define({
+                options:[],
+                name:"Sample Model",
+                selectItem:function (itemId) {
+                    this.selectedItem(itemId);
+                    this.anotherSelectedItem(itemId);
+                },
 
-        ViewModel = photon.observable.model.define({
-            options:[],
-            name:"Sample Model",
-            selectItem:function (itemId) {
-                this.selectedItem(itemId);
-                this.anotherSelectedItem(itemId);
-            },
-
-            selectedItem:{initialValue:3,type:'Number'},
-            anotherSelectedItem:{initialValue:null,type:'Number'}
-        });
-
-        $(function() {
-            var model = new ViewModel({
-                options:[
-                    { Id:1, DisplayName:"One"},
-                    { Id:2, DisplayName:"Two"},
-                    { Id:3, DisplayName:"Three"},
-                    { Id:4, DisplayName:"Four"}
-                ]
+                selectedItem:{initialValue:3, type:'Number'},
+                anotherSelectedItem:{initialValue:null, type:'Number'}
             });
 
-            photon.binding.applyBindings(model, $("#root")[0], "Root");
-        });
+            $(function () {
+                var model = new ViewModel({
+                    options:[
+                        { Id:1, DisplayName:"One"},
+                        { Id:2, DisplayName:"Two"},
+                        { Id:3, DisplayName:"Three"},
+                        { Id:4, DisplayName:"Four"}
+                    ]
+                });
+
+                photon.binding.applyBindings(model, $("#root")[0], "Root");
+            });
+        }
     </script>
 </head>
 <body>
