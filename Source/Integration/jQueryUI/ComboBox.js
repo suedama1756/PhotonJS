@@ -131,6 +131,11 @@ if ($.widget) {
                 display:null,
                 isValid:null
             },
+            dispose : function() {
+                this.superType.dispose.call(this);
+                this.dataContext_.dispose();
+                this.dataContext_ = null;
+            },
             updateContext_:function () {
                 this.dataContext_.setParent(
                     photon.binding.DataContext.getForElement(this.target_));
