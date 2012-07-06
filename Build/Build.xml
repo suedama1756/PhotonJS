@@ -5,6 +5,7 @@
 
         <exec command="${MSBuild} ${MSBuildProject}" logoutput="true"/>
     </target>
+
     <target name="build-all">
         <property name="MSBuild" value="C:\Windows\Microsoft.NET\Framework\v4.0.30319\MSBuild.exe"/>
         <property name="MSBuildProject" file="Build.msbuild" value="Build.msbuild"/>
