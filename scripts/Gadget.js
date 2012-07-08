@@ -90,7 +90,7 @@ photon.extend(photon.examples.gadget, {
             photon.binding.applyBindings(tabsModel);
             self.setupScript(exampleJs);
             self.setupHtml(exampleHtml);
-            hljs.initHighlightingOnLoad();
+            hljs.initHighlighting();
         });
 
 
