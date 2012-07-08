@@ -2,14 +2,20 @@
     <!-- Template: html -->
     <div>
             <pre>
-                <code class="html" id="codeHtml">
+                <code class="html" data-bind="innerText:$data">
                 </code>
             </pre>
     </div>
     <!-- Template: javascript -->
     <div>
             <pre>
-                <code class="javascript" id="codeJs"></code>
+                <code class="javascript" data-bind="innerText:$data"></code>
+            </pre>
+    </div>
+    <!-- Template: css-->
+    <div>
+            <pre>
+                <code class="css" data-bind="innerText:$data"></code>
             </pre>
     </div>
     <!-- Template: tabs -->

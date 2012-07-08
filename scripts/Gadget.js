@@ -40,74 +40,109 @@ photon.extend(photon.examples.gadget, {
     formatHtml:function (html) {
         return style_html(html);
     },
-    setup:function () {
-        var tabsModel = new TabsModel({
-            tabs:[
-                new TabModel({
-                    id:"example",
-                    title:"Example",
-                    template:'exampleTemplates.example'
-                }),
-                new TabModel({
-                    id:"javascript",
-                    title:"JavaScript",
-                    template:'exampleTemplates.javascript'
-                }),
-                new TabModel({
-                    id:"html",
-                    title:"Html",
-                    template:'exampleTemplates.html'
-                })
-            ]});
-
-        var exampleTab = tabsModel.tabs().getItem(0);
-        tabsModel.activeTab(exampleTab);
-
+    createMockPhoton_:function () {
+        // copy with photon
         var mockPhoton = photon.extend({}, photon);
+
+        // copy binding (as we are going to replace bits of it)
         mockPhoton.binding = photon.extend(
             {}, photon.binding);
-        mockPhoton.binding.applyBindings = function (data) {
-            exampleTab.data(data);
-        };
-
-        var exampleJs = window.example;
-        if (exampleJs) {
-            exampleJs(mockPhoton);
-        }
 
         var self = this;
-        $(function () {
-            // grab example html from body
-            var $body = $("body"), exampleHtml = $body.html(), templateCache = photon.templating.getCache();
+        mockPhoton.binding.applyBindings = function (data) {
+            var exampleTab = photon.array.find(self.model_.tabs().unwrap(), function (tab) {
+                return tab.id() === 'example';
+            });
+            if (exampleTab) {
+                exampleTab.data(data);
+            }
+        };
+
+        return mockPhoton;
+    },
+    configureExample_:function () {
+        var $example = $("#example"), templateCache = photon.templating.getCache();
+        if ($example) {
+            var exampleHtml = $example.html();
 
             // add example html to the template cache
             templateCache.addHtml("exampleTemplates.example", exampleHtml);
 
-            $body.empty();
-            $(photon.templating.getCache().getHtml("exampleTemplates.tabs"))
-                .appendTo($("body"));
+            // clear the example
+            $example.empty();
+            $(templateCache.getHtml("exampleTemplates.tabs"))
+                .appendTo($example);
 
-            photon.binding.applyBindings(tabsModel);
-            self.setupScript(exampleJs);
-            self.setupHtml(exampleHtml);
+            this.configureExampleTab_();
+            this.configureScriptTab_();
+            this.configureHtmlTab_(exampleHtml);
+            this.configureCSSTab_();
+        }
+    },
+    configureExampleTab_ : function() {
+        this.model_.tabs().push(
+            new TabModel({
+                id:"example",
+                title:"Example",
+                template:'exampleTemplates.example',
+                data:null
+            }));
+    },
+
+    configureScriptTab_ : function() {
+        var exampleFn = window.example;
+        if (exampleFn) {
+            exampleFn(this.createMockPhoton_());
+
+            this.model_.tabs().push(new TabModel({
+                id:"javascript",
+                title:"JavaScript",
+                template:'exampleTemplates.javascript',
+                data : photon.examples.gadget.formatScript(exampleFn)
+            }));
+        }
+    },
+    configureHtmlTab_:function (html) {
+        this.model_.tabs().push(new TabModel({
+            id:"html",
+            title:"Html",
+            template:'exampleTemplates.html',
+            data : html
+        }));
+    },
+    configureCSSTab_ : function() {
+        var style = $("head style")[0];
+        if (style) {
+            var data = css_beautify(style.innerText || style.textContent);
+            data = photon.array.filter(data.split("\n"), function(line) {
+                return photon.string.trim(line) != '';
+            }).join("\n");
+
+            this.model_.tabs().push(new TabModel({
+                id:"css",
+                title:"Css",
+                template:'exampleTemplates.css',
+                data : data
+            }));
+        }
+
+    },
+    setup:function () {
+        this.model_ = new TabsModel();
+        var self = this;
+        $(function () {
+            self.configureExample_();
+
+            photon.binding.applyBindings(self.model_);
+
             hljs.initHighlighting();
         });
-
-
-    },
-    setupScript:function (script) {
-        $("#codeJs").text(photon.examples.gadget.formatScript(script));
-    },
-    setupHtml:function (html) {
-        var $codeHtml = $("#codeHtml");
-        $codeHtml.text(this.formatHtml("<body>" + html + "</body>"));
-
     }
 });
 
-$(function() {
+$(function () {
     // add example html to the template cache
-    photon.templating.getCache().addResourceUrl("Gadget.Templates.html", function() {
+    photon.templating.getCache().addResourceUrl("Gadget.Templates.html", function () {
         photon.examples.gadget.setup();
     });
 });
