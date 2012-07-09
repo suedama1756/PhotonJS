@@ -18,19 +18,19 @@
                 <code class="css" data-bind="innerText:$data"></code>
             </pre>
     </div>
-    <!-- Template: tabs -->
-    <ul class="nav nav-tabs" id="myTab" data-flow="each:tabs()">
-        <li data-bind="{class-active:$dataContext(1).activeTab() === $data}"
-            data-action="$dataContext(1).activeTab($data)">
+    <!-- Template: pages -->
+    <ul class="nav nav-tabs" data-flow="each:pages()">
+        <li data-bind="{class-active:$dataContext(1).activePage() === $data}"
+            data-action="$dataContext(1).activePage($data)">
             <a data-bind="
                     {attribute-href:'#' + id()}
                     {innerText:title}">
             </a>
         </li>
     </ul>
-    <div class="tab-content" data-flow="each:tabs()">
+    <div class="tab-content" data-flow="each:pages()">
         <div class="tab-pane" data-bind="
-                {class-active:$dataContext(1).activeTab() === $data}
+                {class-active:$dataContext(1).activePage() === $data}
                 {attribute-id:id()}
                 {data-template:
                     {

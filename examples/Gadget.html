@@ -11,20 +11,20 @@
     <script src="../libs/beutify/beautify.js"></script>
     <script src="../libs/beutify/beautify-html.js"></script>
     <script src="../libs/beutify/beautify-css.js"></script>
-    <script src="../scripts/Gadget.js"></script>
+    <script src="../scripts/ExampleWidget.js"></script>
 
     <script type="text/javascript">
-        function example(photon) {
+        function example1(photon) {
             var Model = photon.observable.model.define({
                 amount:0
             });
 
             $(function () {
-                photon.binding.applyBindings(new Model());
+                photon.binding.applyBindings(new Model(), $("#example1")[0]);
             });
         }
     </script>
-    <style type="text/css">
+    <style type="text/css" id="example1Styles">
         .red {
             color: red;
         }
@@ -36,11 +36,18 @@
 <div style="margin: 20px">
     The following example demonstrates the class data binding type.
 </div>
-<div id="example" style="padding: 0px;margin: 0px">
-    <div class="example" >
-        <input data-bind="value:amount">
-        <span data-bind="{textContent:'You are in the ' + (amount() >= 0 ? 'black' : 'red')}{class-red:amount() < 0}"></span>
-    </div>
+
+<div class="example" id="example1" style="padding: 0px;margin: 0px">
+    <input data-bind="value:amount">
+    <span data-bind="{textContent:'You are in the ' + (amount() >= 0 ? 'black' : 'red')}{class-red:amount() < 0}"></span>
 </div>
+
+<div style="margin: 20px">
+    The following example demonstrates another binding type.
+</div>
+<div class="example" id="example2" style="padding: 0px;margin: 0px">
+    <span data-bind="{textContent:'You are in the ' + (amount() >= 0 ? 'black' : 'red')}{class-red:amount() < 0}"></span>
+</div>
+
 </body>
 </html>
