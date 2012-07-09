@@ -1,0 +1,13 @@
+pre .tag {
+    background: transparent
+}
+div .tab-pane {
+    padding: 8px
+}
+div .exampleLayoutCol1 {
+    float:left; width:50%;
+}
+
+div .exampleLayoutCol2 {
+    margin-left:50%; width:50%;
+}

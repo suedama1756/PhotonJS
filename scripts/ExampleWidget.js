@@ -18,12 +18,17 @@
         pages:{
             type:'ObservableArray'
         },
-        activePage:null
+        activePage:null,
+        data:null,
+        css:'',
+        html:'',
+        javascript:''
     });
 
     photon.examples.viewModels.PageViewModel = photon.observable.model.define({
         id:null,
         title:null,
+        style:'code',
         template:null,
         data:null
     });
@@ -47,6 +52,20 @@
 
         // get script
         return js_beautify(script);
+    }
+
+    var escapedFromXmlMap = {
+        '&amp;':'&',
+        '&quot;':'"',
+        '&lt;':'<',
+        '&gt;':'>'
+    };
+
+    function decodeXml(string) {
+        return string.replace(/(&quot;|&lt;|&gt;|&amp;)/g,
+            function (str, item) {
+                return escapedFromXmlMap[item];
+            });
     }
 
     photon.defineType(
@@ -85,16 +104,17 @@
 
                 // clear the example
                 $example.empty();
-                $(templateCache.getHtml("exampleTemplates.pages"))
+                $(templateCache.getHtml("exampleTemplates.container"))
                     .appendTo($example);
 
-                model.pages().push(
-                    new photon.examples.viewModels.PageViewModel({
-                        id:"example",
-                        title:"Example",
-                        template:templateName,
-                        data:null
-                    }));
+//                model.pages().push(
+//                    new photon.examples.viewModels.PageViewModel({
+//                        id:"example",
+//                        title:"Example",
+//                        style:'example',
+//                        template:templateName,
+//                        data:null
+//                    }));
             },
 
             configureScriptTab_:function (model) {
@@ -105,20 +125,24 @@
 
                 exampleFn(this.mockPhoton_(model));
 
+                var script = formatScript(exampleFn);
                 model.pages().push(new photon.examples.viewModels.PageViewModel({
                     id:"javascript",
                     title:"JavaScript",
                     template:'exampleTemplates.javascript',
-                    data:formatScript(exampleFn)
+                    data:script
                 }));
+                model.javascript(script);
             },
             configureHtmlTab_:function (model, $example, buildInfo) {
+                var html = style_html(decodeXml(buildInfo.html));
                 model.pages().push(new photon.examples.viewModels.PageViewModel({
                     id:"html",
                     title:"Html",
                     template:'exampleTemplates.html',
-                    data:style_html(buildInfo.html)
+                    data:html
                 }));
+                model.html(html);
             },
             configureCSSTab_:function (model) {
                 var style = $(photon.string.format("#{0}Styles", model.id()))[0];
@@ -134,6 +158,8 @@
                         template:'exampleTemplates.css',
                         data:data
                     }));
+
+                    model.css(data);
                 }
 
             },
@@ -148,7 +174,7 @@
                 var oldApplyBindings = mockPhoton.binding.applyBindings;
                 mockPhoton.binding.applyBindings = function (data, node) {
                     if (!node || (node.id && node.id === model.id())) {
-                        model.pages().getItem(0).data(data);
+                        model.data(data);
                     } else {
                         oldApplyBindings.apply(mockPhoton.binding, arguments);
                     }
@@ -182,6 +208,8 @@ $(function () {
             photon.binding.applyBindings(exampleViewModel, x);
         });
 
-        hljs.initHighlighting();
+        setTimeout(function() {
+            hljs.initHighlighting();
+        }, 0);
     });
 });

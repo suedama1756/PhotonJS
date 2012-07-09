@@ -1,35 +1,30 @@
 <script type="text/html" id="exampleTemplates">
     <!-- Template: html -->
     <div>
-            <pre>
-                <code class="html" data-bind="innerText:$data">
-                </code>
-            </pre>
+        <pre class="html"><code data-bind="innerText:$data"></code></pre>
     </div>
     <!-- Template: javascript -->
     <div>
-            <pre>
-                <code class="javascript" data-bind="innerText:$data"></code>
-            </pre>
+        <pre class="javascript"><code data-bind="innerText:$data"></code></pre>
     </div>
     <!-- Template: css-->
     <div>
-            <pre>
-                <code class="css" data-bind="innerText:$data"></code>
-            </pre>
+        <pre class="css"><code data-bind="innerText:$data"></code></pre>
     </div>
-    <!-- Template: pages -->
-    <ul class="nav nav-tabs" data-flow="each:pages()">
-        <li data-bind="{class-active:$dataContext(1).activePage() === $data}"
-            data-action="$dataContext(1).activePage($data)">
-            <a data-bind="
+    <!-- Template: container -->
+    <div>
+        <div class="exampleLayoutCol1">
+            <ul class="nav nav-tabs" data-flow="each:pages()">
+                <li data-bind="{class-active:$dataContext(1).activePage() === $data}"
+                    data-action="$dataContext(1).activePage($data)">
+                    <a data-bind="
                     {attribute-href:'#' + id()}
                     {innerText:title}">
-            </a>
-        </li>
-    </ul>
-    <div class="tab-content" data-flow="each:pages()">
-        <div class="tab-pane" data-bind="
+                    </a>
+                </li>
+            </ul>
+            <div class="tab-content" data-flow="each:pages()">
+                <div class="tab-pane" data-bind="
                 {class-active:$dataContext(1).activePage() === $data}
                 {attribute-id:id()}
                 {data-template:
@@ -38,6 +33,27 @@
                         data:data()
                     }
                 }">
+                </div>
+            </div>
         </div>
+        <div class="exampleLayoutCol2" data-bind="
+                {attribute-id:id()}
+                {data-template:
+                    {
+                        name:'exampleTemplates.' + id(),
+                        data:data()
+                    }
+                }">
+        </div>
+        <form class="jsfiddle" method="post" action="http://jsfiddle.net/api/post/library/pure/" target="_blank">
+            <input type="hidden" name="title" value="Photon Example: ">
+            <input type="hidden" name="css" data-bind="value:css()" >
+            <input type="hidden" name="html" data-bind="value:html()" >
+            <input type="hidden" name="js" data-bind="value:javascript()" >
+            <input type="hidden" name="resources" value="http://suedama1756.github.com/Photon/libs/require/require.js,http://suedama1756.github.com/Photon/scripts/requireConfig.js,http://suedama1756.github.com/Photon/scripts/Photon-debug.js,http://suedama1756.github.com/Photon/scripts/ExampleWidget.js" >
+            <button class="btn btn-primary">
+                <i class="icon-white icon-pencil"></i> Edit Me
+            </button>
+        </form>
     </div>
 </script>
