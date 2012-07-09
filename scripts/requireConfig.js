@@ -23,7 +23,7 @@
                 'libs/beautify/beautify'
             ],
             'photon':[
-                'scripts/photon-debug'
+                'scripts/Photon-debug'
             ],
             'exampleWidget': [
                 'scripts/ExampleWidget'
