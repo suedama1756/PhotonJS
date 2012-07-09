@@ -1,9 +1,15 @@
 pre .tag {
     background: transparent
 }
+
+.example {
+    display:inline-block; width: 100%;
+}
+
 div .tab-pane {
     padding: 8px
 }
+
 div .exampleLayoutCol1 {
     float:left; width:50%;
 }

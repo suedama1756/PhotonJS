@@ -1,0 +1,44 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title>'class' binding property.</title>
+    <link rel="stylesheet" href="../libs/highlight/styles/vs.css" type="text/css">
+    <link rel="stylesheet" href="../stylesheets/bootstrap.css" type="text/css">
+    <link rel="stylesheet" href="../stylesheets/site.css" type="text/css">
+    <script src="../libs/require/require.js" type="text/javascript"></script>
+    <script src="../scripts/requireConfig.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        function example(photon) {
+            var Model = photon.observable.model.define({
+                firstName: {
+                    type:'String'
+                },
+                lastName: {
+                        type:'String'
+                }
+            });
+
+            $(function () {
+                photon.binding.applyBindings(new Model());
+            });
+        }
+    </script>
+    <style type="text/css" id="exampleStyles">
+    </style>
+<body>
+<div style="margin: 20px">
+    The following example demonstrates the class data binding type.
+</div>
+<div class="example" id="example">
+    <label>First name:</label>
+    <input data-bind="{value:firstName}">
+    <p></p>
+    <label>Last name:</label>
+    <input data-bind="{value:lastName}">
+    <hr>
+    <p></p>
+    Hello <span data-bind="{innerText:firstName() + ' ' + lastName()}"></span>!
+</div>
+</body>
+</html>

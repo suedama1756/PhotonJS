@@ -42,6 +42,11 @@
             color: red;
         }
     </style>
+    <style type="text/css" id="example2Styles">
+        .red {
+            color: red;
+        }
+    </style>
 <body>
 <div style="margin: 20px">
     The following example demonstrates the class data binding type.
@@ -49,8 +54,8 @@
 <div class="example" id="example1">
     <input data-bind="{value:amount}{class-red:isInTheRed()}">
 </div>
-<!--<div class="example" id="example2">-->
-    <!--<input data-bind="{value:amount}{class-red:amount() < 0}">-->
-<!--</div>-->
+<div class="example" id="example2">
+    <input data-bind="{value:amount}{class-red:amount() < 0}">
+</div>
 </body>
 </html>
