@@ -20,7 +20,7 @@
             });
 
             $(function () {
-                photon.binding.applyBindings(new Model(), $("#example1")[0]);
+                photon.binding.applyBindings(new Model());
             });
         }
     </script>
@@ -28,26 +28,14 @@
         .red {
             color: red;
         }
-        /*pre {*/
-            /*padding: 0px;*/
-        /*}*/
     </style>
 <body>
 <div style="margin: 20px">
     The following example demonstrates the class data binding type.
 </div>
-
-<div class="example" id="example1" style="padding: 0px;margin: 0px">
+<div class="example" id="example1">
     <input data-bind="value:amount">
     <span data-bind="{textContent:'You are in the ' + (amount() >= 0 ? 'black' : 'red')}{class-red:amount() < 0}"></span>
 </div>
-
-<div style="margin: 20px">
-    The following example demonstrates another binding type.
-</div>
-<div class="example" id="example2" style="padding: 0px;margin: 0px">
-    <span data-bind="{textContent:'You are in the ' + (amount() >= 0 ? 'black' : 'red')}{class-red:amount() < 0}"></span>
-</div>
-
 </body>
 </html>
