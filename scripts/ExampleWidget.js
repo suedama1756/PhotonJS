@@ -123,7 +123,7 @@
             configureCSSTab_:function (model) {
                 var style = $(photon.string.format("#{0}Styles", model.id()))[0];
                 if (style) {
-                    var data = css_beautify(style.innerText || style.textContent);
+                    var data = css_beautify(photon.string.trim(style.innerText || style.textContent));
                     data = photon.array.filter(data.split("\n"),function (line) {
                         return photon.string.trim(line) != '';
                     }).join("\n");
