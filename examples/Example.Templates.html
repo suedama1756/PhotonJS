@@ -1,15 +1,15 @@
 <script type="text/html" id="exampleTemplates">
     <!-- Template: html -->
     <div>
-        <pre class="html"><code data-bind="innerText:$data"></code></pre>
+        <pre class="html"><code data-bind="text:$data"></code></pre>
     </div>
     <!-- Template: javascript -->
     <div>
-        <pre class="javascript"><code data-bind="innerText:$data"></code></pre>
+        <pre class="javascript"><code data-bind="text:$data"></code></pre>
     </div>
     <!-- Template: css-->
     <div>
-        <pre class="css"><code data-bind="innerText:$data"></code></pre>
+        <pre class="css"><code data-bind="text:$data"></code></pre>
     </div>
     <!-- Template: container -->
     <div>
@@ -19,7 +19,7 @@
                     data-action="$dataContext(1).activePage($data)">
                     <a data-bind="
                     {attribute-href:'#' + id()}
-                    {innerText:title}">
+                    {text:title}">
                     </a>
                 </li>
             </ul>
