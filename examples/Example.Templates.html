@@ -12,7 +12,7 @@
         <pre class="css"><code data-bind="text:$data"></code></pre>
     </div>
     <!-- Template: container -->
-    <div>
+    <div class="sample">
         <div class="exampleLayoutCol1">
             <ul class="nav nav-tabs" data-flow="each:pages()">
                 <li data-bind="{class-active:$dataContext(1).activePage() === $data}"
@@ -36,24 +36,28 @@
                 </div>
             </div>
         </div>
-        <div class="exampleLayoutCol2" data-bind="
-                {attribute-id:id()}
-                {data-template:
-                    {
-                        name:'exampleTemplates.' + id(),
-                        data:data()
-                    }
-                }">
+        <div class="exampleLayoutCol2" >
+            <form class="jsfiddle" method="post" action="http://fiddle.jshell.net/api/post/library/pure/"
+                  target="_blank">
+                <input type="hidden" name="title" value="Photon Example: ">
+                <input type="hidden" name="css" data-bind="value:jsFiddle().css">
+                <input type="hidden" name="html" data-bind="value:jsFiddle().html">
+                <input type="hidden" name="js" data-bind="value:jsFiddle().javascript">
+                <button class="btn btn-primary">
+                    <i class="icon-white icon-pencil"></i>jsFiddle
+                </button>
+            </form>
+            <div class="exampleContainer">
+                <div data-bind="
+                    {attribute-id:id()}
+                    {data-template:
+                        {
+                            name:'exampleTemplates.' + id(),
+                            data:data()
+                        }
+                    }">
+                </div>
+            </div>
         </div>
-        <p></p>
-        <form class="jsfiddle" method="post" action="http://fiddle.jshell.net/api/post/library/pure/" target="_blank">
-            <input type="hidden" name="title" value="Photon Example: ">
-            <input type="hidden" name="css" data-bind="value:css()">
-            <input type="hidden" name="html" data-bind="value:html()">
-            <input type="hidden" name="js" data-bind="value:javascript()">
-            <button class="btn btn-primary">
-                <i class="icon-white icon-pencil"></i>jsFiddle
-            </button>
-        </form>
     </div>
 </script>

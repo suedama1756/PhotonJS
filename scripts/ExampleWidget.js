@@ -20,9 +20,15 @@
         },
         activePage:null,
         data:null,
-        css:'',
-        html:'',
-        javascript:''
+        jsFiddle : {
+            initializer : function() {
+                return {
+                    css :'',
+                    html :'',
+                    javascript:''
+                }
+            }
+        }
     });
 
     photon.examples.viewModels.PageViewModel = photon.observable.model.define({
@@ -90,6 +96,17 @@
                 this.configureHtmlTab_(model, $example, buildInfo);
                 this.configureCSSTab_(model);
 
+                var lines = [
+                    '<!-- Hack due to jsFiddle issue: http://goo.gl/BUfGZ -->',
+                    '</style>',
+                    '<link rel="stylesheet"; href="http://twitter.github.com/bootstrap/assets/css/bootstrap.css">',
+                    '<script src="http://suedama1756.github.com/Photon/libs/jquery/jquery-1.7.2.js"></script>',
+                    '<script src="http://suedama1756.github.com/Photon/scripts/Photon-debug.js"></script>',
+                    '<style>',
+                    model.jsFiddle().css];
+
+                model.jsFiddle().css = lines.join("\n");
+
                 return model;
             },
 
@@ -123,7 +140,7 @@
                     template:'exampleTemplates.javascript',
                     data:script
                 }));
-                model.javascript(script);
+                model.jsFiddle().javascript = script;
             },
             configureHtmlTab_:function (model, $example, buildInfo) {
                 var html = style_html(decodeXml(buildInfo.html));
@@ -133,15 +150,16 @@
                     template:'exampleTemplates.html',
                     data:html
                 }));
-                model.html(html);
+                model.jsFiddle().html = html;
             },
             configureCSSTab_:function (model) {
                 var style = $(photon.string.format("#{0}Styles", model.id()))[0];
                 if (style) {
                     var data = photon.string.trim(style.innerText || style.textContent || '');
-                    if (data) {
-                        data = css_beautify(data);
+                    if (!data) {
+                        return;
                     }
+                    data = css_beautify(data);
                     data = photon.array.filter(data.split("\n"),function (line) {
                         return photon.string.trim(line) != '';
                     }).join("\n");
@@ -153,16 +171,7 @@
                         data:data
                     }));
 
-                    var lines = [
-                        '<!-- Hack due to jsFiddle issue: http://goo.gl/BUfGZ -->',
-                        '</style>',
-                        '<link rel="stylesheet"; href="http://twitter.github.com/bootstrap/assets/css/bootstrap.css">',
-                        '<script src="http://suedama1756.github.com/Photon/libs/jquery/jquery-1.7.2.js"></script>',
-                        '<script src="http://suedama1756.github.com/Photon/scripts/Photon-debug.js"></script>',
-                        '<style>',
-                        data];
-
-                    model.css(lines.join('\n'));
+                    model.jsFiddle().css = data;
                 }
 
             },

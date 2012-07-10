@@ -1,0 +1,54 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title>'class' binding property.</title>
+    <link rel="stylesheet" href="../libs/highlight/styles/vs.css" type="text/css">
+    <link rel="stylesheet" href="../stylesheets/bootstrap.css" type="text/css">
+    <link rel="stylesheet" href="../stylesheets/site.css" type="text/css">
+    <script src="../libs/require/require.js" type="text/javascript"></script>
+    <script src="../scripts/requireConfig.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        function example1(photon) {
+            var ViewModel = photon.observable.model.define({
+                name:'Model',
+                options:[],
+                selectedOption:{
+                    initialValue:1,
+                    type:'Number'
+                }
+            });
+
+            $(function () {
+                var model = new ViewModel({
+                    options:[
+                        { Id:1, DisplayName:"One"},
+                        { Id:2, DisplayName:"Two"},
+                        { Id:3, DisplayName:"Three"},
+                        { Id:4, DisplayName:"Four"}
+                    ]
+                });
+
+                photon.binding.applyBindings(model);
+            });
+        }
+    </script>
+</head>
+<body>
+<div class="example" id="example1">
+    <select style="width:200px" data-bind="
+            {select-items: options()},
+            {select-value:'Id'},
+            {select-selectedItem:selectedOption},
+            {select-display:'$dataContext(1).name() + \' Item - \' + DisplayName'}"></select>
+    <p></p>
+    <select style="width:200px" data-bind="
+            {select-items: options()},
+            {select-value:'Id'},
+            {select-selectedItem:selectedOption},
+            {select-display:'DisplayName'}"></select>
+    <p></p>
+    Item '<span data-bind="text:selectedOption()"></span>' is selected
+</div>
+</body>
+</html>
