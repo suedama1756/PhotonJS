@@ -4,6 +4,12 @@
         <property name="MSBuildProject" file="Build.msbuild" value="Build.msbuild"/>
 
         <exec command="${MSBuild} ${MSBuildProject}" logoutput="true"/>
+
+        <copy todir="..\..\Photon.Web.Site\Photon\scripts" overwrite="true" >
+            <fileset dir="..\Output">
+                <include name="*.*" />
+            </fileset>
+        </copy>
     </target>
 
     <target name="build-all">
@@ -12,5 +18,11 @@
 
         <exec command="${MSBuild} ${MSBuildProject} /p:IncludeSlickGrid=true /p:IncludeJQueryUI=true /p:IncludeValidation=true"
               logoutput="true"/>
+
+        <copy todir="..\..\Photon.Web.Site\Photon\scripts" overwrite="true" >
+            <fileset dir="..\Output">
+                <include name="*.*" />
+            </fileset>
+        </copy>
     </target>
 </project>

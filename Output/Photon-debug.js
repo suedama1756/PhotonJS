@@ -3440,6 +3440,22 @@
 	        }
 	    }
 	);
+	photon.defineType(
+	    photon.binding.data.TextProperty = function () {
+	    },
+	    photon.binding.data.Property,
+	    /**
+	     * @lends: photon.binding.data.StyleDataBindingProperty.prototype
+	     */
+	    {
+	        getValue:function (binding) {
+	            return $(binding.getTarget()).text();
+	        },
+	        setValue:function (binding) {
+	            $(binding.getTarget()).text(binding.getSourceValue());
+	        }
+	    }
+	);
 	/**
 	 *  @namespace 'photon.binding.data.properties'
 	 */
@@ -3455,6 +3471,7 @@
 	        'property.value':new photon.binding.data.InputProperty(),
 	        'property.checked':new photon.binding.data.InputProperty(),
 	        'property.focus':new photon.binding.data.FocusProperty(),
+	        'property.text':new photon.binding.data.TextProperty(),
 	        'style':new photon.binding.data.StyleProperty(),
 	        'attribute':new photon.binding.data.AttributeProperty(),
 	        'data.context':new photon.binding.data.DataContextProperty(),

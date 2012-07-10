@@ -66,6 +66,7 @@
         <Compile Include="core\binding\data\properties\AttributeProperty.js"/>
         <Compile Include="core\binding\data\properties\DataTemplateProperty.js"/>
         <Compile Include="core\binding\data\properties\ClassProperty.js"/>
+        <Compile Include="core\binding\data\properties\TextProperty.js"/>
         <Compile Include="core\binding\data\properties\properties.js"/>
 
         <!-- Binding/Actions -->
