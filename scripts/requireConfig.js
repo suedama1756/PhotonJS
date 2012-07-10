@@ -31,7 +31,9 @@
         }
     });
 
-    require(['jquery', 'highlight', 'beautifyCss', 'beautifyHtml', 'beautifyJavaScript', 'exampleWidget'], function() {
-
+    require(['jquery', 'photon', 'highlight', 'beautifyCss', 'beautifyHtml', 'beautifyJavaScript', 'exampleWidget'], function($, photon) {
+        $(function() {
+            photon.examples.initialize();
+        });
     });
 

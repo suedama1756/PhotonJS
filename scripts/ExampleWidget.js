@@ -106,15 +106,6 @@
                 $example.empty();
                 $(templateCache.getHtml("exampleTemplates.container"))
                     .appendTo($example);
-
-//                model.pages().push(
-//                    new photon.examples.viewModels.PageViewModel({
-//                        id:"example",
-//                        title:"Example",
-//                        style:'example',
-//                        template:templateName,
-//                        data:null
-//                    }));
             },
 
             configureScriptTab_:function (model) {
@@ -147,7 +138,10 @@
             configureCSSTab_:function (model) {
                 var style = $(photon.string.format("#{0}Styles", model.id()))[0];
                 if (style) {
-                    var data = css_beautify(photon.string.trim(style.innerText || style.textContent));
+                    var data = photon.string.trim(style.innerText || style.textContent || '');
+                    if (data) {
+                        data = css_beautify(data);
+                    }
                     data = photon.array.filter(data.split("\n"),function (line) {
                         return photon.string.trim(line) != '';
                     }).join("\n");
@@ -192,33 +186,35 @@
                 return mockPhoton;
             }
         });
-})();
 
-$(function () {
-    photon.templating.getCache().addResourceUrl("Example.Templates.html", function () {
-        var viewModel = new photon.examples.viewModels.RootViewModel(), exampleBuilder =
-            new photon.examples.ExampleViewModelBuilder();
+    photon.examples.initialize = function() {
+        $(function () {
+            photon.templating.getCache().addResourceUrl("Example.Templates.html", function () {
+                var viewModel = new photon.examples.viewModels.RootViewModel(), exampleBuilder =
+                    new photon.examples.ExampleViewModelBuilder();
 
-        var $examples = $(".example");
-        if (!$examples.length) {
-            $("body").html(
-                "<div class='example' id='example'>" + $("body").html() + "</div>");
-            $examples = $(".example");
-        }
-
-        $examples.each(function (i, x) {
-            var exampleViewModel = exampleBuilder.build($(x));
-            if (exampleViewModel) {
-                viewModel.examples().push(exampleViewModel);
-                if (exampleViewModel.pages().length()) {
-                    exampleViewModel.activePage(exampleViewModel.pages().getItem(0));
+                var $examples = $(".example");
+                if (!$examples.length) {
+                    $("body").html(
+                        "<div class='example' id='example'>" + $("body").html() + "</div>");
+                    $examples = $(".example");
                 }
-            }
-            photon.binding.applyBindings(exampleViewModel, x);
-        });
 
-        setTimeout(function() {
-            hljs.initHighlighting();
-        }, 0);
-    });
-});
+                $examples.each(function (i, x) {
+                    var exampleViewModel = exampleBuilder.build($(x));
+                    if (exampleViewModel) {
+                        viewModel.examples().push(exampleViewModel);
+                        if (exampleViewModel.pages().length()) {
+                            exampleViewModel.activePage(exampleViewModel.pages().getItem(0));
+                        }
+                    }
+                    photon.binding.applyBindings(exampleViewModel, x);
+                });
+
+                setTimeout(function() {
+                    hljs.initHighlighting();
+                }, 0);
+            });
+        });
+    }
+})();
