@@ -3,7 +3,7 @@
         baseUrl : '..',
         shim: {
            'exampleWidget' : {
-               deps:['jquery', 'photon']
+               deps:['jquery', 'photon', 'highlight', 'beautifyCss', 'beautifyHtml', 'beautifyJavaScript']
            }
         },
         paths:{
@@ -31,9 +31,5 @@
         }
     });
 
-    require(['jquery', 'photon', 'highlight', 'beautifyCss', 'beautifyHtml', 'beautifyJavaScript', 'exampleWidget'], function($, photon) {
-        $(function() {
-            photon.examples.initialize();
-        });
-    });
+
 

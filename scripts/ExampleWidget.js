@@ -20,11 +20,11 @@
         },
         activePage:null,
         data:null,
-        jsFiddle : {
-            initializer : function() {
+        jsFiddle:{
+            initializer:function () {
                 return {
-                    css :'',
-                    html :'',
+                    css:'',
+                    html:'',
                     javascript:''
                 }
             }
@@ -81,20 +81,21 @@
          * @lends photon.examples.ExampleViewModelBuilder.prototype
          */
         {
-            build:function ($example) {
+            build:function (configuration) {
                 var buildInfo = {},
                     model = new photon.examples.viewModels.ExampleViewModel({
-                        id:$example[0].id
+                        id:configuration.id
                     });
 
                 if (!model.id()) {
-                   throw new Error("Example elements must provide a unique 'id' attribute, e.g. '<div class=\"example\" id=\"actionExample\">' .")
+                    throw new Error("Example elements must provide a unique 'id' attribute, e.g. '<div class=\"example\" id=\"actionExample\">' .")
                 }
+                var $example = $('#' + configuration.html);
 
                 this.configureExampleTab_(model, $example, buildInfo);
-                this.configureScriptTab_(model);
+                this.configureScriptTab_(model, configuration);
                 this.configureHtmlTab_(model, $example, buildInfo);
-                this.configureCSSTab_(model);
+                this.configureCSSTab_(model, configuration);
 
                 var lines = [
                     '<!-- Hack due to jsFiddle issue: http://goo.gl/BUfGZ -->',
@@ -124,23 +125,34 @@
                 $(templateCache.getHtml("exampleTemplates.container"))
                     .appendTo($example);
             },
-
-            configureScriptTab_:function (model) {
-                var exampleFn = window[model.id()];
-                if (!photon.isFunction(exampleFn)) {
-                    throw new Error(photon.string.format('Unable to find global example startup method \'{0}\'.', model.id()));
+            forEachConfigurationOption:function (option, fn) {
+                if (!option) {
+                    return;
                 }
+                if (!photon.isArray(option)) {
+                    fn.call(this, option);
+                }
+                photon.array.forEach(option, fn, this);
+            },
+            configureScriptTab_:function (model, configuration) {
+                var mockPhoton = this.mockPhoton_(model);
+                this.forEachConfigurationOption(configuration.javaScript, function(option) {
+                    var exampleFn = photon.isFunction(option)  ? option : option.code;
+                    if (!photon.isFunction(exampleFn)) {
+                        throw new Error(photon.string.format('Unable to find global example startup method \'{0}\'.', model.id()));
+                    }
 
-                exampleFn(this.mockPhoton_(model));
+                    exampleFn(mockPhoton);
 
-                var script = formatScript(exampleFn);
-                model.pages().push(new photon.examples.viewModels.PageViewModel({
-                    id:"javascript",
-                    title:"JavaScript",
-                    template:'exampleTemplates.javascript',
-                    data:script
-                }));
-                model.jsFiddle().javascript = script;
+                    var script = formatScript(exampleFn);
+                    model.pages().push(new photon.examples.viewModels.PageViewModel({
+                        id:"javascript",
+                        title:option.title || 'JavaScript',
+                        template:'exampleTemplates.javascript',
+                        data:script
+                    }));
+                    model.jsFiddle().javascript += script + "\n\n";
+                });
             },
             configureHtmlTab_:function (model, $example, buildInfo) {
                 var html = style_html(decodeXml(buildInfo.html));
@@ -152,8 +164,12 @@
                 }));
                 model.jsFiddle().html = html;
             },
-            configureCSSTab_:function (model) {
-                var style = $(photon.string.format("#{0}Styles", model.id()))[0];
+            configureCSSTab_:function (model, configuration) {
+                if (!configuration.css) {
+                    return;
+                }
+
+                var style = $(photon.string.format("#{0}", configuration.css))[0];
                 if (style) {
                     var data = photon.string.trim(style.innerText || style.textContent || '');
                     if (!data) {
@@ -196,34 +212,48 @@
             }
         });
 
-    photon.examples.initialize = function() {
+    photon.examples.initialize = function (configuration) {
         $(function () {
             photon.templating.getCache().addResourceUrl("Example.Templates.html", function () {
                 var viewModel = new photon.examples.viewModels.RootViewModel(), exampleBuilder =
                     new photon.examples.ExampleViewModelBuilder();
 
-                var $examples = $(".example");
-                if (!$examples.length) {
-                    $("body").html(
-                        "<div class='example' id='example'>" + $("body").html() + "</div>");
-                    $examples = $(".example");
+                if (!configuration) {
+                    configuration = {
+                        html:'example',
+                        css:'exampleStyle',
+                        javaScript:photon.isFunction(window.example) ? window.example : null
+                    }
+                }
+                if (!photon.isArray(configuration)) {
+                    configuration = [configuration];
                 }
 
-                $examples.each(function (i, x) {
-                    var exampleViewModel = exampleBuilder.build($(x));
+                photon.array.forEach(configuration, function (item) {
+                    var exampleViewModel = exampleBuilder.build(item);
                     if (exampleViewModel) {
                         viewModel.examples().push(exampleViewModel);
                         if (exampleViewModel.pages().length()) {
                             exampleViewModel.activePage(exampleViewModel.pages().getItem(0));
                         }
                     }
-                    photon.binding.applyBindings(exampleViewModel, x);
+                    photon.binding.applyBindings(exampleViewModel, $('#' + item.html)[0]);
                 });
 
-                setTimeout(function() {
-                    hljs.initHighlighting();
-                }, 0);
+                require(["scripts/Examples", "photon"], function (example, photon) {
+                    $("body").prepend(
+                        photon.templating.getCache().getHtml("exampleTemplates.navigation"));
+
+                    photon.binding.applyBindings(example, $("#menu")[0]);
+
+                    setTimeout(function () {
+                        hljs.initHighlighting();
+                        $("body").show();
+                    }, 0);
+                });
             });
+
+
         });
     }
 })();

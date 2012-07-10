@@ -1,4 +1,13 @@
 <script type="text/html" id="exampleTemplates">
+    <!-- Template: navigation -->
+    <div id="navigation" style="display: inline-block;">
+        <lu data-flow="each:$data" class="nav nav-pills">
+            <li>
+                <a data-bind="{attribute-href:url}{text:name}"></a>
+            </li>
+        </lu>
+    </div>
+
     <!-- Template: html -->
     <div>
         <pre class="html"><code data-bind="text:$data"></code></pre>
@@ -36,7 +45,7 @@
                 </div>
             </div>
         </div>
-        <div class="exampleLayoutCol2" >
+        <div class="exampleLayoutCol2">
             <form class="jsfiddle" method="post" action="http://fiddle.jshell.net/api/post/library/pure/"
                   target="_blank">
                 <input type="hidden" name="title" value="Photon Example: ">

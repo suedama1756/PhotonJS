@@ -1,24 +1,34 @@
-pre .tag {
+
+
+pre.tag {
     background: transparent;
 }
 
-.example {
+code, pre {
+    font-size: 14px;
+}
+
+div.exampleHeader {
+    margin:10px;
+}
+
+div.example {
     display:inline-block; width: 100%;
 }
 
-div .tab-pane {
+div.tab-pane {
     padding: 0px;
 }
 
-div .exampleLayoutCol1 {
-    float:left; width:600px;
+div.exampleLayoutCol1 {
+    float:left; width:620px;
 }
 
-div .exampleLayoutCol2 {
-    margin-left:610px; width:250px; text-align: right;
+div.exampleLayoutCol2 {
+    margin-left:630px; width:300; text-align: right;
 }
 
-div .sample {
+div.sample {
     padding: 10px;
 }
 
@@ -26,7 +36,7 @@ div .sample {
     margin: 3px;
 }
 
-div .exampleContainer {
+div.exampleContainer {
     text-align: left;
     margin-top: 20px;
     border: 1px solid rgba(0, 0, 0, 0.15);

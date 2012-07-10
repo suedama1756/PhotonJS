@@ -1,0 +1,113 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title>'class' binding property.</title>
+    <link rel="stylesheet" href="../stylesheets/bootstrap.css" type="text/css">
+    <link rel="stylesheet" href="../libs/highlight/styles/sunburst.css" type="text/css">
+    <link rel="stylesheet" href="../stylesheets/site.css" type="text/css">
+    <script src="../libs/require/require.js" type="text/javascript"></script>
+    <script src="../scripts/requireConfig.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        require(["exampleWidget"], function () {
+            function PersonScript(photon) {
+                photon.Person = photon.observable.model.define({
+                    firstName:'',
+                    lastName:''
+                });
+            }
+
+            function RootViewModelScript(photon) {
+                photon.RootViewModel = photon.observable.model.define({
+                    itemToAdd:null,
+                    items:{
+                        type:'ObservableArray'
+                    },
+                    add:function () {
+                        if (this.itemToAdd()) {
+                            this.items().push(this.itemToAdd());
+                            this.itemToAdd(null);
+                        }
+                    },
+                    remove:function (item) {
+                        this.items().remove(item);
+                    },
+                    createNew:function () {
+                        this.itemToAdd(new photon.Person());
+                    },
+                    discardChanges:function () {
+                        this.itemToAdd(null);
+                    }
+                });
+            }
+
+            function PageScript(photon) {
+                $(function () {
+                    photon.binding.applyBindings(new photon.RootViewModel());
+                });
+            }
+
+            photon.examples.initialize([
+                {
+                    id:"example1",
+                    javaScript:[
+                        { title:'Person.js', code:PersonScript },
+                        { title:'RootViewModel.js', code:RootViewModelScript },
+                        { title:'Page.js', code:PageScript }
+                    ],
+                    html:'example1',
+                    css:'exampleStyles'
+                }
+            ]);
+        });
+
+
+
+
+    </script>
+    <style type="text/css" id="exampleStyles">
+        button.delete {
+            float: right;
+            font-weight: bold;
+            font-size: 9px;
+            line-height: 10px;
+            border: transparent;
+            background: transparent
+        }
+
+        hr.listSeparator {
+            margin: 2px;
+        }
+    </style>
+<body style="display: none;">
+
+<div class="exampleHeader">
+    <h2 class="example">Flow Bindings</h2>
+<span>
+
+</span>
+</div>
+<div class="example" id="example1">
+    <div data-flow="if:!itemToAdd()">
+        <button data-action="createNew()" class="btn-primary">Create New</button>
+    </div>
+    <div data-flow="if:itemToAdd()">
+        <div data-bind="data-context:itemToAdd()">
+            <label>First Name:</label>
+            <input data-bind="value:firstName" style="width: 120px;">
+            <label>Last Name:</label>
+            <input data-bind="value:lastName" style="width: 120px;">
+        </div>
+        <p></p>
+        <button data-action="add()" class="btn-primary">Save</button>
+    </div>
+    <p></p>
+
+    <div data-flow="each:items()" style="height: 200px;overflow: auto;">
+        <span data-bind="text:$data.firstName() + ' ' + $data.lastName()"></span>
+        <button data-action="$dataContext(1).remove($data)" class="delete">X</button>
+        <hr class="listSeparator">
+    </div>
+</div>
+</body>
+</html>
