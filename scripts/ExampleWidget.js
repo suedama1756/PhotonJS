@@ -244,7 +244,7 @@
                     $("body").prepend(
                         photon.templating.getCache().getHtml("exampleTemplates.navigation"));
 
-                    photon.binding.applyBindings(example, $("#menu")[0]);
+                    photon.binding.applyBindings(example, $("#navigation")[0]);
 
                     setTimeout(function () {
                         hljs.initHighlighting();
