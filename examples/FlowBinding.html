@@ -1,0 +1,41 @@
+---
+layout: example
+title: Flow Binding
+style: |
+    <style type="text/css" id="exampleStyles">
+        button.delete {
+            float: right;
+            font-weight: bold;
+            font-size: 9px;
+            line-height: 10px;
+            border: transparent;
+            background: transparent
+        }
+
+        hr.listSeparator {
+            margin: 2px;
+        }
+    </style>
+script: FlowBinding.js
+---
+<div class="example" id="example1">
+    <div data-flow="if:!itemToAdd()">
+        <button data-action="createNew()" class="btn-primary">Create New</button>
+    </div>
+    <div data-flow="if:itemToAdd()">
+        <div data-bind="data-context:itemToAdd()">
+            <label>First Name:</label>
+            <input data-bind="value:firstName" style="width: 120px;">
+            <label>Last Name:</label>
+            <input data-bind="value:lastName" style="width: 120px;">
+        </div>
+        <p></p>
+        <button data-action="add()" class="btn-primary">Save</button>
+    </div>
+    <p></p>
+    <div data-flow="each:items()" style="height: 200px;overflow: auto;">
+        <span data-bind="text:$data.firstName() + ' ' + $data.lastName()"></span>
+        <button data-action="$dataContext(1).remove($data)" class="delete">X</button>
+        <hr class="listSeparator">
+    </div>
+</div>
