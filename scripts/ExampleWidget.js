@@ -212,33 +212,29 @@
             }
         });
 
+    var rootViewModel = new photon.examples.viewModels.RootViewModel();
+
+    photon.examples.add = function(configuration) {
+        var exampleBuilder = new photon.examples.ExampleViewModelBuilder();
+
+        configuration = photon.isArray(configuration) ? configuration : [configuration];
+        photon.array.forEach(configuration, function (item) {
+            var exampleViewModel = exampleBuilder.build(item);
+            if (exampleViewModel) {
+                rootViewModel.examples().push(exampleViewModel);
+                if (exampleViewModel.pages().length()) {
+                    exampleViewModel.activePage(exampleViewModel.pages().getItem(0));
+                }
+            }
+
+            photon.binding.applyBindings(exampleViewModel, $('#' + item.html)[0]);
+        });
+    }
+
     photon.examples.initialize = function (configuration) {
         $(function () {
             photon.templating.getCache().addResourceUrl("Example.Templates.html", function () {
-                var viewModel = new photon.examples.viewModels.RootViewModel(), exampleBuilder =
-                    new photon.examples.ExampleViewModelBuilder();
-
-                if (!configuration) {
-                    configuration = {
-                        html:'example',
-                        css:'exampleStyle',
-                        javaScript:photon.isFunction(window.example) ? window.example : null
-                    }
-                }
-                if (!photon.isArray(configuration)) {
-                    configuration = [configuration];
-                }
-
-                photon.array.forEach(configuration, function (item) {
-                    var exampleViewModel = exampleBuilder.build(item);
-                    if (exampleViewModel) {
-                        viewModel.examples().push(exampleViewModel);
-                        if (exampleViewModel.pages().length()) {
-                            exampleViewModel.activePage(exampleViewModel.pages().getItem(0));
-                        }
-                    }
-                    photon.binding.applyBindings(exampleViewModel, $('#' + item.html)[0]);
-                });
+                photon.examples.add(configuration);
 
                 require(["scripts/Examples", "photon"], function (example, photon) {
                     $("body").prepend(
@@ -252,8 +248,6 @@
                     }, 0);
                 });
             });
-
-
         });
     }
 })();
