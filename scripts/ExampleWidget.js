@@ -119,11 +119,16 @@
 
                 // add example html to the template cache
                 templateCache.addHtml(templateName, exampleHtml);
+                var $exampleDescription = $(photon.string.format("#{0}-description", model.id()));
+                if ($exampleDescription.length) {
+                    templateCache.addHtml(templateName + "-description", $exampleDescription.html());
+                } else {
+                    templateCache.addHtml(templateName + "-description", '');
+                }
+                $exampleDescription.remove();
 
                 // clear the example
                 $example.remove();
-                //$(templateCache.getHtml("exampleTemplates.container"))
-               //     .appendTo($example);
             },
             forEachConfigurationOption:function (option, fn) {
                 if (!option) {
