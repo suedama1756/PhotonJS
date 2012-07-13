@@ -33,6 +33,10 @@ photon.defineType(
             if (expression.getStopPropagation()) {
                 event.stopPropagation();
             }
+            if (expression.getPreventDefault()) {
+                event.preventDefault();
+            }
+
             photon.binding.evaluateInContext(
                 this.dataContext_, expression.getAction(), null, event
             );

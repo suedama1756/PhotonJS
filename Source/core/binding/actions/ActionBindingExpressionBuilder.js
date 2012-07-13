@@ -16,10 +16,13 @@ photon.defineType(
             return new photon.binding.actions.ActionBindingExpression(this.getText(),
                 function($context, $event, $data) {
                    action($context || {}, $event, $data);
-                }, this.events_, this.stopPropagation_);
+                }, this.events_, this.stopPropagation_, this.preventDefault_);
         },
         "set-stopPropagation" : function(value) {
             this.stopPropagation_  = photon.object.toBoolean(value);
+        },
+        "set-preventDefault" : function(value) {
+            this.preventDefault_ = photon.object.toBoolean(value);
         },
         "set-events":function (events) {
             this.events_ = events;
