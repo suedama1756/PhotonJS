@@ -12,20 +12,16 @@ div.exampleHeader {
     margin:10px;
 }
 
-div.example {
-    display:inline-block; width: 100%;
-}
-
 div.tab-pane {
     padding: 0px;
 }
 
 div.exampleLayoutCol1 {
-    float:left; width:620px;
+    display: inline-block; width:620px;
 }
 
 div.exampleLayoutCol2 {
-    margin-left:630px; width:300; text-align: right;
+    display: inline-block; width:300px; text-align: right; vertical-align: top;
 }
 
 div.sample {

@@ -9,15 +9,15 @@ style: |
     </style>
 script: ClassProperty.js
 ---
-<span>
+<span id="example1-description">
     The 'class' type property binding adds or removes a named CSS class from the associated DOM element. <p></p>
     The binding is in the form {class-&lt;CSSClassName&gt;:&lt;Condition&gt;}.
 </span>
-<div class="example" id="example1">
+<div id="example1">
     Entering a negative number will turn the text red!<p></p>
     <input data-bind="{value:amount}{class-red:isInTheRed()}">
 </div>
-<div class="example" id="example2">
+<div id="example2">
     Entering a negative number will turn the text red!
     <p></p>
     <input data-bind="{value:amount}{class-red:amount() < 0}">

@@ -8,6 +8,12 @@
         </ul>
     </div>
 
+    <!-- Template: examples -->
+    <div data-flow="each:examples()" id="examples">
+        <div data-bind="data-template:{name:'exampleTemplates.container', data:$data}">
+        </div>
+    </div>
+
     <!-- Template: html -->
     <div>
         <pre class="html"><code data-bind="text:$data"></code></pre>
@@ -22,6 +28,8 @@
     </div>
     <!-- Template: container -->
     <div class="sample">
+        <div data-bind="data-template:{name:'exampleTemplates.' + id() + '-description'}">
+        </div>
         <div class="exampleLayoutCol1">
             <ul class="nav nav-tabs" data-flow="each:pages()">
                 <li data-bind="{class-active:$dataContext(1).activePage() === $data}"

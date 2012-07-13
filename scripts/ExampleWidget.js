@@ -121,9 +121,9 @@
                 templateCache.addHtml(templateName, exampleHtml);
 
                 // clear the example
-                $example.empty();
-                $(templateCache.getHtml("exampleTemplates.container"))
-                    .appendTo($example);
+                $example.remove();
+                //$(templateCache.getHtml("exampleTemplates.container"))
+               //     .appendTo($example);
             },
             forEachConfigurationOption:function (option, fn) {
                 if (!option) {
@@ -227,7 +227,7 @@
                 }
             }
 
-            photon.binding.applyBindings(exampleViewModel, $('#' + item.html)[0]);
+            //photon.binding.applyBindings(exampleViewModel, $('#' + item.html)[0]);
         });
     }
 
@@ -238,8 +238,11 @@
 
                 require(["scripts/Examples", "photon"], function (example, photon) {
                     $("body").prepend(
-                        photon.templating.getCache().getHtml("exampleTemplates.navigation"));
+                        photon.templating.getCache().getHtml("exampleTemplates.examples"));
+                    photon.binding.applyBindings(rootViewModel, $("#examples")[0]);
 
+                    $("body").prepend(
+                        photon.templating.getCache().getHtml("exampleTemplates.navigation"));
                     photon.binding.applyBindings(example, $("#navigation")[0]);
 
                     setTimeout(function () {
