@@ -4503,7 +4503,7 @@
 	        getFragment:function () {
 	            if (!this.fragment_) {
 	                if (!this.html_) {
-	                    return null;
+	                    return this.fragment_ = document.createDocumentFragment();
 	                }
 	
 	                // parse html
