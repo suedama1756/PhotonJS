@@ -28,28 +28,27 @@
     </div>
     <!-- Template: container -->
     <div class="sample">
-        <div data-bind="data-template:{name:'exampleTemplates.' + id() + '-description'}">
+        <div data-bind="data-template:{
+                name:'exampleTemplates.' + id() + '-description'
+            }">
         </div>
         <div class="exampleLayoutCol1">
             <ul class="nav nav-tabs" data-flow="each:pages()">
-                <li data-bind="{class-active:$dataContext(1).activePage() === $data}"
-                    data-action="$dataContext(1).activePage($data)">
+                <li data-bind="{class-active:$dataContext(1).activePage() === $data}" data-action="$dataContext(1).activePage($data), preventDefault:true">
                     <a data-bind="
-                    {attribute-href:'#' + id()}
-                    {text:title}">
+                        {attribute-href:'#' + id()}
+                        {text:title}">
                     </a>
                 </li>
             </ul>
             <div class="tab-content" data-flow="each:pages()">
-                <div class="tab-pane" data-bind="
-                {class-active:$dataContext(1).activePage() === $data}
-                {attribute-id:id()}
-                {data-template:
-                    {
-                        name:template(),
-                        data:data()
-                    }
-                }">
+                <div class="tab-pane" data-bind="{class-active:$dataContext(1).activePage() === $data}{attribute-id:id()}
+                    {data-template:
+                        {
+                            name:template(),
+                            data:data()
+                        }
+                    }">
                 </div>
             </div>
         </div>

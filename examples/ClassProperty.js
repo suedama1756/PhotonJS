@@ -1,4 +1,4 @@
-require(["exampleWidget"], function () {
+require(["exampleWidget"], function (photon) {
     function modelWithDerivedPropertyScript(photon) {
         photon.ExampleViewModel = photon.observable.model.define({
             amount:{
