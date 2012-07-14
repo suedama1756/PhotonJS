@@ -1,4 +1,4 @@
-require(["exampleWidget"], function () {
+require(["exampleWidget"], function (photon) {
     function rootViewModelScript(photon) {
         photon.RootViewModel = photon.observable.model.define({
             name:'Model',

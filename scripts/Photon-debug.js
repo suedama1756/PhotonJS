@@ -13,7 +13,7 @@
             factory(window.photon, window.$);
         }
     })(function(photon, $) {
-        window.photon = photon;
+
         defineNamespace = function (namespace, properties) {
 	    var parts = namespace.split(".");
 	    var currentPart = photon;
@@ -3516,6 +3516,10 @@
 	            if (expression.getStopPropagation()) {
 	                event.stopPropagation();
 	            }
+	            if (expression.getPreventDefault()) {
+	                event.preventDefault();
+	            }
+	
 	            photon.binding.evaluateInContext(
 	                this.dataContext_, expression.getAction(), null, event
 	            );
@@ -3525,7 +3529,7 @@
 	 * Expression type used for defining actions
 	 */
 	photon.defineType(
-	    photon.binding.actions.ActionBindingExpression = function (text, action, events, stopPropagation) {
+	    photon.binding.actions.ActionBindingExpression = function (text, action, events, stopPropagation, preventDefault) {
 	        // call base with Binding constructor and original expression text
 	        photon.binding.actions.ActionBindingExpression.base(this, photon.binding.actions.ActionBinding, text);
 	
@@ -3536,6 +3540,7 @@
 	        }
 	        this.events_ = events.split(/\W+/).join(".photon ") + ".photon";
 	        this.stopPropagation_ = photon.isUndefined(stopPropagation) ? false : (stopPropagation ? true : false);
+	        this.preventDefault_ = photon.isUndefined(preventDefault) ? false : (preventDefault ? true : false);
 	    },
 	    photon.binding.BindingExpression,
 	    /**
@@ -3547,6 +3552,9 @@
 	        },
 	        getStopPropagation : function() {
 	            return this.stopPropagation_;
+	        },
+	        getPreventDefault : function() {
+	            return this.preventDefault_;
 	        },
 	        getEvents : function() {
 	            return this.events_;
@@ -3570,10 +3578,13 @@
 	            return new photon.binding.actions.ActionBindingExpression(this.getText(),
 	                function($context, $event, $data) {
 	                   action($context || {}, $event, $data);
-	                }, this.events_, this.stopPropagation_);
+	                }, this.events_, this.stopPropagation_, this.preventDefault_);
 	        },
 	        "set-stopPropagation" : function(value) {
 	            this.stopPropagation_  = photon.object.toBoolean(value);
+	        },
+	        "set-preventDefault" : function(value) {
+	            this.preventDefault_ = photon.object.toBoolean(value);
 	        },
 	        "set-events":function (events) {
 	            this.events_ = events;

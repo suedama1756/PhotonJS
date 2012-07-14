@@ -1,4 +1,4 @@
-require(["exampleWidget"], function () {
+require(["exampleWidget"], function (photon) {
     function PersonScript(photon) {
         photon.Person = photon.observable.model.define({
             firstName:'',

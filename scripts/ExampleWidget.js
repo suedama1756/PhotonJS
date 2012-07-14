@@ -1,4 +1,4 @@
-(function () {
+define(['photon'], function(photon) {
     /** @namespace photon.examples */
     photon.provide("photon.examples");
 
@@ -243,12 +243,12 @@
 
                 require(["scripts/Examples", "photon"], function (example, photon) {
                     $("body").prepend(
-                        photon.templating.getCache().getHtml("exampleTemplates.examples"));
-                    photon.binding.applyBindings(rootViewModel, $("#examples")[0]);
-
-                    $("body").prepend(
                         photon.templating.getCache().getHtml("exampleTemplates.navigation"));
                     photon.binding.applyBindings(example, $("#navigation")[0]);
+
+                    $("body").append(
+                        photon.templating.getCache().getHtml("exampleTemplates.examples"));
+                    photon.binding.applyBindings(rootViewModel, $("#examples")[0]);
 
                     setTimeout(function () {
                         hljs.initHighlighting();
@@ -258,4 +258,7 @@
             });
         });
     }
-})();
+
+    return photon;
+});
+
