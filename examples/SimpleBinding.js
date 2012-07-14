@@ -1,6 +1,6 @@
-require(["exampleWidget"], function (photon) {
-    function modelScript(photon) {
-        photon.RootViewModel = photon.observable.model.define({
+require(["exampleWidget"], function (exampleWidget) {
+    function personScript(photon, example) {
+        example.Person = photon.observable.model.define({
             firstName:{
                 type:'String'
             },
@@ -10,19 +10,19 @@ require(["exampleWidget"], function (photon) {
         });
     };
 
-    function pageScript(photon) {
+    function pageScript(photon, example) {
         $(function () {
-            photon.binding.applyBindings(new photon.RootViewModel());
+            photon.binding.applyBindings(new example.Person());
         });
     }
 
-    photon.examples.initialize([
+    exampleWidget.add([
         {
             id:'example1',
             javaScript:[
                 {
-                    title:'Model.js',
-                    code:modelScript
+                    title:'Person.js',
+                    code:personScript
                 },
                 {
                     title:'Page.js',

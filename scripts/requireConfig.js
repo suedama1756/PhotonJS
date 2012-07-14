@@ -26,7 +26,7 @@
                 'scripts/Photon-debug'
             ],
             'exampleWidget': [
-                'scripts/ExampleWidget'
+                'scripts/examples/ExampleWidget'
             ]
         }
     });

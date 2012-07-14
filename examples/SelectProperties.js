@@ -1,6 +1,6 @@
-require(["exampleWidget"], function (photon) {
-    function rootViewModelScript(photon) {
-        photon.RootViewModel = photon.observable.model.define({
+require(["exampleWidget"], function (exampleWidget) {
+    function numberSelectorScript(photon, example) {
+        example.NumberSelector = photon.observable.model.define({
             name:'Model',
             options:[],
             selectedOption:{
@@ -10,9 +10,9 @@ require(["exampleWidget"], function (photon) {
         });
     }
 
-    function pageScript(photon) {
+    function pageScript(photon, example) {
         $(function () {
-            var model = new photon.RootViewModel({
+            var model = new example.NumberSelector({
                 options:[
                     { Id:1, DisplayName:"One"},
                     { Id:2, DisplayName:"Two"},
@@ -25,13 +25,13 @@ require(["exampleWidget"], function (photon) {
         });
     }
 
-    photon.examples.initialize([
+    exampleWidget.add([
         {
             id:'example1',
             javaScript:[
                 {
-                    title:'Model.js',
-                    code:rootViewModelScript
+                    title:'NumberSelector.js',
+                    code:numberSelectorScript
                 },
                 {
                     title:'Page.js',

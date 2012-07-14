@@ -15,17 +15,14 @@
     </div>
 
     <!-- Template: html -->
-    <div>
-        <pre class="html"><code data-bind="text:$data"></code></pre>
-    </div>
+    <pre><code data-bind="highlight-html:$data"></code></pre>
+
     <!-- Template: javascript -->
-    <div>
-        <pre class="javascript"><code data-bind="text:$data"></code></pre>
-    </div>
+    <pre><code data-bind="highlight-javascript:$data"></code></pre>
+
     <!-- Template: css-->
-    <div>
-        <pre class="css"><code data-bind="text:$data"></code></pre>
-    </div>
+    <pre><code data-bind="highlight-css:$data"></code></pre>
+
     <!-- Template: container -->
     <div class="sample">
         <div data-bind="data-template:{
@@ -33,16 +30,16 @@
             }">
         </div>
         <div class="exampleLayoutCol1">
-            <ul class="nav nav-tabs" data-flow="each:pages()">
-                <li data-bind="{class-active:$dataContext(1).activePage() === $data}" data-action="$dataContext(1).activePage($data), preventDefault:true">
+            <ul class="nav nav-tabs" data-flow="each:codeSnippets()">
+                <li data-bind="{class-active:$dataContext(1).activeCodeSnippet() === $data}" data-action="$dataContext(1).activeCodeSnippet($data), preventDefault:true">
                     <a data-bind="
                         {attribute-href:'#' + id()}
                         {text:title}">
                     </a>
                 </li>
             </ul>
-            <div class="tab-content" data-flow="each:pages()">
-                <div class="tab-pane" data-bind="{class-active:$dataContext(1).activePage() === $data}{attribute-id:id()}
+            <div class="tab-content" data-flow="each:codeSnippets()">
+                <div class="tab-pane" data-bind="{class-active:$dataContext(1).activeCodeSnippet() === $data}{attribute-id:id()}
                     {data-template:
                         {
                             name:template(),

@@ -1,13 +1,13 @@
-require(["exampleWidget"], function (photon) {
-    function PersonScript(photon) {
-        photon.Person = photon.observable.model.define({
+require(["exampleWidget"], function (exampleWidget) {
+    function PersonScript(photon, example) {
+        example.Person = photon.observable.model.define({
             firstName:'',
             lastName:''
         });
     }
 
-    function RootViewModelScript(photon) {
-        photon.RootViewModel = photon.observable.model.define({
+    function RootModelScript(photon, example) {
+        example.PersonCollection = photon.observable.model.define({
             itemToAdd:null,
             items:{
                 type:'ObservableArray'
@@ -22,7 +22,7 @@ require(["exampleWidget"], function (photon) {
                 this.items().remove(item);
             },
             createNew:function () {
-                this.itemToAdd(new photon.Person());
+                this.itemToAdd(new example.Person());
             },
             discardChanges:function () {
                 this.itemToAdd(null);
@@ -30,13 +30,13 @@ require(["exampleWidget"], function (photon) {
         });
     }
 
-    function PageScript(photon) {
+    function PageScript(photon, example) {
         $(function () {
-            photon.binding.applyBindings(new photon.RootViewModel());
+            photon.binding.applyBindings(new example.PersonCollection());
         });
     }
 
-    photon.examples.initialize([
+    exampleWidget.add([
         {
             id:"example1",
             javaScript:[
@@ -45,8 +45,8 @@ require(["exampleWidget"], function (photon) {
                     code:PersonScript
                 },
                 {
-                    title:'RootViewModel.js',
-                    code:RootViewModelScript
+                    title:'PersonCollection.js',
+                    code:RootModelScript
                 },
                 {
                     title:'Page.js',

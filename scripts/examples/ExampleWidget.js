@@ -1,24 +1,27 @@
-define(['photon'], function(photon) {
-    /** @namespace photon.examples */
-    photon.provide("photon.examples");
+define(['photon'], function (photon) {
+    var example = {
+        models : {
+        },
+        presenters : {
+        },
+        views: {
+            properties : {
+            }
+        }
+    };
 
-    /** @namespace photon.examples.viewModels */
-    photon.provide("photon.examples.viewModels", {
-
-    });
-
-    photon.examples.viewModels.RootViewModel = photon.observable.model.define({
+    example.models.Root = photon.observable.model.define({
         examples:{
             type:'ObservableArray'
         }
     });
 
-    photon.examples.viewModels.ExampleViewModel = photon.observable.model.define({
+    example.models.Example = photon.observable.model.define({
         id:null,
-        pages:{
+        codeSnippets:{
             type:'ObservableArray'
         },
-        activePage:null,
+        activeCodeSnippet:null,
         data:null,
         jsFiddle:{
             initializer:function () {
@@ -31,13 +34,42 @@ define(['photon'], function(photon) {
         }
     });
 
-    photon.examples.viewModels.PageViewModel = photon.observable.model.define({
+    example.models.CodeSnippet = photon.observable.model.define({
         id:null,
         title:null,
-        style:'code',
         template:null,
         data:null
     });
+
+    var highlightProperty = example.views.properties.HighlightedTextProperty = function() {
+        highlightProperty.base(this);
+    };
+
+    photon.defineType(highlightProperty, photon.binding.data.Property,
+        {
+            getValue:function (binding) {
+                return binding.rawValue_;
+            },
+            setValue:function (binding) {
+                var oldValue = binding.rawValue_, newValue = binding.getSourceValue();
+                if (oldValue !== newValue) {
+                    // update raw value
+                    binding.rawValue_ = newValue;
+
+                    // replace target content
+                    var $target = $(binding.getTarget());
+                    $target.empty()
+                        .text(newValue)
+                        .addClass(binding.getExpression().getPropertyName());
+
+                    // highlight
+                    hljs.highlightBlock(binding.getTarget());
+                }
+            }
+        }
+    );
+
+    photon.binding.data.properties["highlight"] = new highlightProperty();
 
     function formatScript(script) {
         if (photon.isFunction(script)) {
@@ -75,15 +107,15 @@ define(['photon'], function(photon) {
     }
 
     photon.defineType(
-        photon.examples.ExampleViewModelBuilder = function () {
+        example.presenters.ExampleBuilder = function () {
         },
         /**
-         * @lends photon.examples.ExampleViewModelBuilder.prototype
+         * @lends example.presenters.ExampleBuilder.prototype
          */
         {
             build:function (configuration) {
                 var buildInfo = {},
-                    model = new photon.examples.viewModels.ExampleViewModel({
+                    model = new example.models.Example({
                         id:configuration.id
                     });
 
@@ -140,17 +172,17 @@ define(['photon'], function(photon) {
                 photon.array.forEach(option, fn, this);
             },
             configureScriptTab_:function (model, configuration) {
-                var mockPhoton = this.mockPhoton_(model);
-                this.forEachConfigurationOption(configuration.javaScript, function(option) {
-                    var exampleFn = photon.isFunction(option)  ? option : option.code;
+                var mockPhoton = this.mockPhoton_(model), exampleNs = {};
+                this.forEachConfigurationOption(configuration.javaScript, function (option) {
+                    var exampleFn = photon.isFunction(option) ? option : option.code;
                     if (!photon.isFunction(exampleFn)) {
                         throw new Error(photon.string.format('Unable to find global example startup method \'{0}\'.', model.id()));
                     }
 
-                    exampleFn(mockPhoton);
+                    exampleFn(mockPhoton, exampleNs);
 
                     var script = formatScript(exampleFn);
-                    model.pages().push(new photon.examples.viewModels.PageViewModel({
+                    model.codeSnippets().push(new example.models.CodeSnippet({
                         id:"javascript",
                         title:option.title || 'JavaScript',
                         template:'exampleTemplates.javascript',
@@ -161,7 +193,7 @@ define(['photon'], function(photon) {
             },
             configureHtmlTab_:function (model, $example, buildInfo) {
                 var html = style_html(decodeXml(buildInfo.html));
-                model.pages().push(new photon.examples.viewModels.PageViewModel({
+                model.codeSnippets().push(new example.models.CodeSnippet({
                     id:"html",
                     title:"Html",
                     template:'exampleTemplates.html',
@@ -185,7 +217,7 @@ define(['photon'], function(photon) {
                         return photon.string.trim(line) != '';
                     }).join("\n");
 
-                    model.pages().push(new photon.examples.viewModels.PageViewModel({
+                    model.codeSnippets().push(new example.models.CodeSnippet({
                         id:"css",
                         title:"Css",
                         template:'exampleTemplates.css',
@@ -217,48 +249,40 @@ define(['photon'], function(photon) {
             }
         });
 
-    var rootViewModel = new photon.examples.viewModels.RootViewModel();
+    var rootModel = new example.models.Root();
 
-    photon.examples.add = function(configuration) {
-        var exampleBuilder = new photon.examples.ExampleViewModelBuilder();
+    example.add = function (configuration) {
+        var exampleBuilder = new example.presenters.ExampleBuilder();
 
         configuration = photon.isArray(configuration) ? configuration : [configuration];
         photon.array.forEach(configuration, function (item) {
             var exampleViewModel = exampleBuilder.build(item);
             if (exampleViewModel) {
-                rootViewModel.examples().push(exampleViewModel);
-                if (exampleViewModel.pages().length()) {
-                    exampleViewModel.activePage(exampleViewModel.pages().getItem(0));
+                rootModel.examples().push(exampleViewModel);
+                if (exampleViewModel.codeSnippets().length()) {
+                    exampleViewModel.activeCodeSnippet(exampleViewModel.codeSnippets().getItem(0));
                 }
             }
-
-            //photon.binding.applyBindings(exampleViewModel, $('#' + item.html)[0]);
         });
-    }
+    };
 
-    photon.examples.initialize = function (configuration) {
-        $(function () {
-            photon.templating.getCache().addResourceUrl("Example.Templates.html", function () {
-                photon.examples.add(configuration);
+    $(function () {
+        photon.templating.getCache().addResourceUrl("Example.Templates.html", function () {
+            require(["scripts/Examples"], function (example) {
 
-                require(["scripts/Examples", "photon"], function (example, photon) {
-                    $("body").prepend(
-                        photon.templating.getCache().getHtml("exampleTemplates.navigation"));
-                    photon.binding.applyBindings(example, $("#navigation")[0]);
+                $("body").prepend(
+                    photon.templating.getCache().getHtml("exampleTemplates.navigation"));
+                photon.binding.applyBindings(example, $("#navigation")[0]);
 
-                    $("body").append(
-                        photon.templating.getCache().getHtml("exampleTemplates.examples"));
-                    photon.binding.applyBindings(rootViewModel, $("#examples")[0]);
+                $("body").append(
+                    photon.templating.getCache().getHtml("exampleTemplates.examples"));
+                photon.binding.applyBindings(rootModel, $("#examples")[0]);
 
-                    setTimeout(function () {
-                        hljs.initHighlighting();
-                        $("body").show();
-                    }, 0);
-                });
+                $("body").show();
             });
         });
-    }
+    });
 
-    return photon;
+    return example;
 });
 

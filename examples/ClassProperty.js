@@ -1,7 +1,7 @@
-require(["exampleWidget"], function (photon) {
-    function modelWithDerivedPropertyScript(photon) {
-        photon.ExampleViewModel = photon.observable.model.define({
-            amount:{
+require(["exampleWidget"], function (exampleWidget) {
+    function modelWithDerivedPropertyScript(photon, example) {
+        example.Account = photon.observable.model.define({
+            balance:{
                 initialValue:0,
                 afterChange:function (oldValue, newValue) {
                     this.set("isInTheRed", newValue < 0);
@@ -14,24 +14,24 @@ require(["exampleWidget"], function (photon) {
         });
     }
 
-    function modelBasicScript(photon) {
-        photon.ExampleViewModel = photon.observable.model.define({
-            amount:0
+    function modelBasicScript(photon, example) {
+        example.Account = photon.observable.model.define({
+            balance:0
         });
     }
 
-    function pageScript(photon) {
+    function pageScript(photon, example) {
         $(function () {
-            photon.binding.applyBindings(new photon.ExampleViewModel());
+            photon.binding.applyBindings(new example.Account());
         });
     }
 
-    photon.examples.initialize([
+    exampleWidget.add([
         {
             id:"example1",
             javaScript:[
                 {
-                    title:'Model.js',
+                    title:'Account.js',
                     code:modelWithDerivedPropertyScript
                 },
                 {
@@ -47,7 +47,7 @@ require(["exampleWidget"], function (photon) {
             id:"example2",
             javaScript:[
                 {
-                    title:'Model.js',
+                    title:'Account.js',
                     code:modelBasicScript
                 },
                 {
