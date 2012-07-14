@@ -1,75 +1,98 @@
 define(['photon'], function (photon) {
     var example = {
-        models : {
+        models:{
         },
-        presenters : {
+        presenters:{
         },
-        views: {
-            properties : {
-            }
+        views:{
+        },
+        scripts:{
         }
     };
 
-    example.models.Root = photon.observable.model.define({
-        examples:{
-            type:'ObservableArray'
-        }
-    });
-
-    example.models.Example = photon.observable.model.define({
-        id:null,
-        codeSnippets:{
-            type:'ObservableArray'
-        },
-        activeCodeSnippet:null,
-        data:null,
-        jsFiddle:{
-            initializer:function () {
-                return {
-                    css:'',
-                    html:'',
-                    javascript:''
-                }
+    function modelsRootScript(photon, example) {
+        example.models.Root = photon.observable.model.define({
+            examples:{
+                type:'ObservableArray'
             }
-        }
-    });
+        });
+    }
 
-    example.models.CodeSnippet = photon.observable.model.define({
-        id:null,
-        title:null,
-        template:null,
-        data:null
-    });
-
-    var highlightProperty = example.views.properties.HighlightedTextProperty = function() {
-        highlightProperty.base(this);
-    };
-
-    photon.defineType(highlightProperty, photon.binding.data.Property,
-        {
-            getValue:function (binding) {
-                return binding.rawValue_;
+    function modelsExampleScript(photon, example) {
+        example.models.Example = photon.observable.model.define({
+            id:null,
+            codeSnippets:{
+                type:'ObservableArray'
             },
-            setValue:function (binding) {
-                var oldValue = binding.rawValue_, newValue = binding.getSourceValue();
-                if (oldValue !== newValue) {
-                    // update raw value
-                    binding.rawValue_ = newValue;
-
-                    // replace target content
-                    var $target = $(binding.getTarget());
-                    $target.empty()
-                        .text(newValue)
-                        .addClass(binding.getExpression().getPropertyName());
-
-                    // highlight
-                    hljs.highlightBlock(binding.getTarget());
+            activeCodeSnippet:null,
+            data:null,
+            jsFiddle:{
+                initializer:function () {
+                    return {
+                        css:'',
+                        html:'',
+                        javascript:'example = {};\n\n'
+                    }
                 }
             }
-        }
-    );
+        });
+    }
 
-    photon.binding.data.properties["highlight"] = new highlightProperty();
+    function modelsCodeSnippetScript(photon, example) {
+        example.models.CodeSnippet = photon.observable.model.define({
+            id:null,
+            title:null,
+            template:null,
+            data:null
+        });
+    }
+
+    function runScripts(scripts) {
+        photon.array.forEach(scripts, function(script) {
+            script(photon, example);
+        });
+    }
+
+    function viewsHighlightPropertyScript(photon, example) {
+        var highlightProperty = example.views.HighlightedTextProperty = function () {
+            highlightProperty.base(this);
+        };
+
+        photon.defineType(highlightProperty, photon.binding.data.Property,
+            {
+                getValue:function (binding) {
+                    return binding.rawValue_;
+                },
+                setValue:function (binding) {
+                    var oldValue = binding.rawValue_, newValue = binding.getSourceValue();
+                    if (oldValue !== newValue) {
+                        // update raw value
+                        binding.rawValue_ = newValue;
+
+                        // replace target content
+                        var $target = $(binding.getTarget());
+                        $target.empty()
+                            .text(newValue);
+                        $target.addClass(binding.getExpression().getPropertyName());
+
+                        // highlight
+                        hljs.highlightBlock(binding.getTarget());
+                    }
+                }
+            }
+        );
+
+        photon.binding.data.properties["highlight"] = new highlightProperty();
+    }
+
+    runScripts([
+        modelsRootScript,
+        modelsExampleScript,
+        modelsCodeSnippetScript,
+        viewsHighlightPropertyScript
+    ]);
+
+
 
     function formatScript(script) {
         if (photon.isFunction(script)) {
@@ -85,11 +108,13 @@ define(['photon'], function (photon) {
                     return photon.string.trim(line);
                 });
 
-            script = scriptLines.join("\n");
+            script = scriptLines.join("\r\n");
         }
 
         // get script
-        return js_beautify(script);
+        return js_beautify(script, {
+            preserve_newlines : true
+        });
     }
 
     var escapedFromXmlMap = {
@@ -172,7 +197,18 @@ define(['photon'], function (photon) {
                 photon.array.forEach(option, fn, this);
             },
             configureScriptTab_:function (model, configuration) {
-                var mockPhoton = this.mockPhoton_(model), exampleNs = {};
+                var mockPhoton = this.mockPhoton_(model), exampleNs =  {
+                    models:{
+                    },
+                    presenters:{
+                    },
+                    views:{
+                        properties:{
+                        }
+                    },
+                    scripts:{
+                    }
+                };
                 this.forEachConfigurationOption(configuration.javaScript, function (option) {
                     var exampleFn = photon.isFunction(option) ? option : option.code;
                     if (!photon.isFunction(exampleFn)) {
@@ -188,6 +224,7 @@ define(['photon'], function (photon) {
                         template:'exampleTemplates.javascript',
                         data:script
                     }));
+
                     model.jsFiddle().javascript += script + "\n\n";
                 });
             },
@@ -250,6 +287,30 @@ define(['photon'], function (photon) {
         });
 
     var rootModel = new example.models.Root();
+    example.addSelf = function () {
+        example.add({
+            id:"example",
+            javaScript:[
+                {
+                    title:'Root.js',
+                    code:modelsRootScript
+                },
+                {
+                    title:'Example.js',
+                    code:modelsExampleScript
+                },
+                {
+                    title:'CodeSnippet.js',
+                    code:modelsCodeSnippetScript
+                },
+                {
+                    title:'HighlightProperty.js',
+                    code: viewsHighlightPropertyScript
+                }
+            ],
+            html:'example'
+        });
+    };
 
     example.add = function (configuration) {
         var exampleBuilder = new example.presenters.ExampleBuilder();
@@ -284,5 +345,6 @@ define(['photon'], function (photon) {
     });
 
     return example;
-});
+})
+;
 
