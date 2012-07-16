@@ -1,0 +1,14 @@
+<script type="text/html" id="pageTemplates">
+    <!-- Template: navigationBar -->
+    <div class="navbar">
+        <div class="navbar-inner">
+            <div class="container">
+                <ul class="nav" data-flow="each:items">
+                    <li data-bind="class-active:$dataContext('navigationBar').activeItem() == $data">
+                        <a data-bind="{attribute-href:bootstrapper.baseUrl + href}{text:title}"></a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</script>

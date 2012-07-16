@@ -1,0 +1,20 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title>{{ page.title }}</title>
+    <link rel="stylesheet" href="{{ page.baseUrl }}stylesheets/site.css" type="text/css">
+    <script src="{{ page.baseUrl }}/libs/require/require.js" type="text/javascript"></script>
+    <script src="{{ page.baseUrl }}/scripts/bootstrapper.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        bootstrapper.configure(function(config) {
+            config.baseUrl = '{{ page.baseUrl }}';
+        });
+    </script>
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <script src="{{ page.script }} "></script>
+    {{ page.style }}
+</head>
+<body style="display: none;" >

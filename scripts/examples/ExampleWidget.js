@@ -336,11 +336,11 @@ define(['photon'], function (photon) {
         photon.templating.getCache().addResourceUrl("Example.Templates.html", function () {
             require(["scripts/Examples"], function (example) {
 
-                $("body").prepend(
+                $("#exampleWrapper").prepend(
                     photon.templating.getCache().getHtml("exampleTemplates.navigation"));
                 photon.binding.applyBindings(example, $("#navigation")[0]);
 
-                $("body").append(
+                $("#exampleWrapper").append(
                     photon.templating.getCache().getHtml("exampleTemplates.examples"));
                 photon.binding.applyBindings(rootModel, $("#examples")[0]);
 

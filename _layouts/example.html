@@ -1,9 +1,11 @@
-{% include example-head-begin.html %}
-{% include example-head-end.html %}
-<div class="exampleHeader">
-    <h2 class="example">{{ page.title }}</h2>
+---
+layout: page
+baseUrl: ../
+---
+<div id="exampleWrapper">
+    <div class="exampleHeader">
+        <h2 class="example">{{ page.title }}</h2>
+    </div>
 </div>
 {{ content }}
-</body>
-</html>
 

@@ -6,7 +6,7 @@ define([], function () {
         },
         {
             name:'Class Property',
-            url:'ClassProperty.html'
+            url:'ClassBinding.html'
         } ,
         {
             name : 'Select Properties',
