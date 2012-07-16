@@ -22,7 +22,7 @@ require(["photon", "jquery"], function (photon, $) {
             items:[
                 {
                     title:'Home',
-                    href:'main.html'
+                    href:'Main.html'
                 },
                 {
                     title:'Live Examples',
