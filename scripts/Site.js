@@ -1,6 +1,6 @@
 require(["photon", "jquery"], function (photon, $) {
     var cache = photon.templating.getCache();
-    cache.addResourceUrl([bootstrapper.baseUrl + "Templates/PageTemplates.html"], function () {
+    cache.addResourceUrl([bootstrapper.baseUrl + "templates/page-templates.html"], function () {
         var NavigationBar = function (initialValues) {
             NavigationBar.base(this, initialValues);
 
@@ -22,7 +22,7 @@ require(["photon", "jquery"], function (photon, $) {
             items:[
                 {
                     title:'Home',
-                    href:'Main.html'
+                    href:'main.html'
                 },
                 {
                     title:'Live Examples',
