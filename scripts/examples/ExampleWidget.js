@@ -333,7 +333,7 @@ define(['photon'], function (photon) {
     };
 
     $(function () {
-        photon.templating.getCache().addResourceUrl("Example.Templates.html", function () {
+        photon.templating.getCache().addResourceUrl(bootstrapper.baseUrl + "templates/example-templates.html", function () {
             require(["scripts/Examples"], function (example) {
 
                 $("#exampleWrapper").prepend(
