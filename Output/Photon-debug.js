@@ -3919,6 +3919,15 @@
 	        }
 	        :
 	        function (element, bindingTypes, callback) {
+	            if (element.nodeType === 1) {
+	                for (var j = 0, nj = bindingTypes.length; j < nj; j++) {
+	                    var bindingType = bindingTypes[j];
+	                    var bindingValue = element.getAttribute(bindingType);
+	                    if (bindingValue) {
+	                        callback(element, bindingType, bindingValue);
+	                    }
+	                }
+	            }
 	            var elements = element.getElementsByTagName("*");
 	            for (var i = 0, ni = elements.length; i < ni; i++) {
 	                var currentElement = elements[i];
