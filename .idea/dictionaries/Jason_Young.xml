@@ -2,7 +2,9 @@
   <dictionary name="Jason Young">
     <words>
       <w>&amp;amp</w>
+      <w>deps</w>
       <w>endif</w>
+      <w>nullable</w>
     </words>
   </dictionary>
 </component>

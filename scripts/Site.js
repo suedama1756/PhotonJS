@@ -9,7 +9,7 @@ require(["photon", "jquery"], function (photon, $) {
             });
 
             this.activeItem(item);
-        }
+        };
 
         photon.observable.model.define(NavigationBar, {
             items:{
