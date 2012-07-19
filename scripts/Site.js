@@ -37,22 +37,22 @@ require(["photon", "jquery", "bootstrapDropDown"], function (photon, $) {
                     children:[
                         {
                             id:'basicBinding',
-                            title:'Basic Binding',
-                            href:'examples/SimpleBinding.html'
-                        },
-                        {   id:'selectBinding',
-                            title:'Select Properties',
-                            href:'examples/SelectProperties.html'
-                        },
-                        {
-                            id:'cssClassBinding',
-                            title:'CSS Class Binding',
-                            href:'examples/ClassBinding.html'
+                            title:'The Basics',
+                            href:'examples/TheBasics.html'
                         },
                         {
                             id:'flowBinding',
-                            title:'Flow Binding',
-                            href:'examples/FlowBinding.html'
+                            title:'Flow Control',
+                            href:'examples/FlowControl.html'
+                        },
+                        {   id:'selectBinding',
+                            title:'Select Binding',
+                            href:'examples/SelectBinding.html'
+                        },
+                        {
+                            id:'cssClassBinding',
+                            title:'Class Binding',
+                            href:'examples/ClassBinding.html'
                         }
                     ]
                 }
