@@ -4,11 +4,17 @@ require(["photon", "jquery", "bootstrapDropDown"], function (photon, $) {
         var NavigationBar = function (initialValues) {
             NavigationBar.base(this, initialValues);
 
-//            var item = photon.array.find(this.items().unwrap(), function (item) {
-//                return location.pathname.toLowerCase().indexOf(item.href.toLowerCase()) !== -1;
-//            });
-//
-//            this.activeItem(item);
+            function findItem(items, path) {
+                return photon.array.find(items, function (item) {
+                    if (item.children) {
+                        return findItem(item.children, path) != null;
+                    }
+                    return path.toLowerCase().indexOf(item.href.toLowerCase()) !== -1;
+                });
+            }
+
+            var item = findItem(this.items().unwrap(), location.pathname);
+            this.activeItem(item);
         };
 
         photon.observable.model.define(NavigationBar, {
