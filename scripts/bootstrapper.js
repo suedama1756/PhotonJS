@@ -13,6 +13,9 @@ bootstrapper = {
             shim:{
                 'exampleWidget':{
                     deps:['jquery', 'photon', 'highlight', 'beautifyCss', 'beautifyHtml', 'beautifyJavaScript']
+                },
+                'bootstrapDropDown' : {
+                    deps:['jquery']
                 }
             },
             paths:this.getPaths()
@@ -40,6 +43,9 @@ bootstrapper = {
             ],
             'exampleWidget':[
                 'scripts/examples/ExampleWidget'
+            ],
+            'bootstrapDropDown' : [
+                'libs/bootstrap/bootstrap-dropdown'
             ]
         }
     }

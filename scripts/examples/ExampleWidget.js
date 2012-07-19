@@ -334,18 +334,18 @@ define(['photon'], function (photon) {
 
     $(function () {
         photon.templating.getCache().addResourceUrl(bootstrapper.baseUrl + "templates/example-templates.html", function () {
-            require(["scripts/Examples"], function (example) {
+            //require(["scripts/Examples"], function (example) {
 
-                $("#exampleWrapper").prepend(
-                    photon.templating.getCache().getHtml("exampleTemplates.navigation"));
-                photon.binding.applyBindings(example, $("#navigation")[0]);
+//                $("#exampleWrapper").prepend(
+//                    photon.templating.getCache().getHtml("exampleTemplates.navigation"));
+//                photon.binding.applyBindings(example, $("#navigation")[0]);
 
                 $("#exampleWrapper").append(
                     photon.templating.getCache().getHtml("exampleTemplates.examples"));
                 photon.binding.applyBindings(rootModel, $("#examples")[0]);
 
                 $("body").show();
-            });
+            //});
         });
     });
 
