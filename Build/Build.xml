@@ -5,7 +5,7 @@
 
         <exec command="${MSBuild} ${MSBuildProject}" logoutput="true"/>
 
-        <copy todir="..\..\Photon.Web.Site\Photon\scripts" overwrite="true" >
+        <copy todir="..\..\Site\scripts" overwrite="true" >
             <fileset dir="..\Output">
                 <include name="*.*" />
             </fileset>
@@ -19,7 +19,7 @@
         <exec command="${MSBuild} ${MSBuildProject} /p:IncludeSlickGrid=true /p:IncludeJQueryUI=true /p:IncludeValidation=true"
               logoutput="true"/>
 
-        <copy todir="..\..\Photon.Web.Site\Photon\scripts" overwrite="true" >
+        <copy todir="..\..\Site\scripts" overwrite="true" >
             <fileset dir="..\Output">
                 <include name="*.*" />
             </fileset>
