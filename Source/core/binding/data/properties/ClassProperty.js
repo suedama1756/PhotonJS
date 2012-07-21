@@ -10,18 +10,38 @@ photon.defineType(
             return photon.binding.data.DataBindingMode.OneWay;
         },
         getValue:function (binding) {
-            return $(binding.getTarget()).hasClass(
-                binding.getExpression().getPropertyName());
+            var classNameOrIndex = binding.getExpression().getPropertyName(),
+                classIndex = Number(classNameOrIndex);
+            if (isNaN(classIndex)) {
+                return $(binding.getTarget()).hasClass(
+                    binding.getExpression().getPropertyName());
+            } else {
+                return binding.cssClasses_ && binding.cssClasses_[classIndex];
+            }
         },
         setValue:function (binding) {
-            var sourceValue = binding.getSourceValue();
+            var sourceValue = binding.getSourceValue(), className = binding.getExpression().getPropertyName(),
+                $target = $(binding.getTarget()),
+                index = Number(className);
 
-            var className = binding.getExpression().getPropertyName();
-            if (sourceValue) {
-                $(binding.getTarget()).addClass(className);
-            } else
-            {
-                $(binding.getTarget()).removeClass(className);
+            if (isNaN(index)) {
+                if (sourceValue) {
+                    $target.addClass(className);
+                } else {
+                    $target.removeClass(className);
+                }
+            } else {
+                binding.cssClasses_ = binding.cssClasses_ || [];
+                var oldValue = binding.cssClasses_[index];
+                if (oldValue != sourceValue) {
+                    if (oldValue) {
+                        $target.removeClass(oldValue);
+                    }
+                    binding.cssClasses_[index] = className;
+                    if (sourceValue) {
+                        $target.addClass(sourceValue);
+                    }
+                }
             }
         }
     }
