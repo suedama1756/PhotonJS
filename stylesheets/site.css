@@ -37,6 +37,13 @@ div.sample {
     text-align: center
 }
 
+.border {
+    background-color: #EEE;
+    border-radius: 6px;
+    webkit-border-radius: 6px;
+padding: 20px;
+}
+
 div.exampleContainer {
     text-align: left;
     margin-top: 20px;
