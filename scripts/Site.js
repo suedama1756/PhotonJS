@@ -29,11 +29,13 @@ require(["photon", "jquery", "bootstrapDropDown"], function (photon, $) {
                 {
                     id:"home",
                     title:'Home',
-                    href:'main.html'
+                    href:'main.html',
+                    icon:'icon-home'
                 },
                 {
                     id:"liveExamples",
                     title:'Live Examples',
+                    icon:'icon-cog',
                     children:[
                         {
                             id:'basicBinding',

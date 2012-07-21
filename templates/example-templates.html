@@ -9,9 +9,8 @@
     </div>
 
     <!-- Template: examples -->
-    <div data-flow="each:examples()" id="examples">
-        <div data-bind="data-template:{name:'exampleTemplates.container', data:$data}">
-        </div>
+    <div id="examples" data-flow="each:examples()"
+         data-bind="data-template:{name:'exampleTemplates.container', each:examples()}">
     </div>
 
     <!-- Template: html -->
@@ -24,14 +23,13 @@
     <pre><code data-bind="highlight-css:$data"></code></pre>
 
     <!-- Template: container -->
-    <div class="sample">
-        <div class="row" data-bind="data-template:{
-                name:'exampleTemplates.' + id() + '-description'
-            }">
-        </div>
-        <div class="exampleLayoutCol1">
+    <span class="span12" data-bind="data-template:{ name:'exampleTemplates.' + id() + '-description' }"></span>
+
+
+        <div class="span8" style="padding-top:20px;padding-bottom:20px">
             <ul class="nav nav-tabs" data-flow="each:codeSnippets()">
-                <li data-bind="{class-active:$dataContext(1).activeCodeSnippet() === $data}" data-action="$dataContext(1).activeCodeSnippet($data), preventDefault:true">
+                <li data-bind="{class-active:$dataContext(1).activeCodeSnippet() === $data}"
+                    data-action="$dataContext(1).activeCodeSnippet($data), preventDefault:true">
                     <a data-bind="
                         {attribute-href:'#' + id()}
                         {text:title}">
@@ -49,18 +47,20 @@
                 </div>
             </div>
         </div>
-        <div class="exampleLayoutCol2">
-            <form class="jsfiddle" method="post" action="http://fiddle.jshell.net/api/post/library/pure/"
-                  target="_blank">
-                <input type="hidden" name="title" value="Photon Example: ">
-                <input type="hidden" name="css" data-bind="value:jsFiddle().css">
-                <input type="hidden" name="html" data-bind="value:jsFiddle().html">
-                <input type="hidden" name="js" data-bind="value:jsFiddle().javascript">
-                <button class="btn btn-primary">
-                    <i class="icon-white icon-pencil"></i>jsFiddle
-                </button>
-            </form>
-            <div class="exampleContainer">
+        <div class="span4" style="padding-top:20px;padding-bottom:20px">
+            <div style="text-align: right;">
+                <form class="jsfiddle" method="post" action="http://fiddle.jshell.net/api/post/library/pure/"
+                      target="_blank">
+                    <input type="hidden" name="title" value="Photon Example: ">
+                    <input type="hidden" name="css" data-bind="value:jsFiddle().css">
+                    <input type="hidden" name="html" data-bind="value:jsFiddle().html">
+                    <input type="hidden" name="js" data-bind="value:jsFiddle().javascript">
+                    <button class="btn btn-primary">
+                        <i class="icon-white icon-pencil"></i>jsFiddle
+                    </button>
+                </form>
+            </div>
+            <div class="groupbox-small groupbox-border">
                 <div data-bind="
                     {attribute-id:id()}
                     {data-template:
@@ -72,5 +72,5 @@
                 </div>
             </div>
         </div>
-    </div>
+
 </script>

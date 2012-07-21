@@ -2,9 +2,11 @@
   <dictionary name="Jason Young">
     <words>
       <w>&amp;amp</w>
+      <w>bootstrapper</w>
       <w>deps</w>
       <w>dropdown</w>
       <w>endif</w>
+      <w>groupbox</w>
       <w>nullable</w>
     </words>
   </dictionary>

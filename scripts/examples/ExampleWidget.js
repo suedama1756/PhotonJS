@@ -334,7 +334,7 @@ define(['photon'], function (photon) {
 
     $(function () {
         photon.templating.getCache().addResourceUrl(bootstrapper.baseUrl + "templates/example-templates.html", function () {
-            $("#exampleWrapper").append(
+            $("#exampleContainer").append(
                 photon.templating.getCache().getHtml("exampleTemplates.examples"));
             photon.binding.applyBindings(rootModel, $("#examples")[0]);
 

@@ -1,30 +1,32 @@
 <script type="text/html" id="pageTemplates">
+    <!-- Template: navigationItem -->
+    <a data-bind="{attribute-href:bootstrapper.baseUrl + href}">
+        <i class="icon-white" data-bind="class-0:$data.icon"></i>
+        <span data-bind="{text:title}" />
+    </a>
     <!-- Template: navigationBar -->
     <div class="navbar navbar-fixed-top">
         <div class="navbar-inner">
             <div class="container">
                 <ul class="nav" data-flow="each:items" >
                     <p:Flow data-flow="if:$data.children, applyTo:NextSibling">
+                        <img data-bind="src:$data.image">
                         <li class="dropdown" data-bind="{id:id}{class-active:$dataContext('navigationBar').activeItem() == $data}">
-                            <a class="dropdown-toggle" data-toggle="dropdown" data-bind="{text:title}{href:'#' + id}">
+                            <a class="dropdown-toggle" data-toggle="dropdown" data-bind="{href:'#' + id}">
+                                <i class="icon-white" data-bind="class-0:$data.icon"></i>
+                                <span data-bind="{text:title}" />
                                 <b class="caret"></b>
                             </a>
                             <ul class="dropdown-menu" data-flow="each:children">
-                                <li data-bind="class-active:$dataContext('navigationBar').activeItem() == $data">
-                                    <a data-bind="{attribute-href:bootstrapper.baseUrl + href}{text:title}"></a>
+                                <li data-bind="{class-active:$dataContext('navigationBar').activeItem() == $data}{data-template:{name:'pageTemplates.navigationItem', data:$data}}" >
                                 </li>
                             </ul>
                         </li>
                     </p:Flow>
                     <p:Flow data-flow="if:!$data.children, applyTo:NextSibling">
-                        <li data-bind="class-active:$dataContext('navigationBar').activeItem() == $data">
-                            <a data-bind="{attribute-href:bootstrapper.baseUrl + href}{text:title}"></a>
-                        </li>
+                        <li data-bind="{class-active:$dataContext('navigationBar').activeItem() == $data}{data-template:{name:'pageTemplates.navigationItem', data:$data}}" ></li>
                     </p:Flow>
                 </ul>
-
-
-
             </div>
         </div>
     </div>
