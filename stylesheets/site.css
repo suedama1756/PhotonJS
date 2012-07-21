@@ -33,6 +33,10 @@ div.sample {
     margin: 3px;
 }
 
+.center {
+    text-align: center
+}
+
 div.exampleContainer {
     text-align: left;
     margin-top: 20px;
