@@ -9,16 +9,19 @@ style: |
     </style>
 script: ClassBinding.js
 ---
-<span id="example1-description">
-    The 'class' type property binding adds or removes a named CSS class from the associated DOM element. <p></p>
-    The binding is in the form {class-&lt;CSSClassName&gt;:&lt;Condition&gt;}.
+<span id="example1-description" >
+    The 'Class' binding provides a way to conditionally add or remove CSS classes.
+    The binding is in the form "<strong>class-&lt;class&gt;:&lt;Condition&gt;</strong>", for example:
+    <strong>"class-red:isInTheRed"</strong>.
 </span>
-<div id="example1">
-    Entering a negative number will turn the text red!<p></p>
-    <input data-bind="{value:balance}{class-red:isInTheRed()}">
-</div>
+
 <div id="example2">
     Entering a negative number will turn the text red!
     <p></p>
     <input data-bind="{value:balance}{class-red:balance() < 0}">
+</div>
+
+<div id="example1">
+    Entering a negative number will turn the text red!<p></p>
+    <input data-bind="{value:balance}{class-red:isInTheRed()}">
 </div>
