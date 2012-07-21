@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/Photon.iml" filepath="$PROJECT_DIR$/.idea/Photon.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/PhotonJS.Site.iml" filepath="$PROJECT_DIR$/.idea/PhotonJS.Site.iml" />
     </modules>
   </component>
 </project>
