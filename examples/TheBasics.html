@@ -3,14 +3,44 @@ layout: example
 title: The Basics
 script: TheBasics.js
 ---
-<div class="example" id="example">
+<span id="example1-description" >
+    Data Binding expression in photon are expressed by default using the HTML5 compliant "data-bind" attribute. For
+    simple bindings the attribute value should be in the form:
+    <span class="expression">&lt;Target Property&gt;:&lt;Source Expression&gt;</span> (other options will be discussed below).
+</span>
+<div class="example" id="example1">
     <label>First name:</label>
-    <input data-bind="{value:firstName}">
-
+    <input data-bind="value:firstName">
     <p></p>
     <label>Last name:</label>
-    <input data-bind="{value:lastName}">
+    <input data-bind="value:lastName">
     <hr>
     <p></p>
-    Hello <span data-bind="{text:firstName() + ' ' + lastName()}"></span>!
+    Hello <span data-bind="text:firstName() + ' ' + lastName()"></span>!
 </div>
+
+<span id="example2-description" >
+    Multiple bindings can be associated with an element by wrapping them in '{}' characters.
+</span>
+<div class="example" id="example2">
+    <label>Value:</label>
+    <input data-bind="{value:value}{maxLength:maxLength}" >
+</div>
+
+<span id="example3-description" >
+    Binding values can be converted using the convertFrom and convertTo options.
+</span>
+<div class="example" id="example3">
+    <label>Is Editable:</label>
+    <input type="checkbox" data-bind="{checked:isReadOnly,
+        convertFrom:!$value, convertTo:!$value}" >
+    <p></p>
+    <span data-bind="{text:'Is ReadOnly:' + isReadOnly()}" ></span>
+</div>
+
+
+<!--Property bindings in photon are expressed in the form-->
+<!--<strong>{[&lt;Provider&gt;-]&lt;Property&gt;:&lt;Expression&gt;}</strong>. For example, the binding-->
+<!--{property-src:myImage} uses the 'property' provider to set the 'src' property on the element to the value returned-->
+<!--by 'myImage'. Because the 'property' binding-->
+<!--</span>-->

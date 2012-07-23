@@ -8,11 +8,38 @@ require(["exampleWidget"], function (exampleWidget) {
                 type:'String'
             }
         });
-    };
+    }
 
     function pageScript(photon, example) {
         $(function () {
             photon.binding.applyBindings(new example.Person());
+        });
+    }
+
+    function multipleBindingModelScript(photon, example) {
+        example.TextValue = photon.observable.model.define({
+            value:{
+                type:'String'
+            },
+            maxLength:10
+        });
+    }
+
+    function multipleBindingPageScript(photon, example) {
+        $(function () {
+            photon.binding.applyBindings(new example.TextValue());
+        });
+    }
+
+    function converterModelScript(photon, example) {
+        example.Model = photon.observable.model.define({
+            isReadOnly:true
+        });
+    }
+
+    function converterPageScript(photon, example) {
+        $(function () {
+            photon.binding.applyBindings(new example.Model());
         });
     }
 
@@ -30,7 +57,37 @@ require(["exampleWidget"], function (exampleWidget) {
                 }
             ],
             css:'',
-            html:'example'
+            html:'example1'
+        },
+        {
+            id:'example2',
+            javaScript:[
+                {
+                    title:'TextValue.js',
+                    code:multipleBindingModelScript
+                },
+                {
+                    title:'Page.js',
+                    code:multipleBindingPageScript
+                }
+            ],
+            css:'',
+            html:'example2'
+        },
+        {
+            id:'example3',
+            javaScript:[
+                {
+                    title:'Model.js',
+                    code:converterModelScript
+                },
+                {
+                    title:'Page.js',
+                    code:converterPageScript
+                }
+            ],
+            css:'',
+            html:'example3'
         }
     ]);
 });
