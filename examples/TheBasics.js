@@ -43,6 +43,15 @@ require(["exampleWidget"], function (exampleWidget) {
         });
     }
 
+    function pojoPageScript(photon, example) {
+        $(function () {
+            photon.binding.applyBindings({
+                message:'Photon Rocks!!!'
+            });
+        });
+    }
+
+
     exampleWidget.add([
         {
             id:'example1',
@@ -88,6 +97,17 @@ require(["exampleWidget"], function (exampleWidget) {
             ],
             css:'',
             html:'example3'
+        },
+        {
+            id:'example4',
+            javaScript:[
+                {
+                    title:'Page.js',
+                    code:pojoPageScript
+                }
+            ],
+            css:'',
+            html:'example4'
         }
     ]);
 });
