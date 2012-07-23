@@ -10,7 +10,6 @@
             <div class="container">
                 <ul class="nav" data-flow="each:items" >
                     <p:Flow data-flow="if:$data.children, applyTo:NextSibling">
-                        <img data-bind="src:$data.image">
                         <li class="dropdown" data-bind="{id:id}{class-active:$dataContext('navigationBar').activeItem() == $data}">
                             <a class="dropdown-toggle" data-toggle="dropdown" data-bind="{href:'#' + id}">
                                 <i class="icon-white" data-bind="class-0:$data.icon"></i>
