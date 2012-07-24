@@ -3,16 +3,16 @@ layout: example
 title: The Basics
 script: TheBasics.js
 ---
-<span id="examplePojo-description" >
+<span id="examplePojo-description">
     Data Binding expressions in photon are expressed (by default) using the HTML5 compliant "data-bind" attribute. A
     valid binding expression must specify a target property and source expression in the form:
     <span class="expression">&lt;Target Property&gt;:&lt; Source Expression&gt;</span> (additional options will
     be discussed below).
 </span>
 <div class="example" id="examplePojo">
-    <span data-bind="text:message" />
+    <span data-bind="text:message"/>
 </div>
-<span id="example1-description" >
+<span id="example1-description">
     <h3>Automatic Change Tracking</h3>
     Although Photon supports two way binding to plain ol' JavaScript objects (POJOs), it does not currently support
     automatic updates using POJOs. To take advantage of Photon's automatic change tracking facilities you should
@@ -48,30 +48,30 @@ script: TheBasics.js
     <p></p>
     Hello <span data-bind="text:firstName() + ' ' + lastName()"></span>!
 </div>
-<span id="example2-description" >
+<span id="example2-description">
     <h3>Multiple Bindings</h3>
     Multiple bindings can be associated with an element by wrapping them in '{}' characters.
 </span>
 <div class="example" id="example2">
     <label>Value:</label>
-    <input data-bind="{value:value}{maxLength:maxLength}" >
+    <input data-bind="{value:value}{maxLength:maxLength}">
 </div>
-<span id="example3-description" >
+<span id="example3-description">
      <h3>Converters</h3>
     Source values can be converted using the convertFrom and convertTo options.
 </span>
 <div class="example" id="example3">
     <label>Is Editable:</label>
     <input type="checkbox" data-bind="{checked:isReadOnly,
-        convertFrom:!$value, convertTo:!$value}" >
-    <p></p>
-    <span data-bind="{text:'Is ReadOnly:' + isReadOnly()}" ></span>
-</div>
+        convertFrom:!$value, convertTo:!$value}">
 
-<span id="exampleDataContext-description" >
+    <p></p>
+    <span data-bind="{text:'Is ReadOnly:' + isReadOnly()}"></span>
+</div>
+<span id="exampleDataContext-description">
     <h3>Data Contexts</h3>
-    When working with nested object structures it can sometimes be useful to change the data source used to evaluate
-    expressions. To do this, use the special 'data-context' property.
+    When working with nested object structures it can sometimes be useful to change the current data source being used
+    to evaluate expressions. To do this, use the special 'data-context' property.
 </span>
 <div class="example" id="exampleDataContext">
     <div>
@@ -79,6 +79,7 @@ script: TheBasics.js
         <input data-bind="value:firstName">
         <label>Last name:</label>
         <input data-bind="value:lastName">
+
         <div data-bind="data-context:address()">
             <h2>Address</h2>
             <label>Line1:</label>
@@ -91,6 +92,7 @@ script: TheBasics.js
             <input data-bind="value:county">
             <label>Zip/Post Code:</label>
             <input data-bind="value:postCode">
+
             <p></p>
             Full Address: <span data-bind="text:[
                     line1(),
@@ -100,6 +102,34 @@ script: TheBasics.js
                     postCode()
                 ]
                 .join(', ')"></span>
+        </div>
+    </div>
+</div>
+
+<span id="exampleParentDataContext-description">
+    <h3>Access Parent Data Contexts</h3>
+    Sometimes it can be useful to reference parent data contexts from within a nested scope. This is where the
+    special <span class="expression">$dataContext</span> function comes in. The <span class="expression">$dataContext</span>
+    function accepts a single parameter which is either the index, or the name of the data context you want to access.
+    To give a data context a name specify a value for the <span class="expression">name</span> parameter in the
+    data-context binding.
+</span>
+<div class="example" id="exampleParentDataContext">
+    <div>
+        <label>Root:</label>
+        <input data-bind="value:value">
+        <div data-bind="data-context:next(), name:Level1">
+            <label>Level1:</label>
+            <input data-bind="value:value">
+            <div data-bind="data-context:next(), name:Level2">
+                <label>Level2:</label>
+                <input data-bind="value:value">
+                <p></p>
+                <span data-bind="text:$dataContext(2).value() + '-' +
+                    $dataContext('Level1').value() + '-' +
+                    value()" >
+                </span>
+            </div>
         </div>
     </div>
 </div>

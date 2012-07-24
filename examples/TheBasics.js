@@ -69,6 +69,23 @@ require(["exampleWidget"], function (exampleWidget) {
         });
     }
 
+    function nodeScript(photon, example) {
+        example.Node = photon.observable.model.define({
+            value : '',
+            next : null
+        });
+    }
+
+    function nodePageScript(photon, example) {
+        $(function () {
+            photon.binding.applyBindings(new example.Node({
+                next : new example.Node({
+                    next : new example.Node()
+                })
+            }));
+        });
+    }
+
     exampleWidget.add([
         {
             id:'examplePojo',
@@ -159,6 +176,21 @@ require(["exampleWidget"], function (exampleWidget) {
             ],
             css:'',
             html:'exampleDataContext'
+        },
+        {
+            id:'exampleParentDataContext',
+            javaScript:[
+                {
+                    title:'Node.js',
+                    code:nodeScript
+                },
+                {
+                    title:'Page.js',
+                    code:nodePageScript
+                }
+            ],
+            css:'',
+            html:'exampleParentDataContext'
         }
     ]);
 });
