@@ -1,12 +1,8 @@
 require(["exampleWidget"], function (exampleWidget) {
     function personScript(photon, example) {
         example.Person = photon.observable.model.define({
-            firstName:{
-                type:'String'
-            },
-            lastName:{
-                type:'String'
-            }
+            firstName:'',
+            lastName:''
         });
     }
 
@@ -54,6 +50,17 @@ require(["exampleWidget"], function (exampleWidget) {
 
     exampleWidget.add([
         {
+            id:'examplePojo',
+            javaScript:[
+                {
+                    title:'Page.js',
+                    code:pojoPageScript
+                }
+            ],
+            css:'',
+            html:'examplePojo'
+        },
+        {
             id:'example1',
             javaScript:[
                 {
@@ -67,6 +74,21 @@ require(["exampleWidget"], function (exampleWidget) {
             ],
             css:'',
             html:'example1'
+        },
+        {
+            id:'exampleExpressions',
+            javaScript:[
+                {
+                    title:'Person.js',
+                    code:personScript
+                },
+                {
+                    title:'Page.js',
+                    code:pageScript
+                }
+            ],
+            css:'',
+            html:'exampleExpressions'
         },
         {
             id:'example2',
@@ -97,17 +119,6 @@ require(["exampleWidget"], function (exampleWidget) {
             ],
             css:'',
             html:'example3'
-        },
-        {
-            id:'example4',
-            javaScript:[
-                {
-                    title:'Page.js',
-                    code:pojoPageScript
-                }
-            ],
-            css:'',
-            html:'example4'
         }
     ]);
 });

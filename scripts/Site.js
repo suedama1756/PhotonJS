@@ -55,6 +55,11 @@ require(["photon", "jquery", "bootstrapDropDown"], function (photon, $) {
                             id:'cssClassBinding',
                             title:'Class Binding',
                             href:'examples/ClassBinding.html'
+                        },
+                        {
+                            id:'modelling',
+                            title:'Modelling',
+                            href:'examples/Modelling.html'
                         }
                     ]
                 }

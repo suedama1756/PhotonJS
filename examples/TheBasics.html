@@ -3,12 +3,40 @@ layout: example
 title: The Basics
 script: TheBasics.js
 ---
-<span id="example1-description" >
+<span id="examplePojo-description" >
     Data Binding expression in photon are expressed by default using the HTML5 compliant "data-bind" attribute. For
-    simple bindings the attribute value should be in the form:
-    <span class="expression">&lt;Target Property&gt;:&lt;Source Expression&gt;</span> (other options will be discussed below).
+    simple bindings the attribute value should be in the form: <span class="expression">&lt;Target Property&gt;:&lt;
+    Source Expression&gt;</span> (advanced options will be discussed below).
+</span>
+<div class="example" id="examplePojo">
+    <span data-bind="text:message" />
+</div>
+
+<span id="example1-description" >
+    Although Photon supports two way binding to plain ol' JavaScript objects (POJOs), it does not currently support
+    automatic updates using POJOs. To take advantage of Photon's automatic change tracking facilities you should
+    'inherit' from the 'Model' type (see <a href="Modelling.html">Modelling</a> for more details).
 </span>
 <div class="example" id="example1">
+    <label>First name:</label>
+    <input data-bind="value:firstName">
+    <p></p>
+    <label>Last name:</label>
+    <input data-bind="value:lastName">
+    <hr>
+    <p></p>
+    Hello <span data-bind="text:firstName"></span> <span data-bind="text:lastName"></span>!
+</div>
+
+<span id="exampleExpressions-description">
+    Binding expressions are not limited to simple property accessor expressions, for example the 'Hello' message above could
+    be expressed as <strong>{text:firstName() + ' ' + lastName()}</strong>.<p></p><strong>Note:</strong>  Model properties
+    used within complex expressions must by default be accessed using the function call syntax, e.g. lastName() rather than lastName.
+    This restriction can be overcome on more modern browsers (> IE8) by altering Photon's model generation options
+    (see <a href="Modelling.html">Modelling</a> for more details).
+</span>
+
+<div class="example" id="exampleExpressions">
     <label>First name:</label>
     <input data-bind="value:firstName">
     <p></p>
@@ -28,7 +56,7 @@ script: TheBasics.js
 </div>
 
 <span id="example3-description" >
-    Values can be converted using the convertFrom and convertTo options.
+    Source values can be converted using the convertFrom and convertTo options.
 </span>
 <div class="example" id="example3">
     <label>Is Editable:</label>
@@ -37,19 +65,3 @@ script: TheBasics.js
     <p></p>
     <span data-bind="{text:'Is ReadOnly:' + isReadOnly()}" ></span>
 </div>
-
-
-<span id="example4-description" >
-    Bindings work with plain ol' JavaScript objects. (Note: automatic updates are not currently supported with
-    POJOs but there are plans to support this in the future!!).
-</span>
-<div class="example" id="example4">
-    <span data-bind="text:message" />
-</div>
-
-
-<!--Property bindings in photon are expressed in the form-->
-<!--<strong>{[&lt;Provider&gt;-]&lt;Property&gt;:&lt;Expression&gt;}</strong>. For example, the binding-->
-<!--{property-src:myImage} uses the 'property' provider to set the 'src' property on the element to the value returned-->
-<!--by 'myImage'. Because the 'property' binding-->
-<!--</span>-->
