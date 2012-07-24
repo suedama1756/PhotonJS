@@ -4,23 +4,25 @@ title: The Basics
 script: TheBasics.js
 ---
 <span id="examplePojo-description" >
-    Data Binding expression in photon are expressed by default using the HTML5 compliant "data-bind" attribute. For
-    simple bindings the attribute value should be in the form: <span class="expression">&lt;Target Property&gt;:&lt;
-    Source Expression&gt;</span> (advanced options will be discussed below).
+    Data Binding expressions in photon are expressed (by default) using the HTML5 compliant "data-bind" attribute. A
+    valid binding expression must specify a target property and source expression in the form:
+    <span class="expression">&lt;Target Property&gt;:&lt; Source Expression&gt;</span> (additional options will
+    be discussed below).
 </span>
 <div class="example" id="examplePojo">
     <span data-bind="text:message" />
 </div>
-
 <span id="example1-description" >
+    <h3>Automatic Change Tracking</h3>
     Although Photon supports two way binding to plain ol' JavaScript objects (POJOs), it does not currently support
     automatic updates using POJOs. To take advantage of Photon's automatic change tracking facilities you should
-    'inherit' from the 'Model' type (see <a href="Modelling.html">Modelling</a> for more details).
+    inherit from the 'Model' type as shown in
+    <a data-action="$data.activeCodeSnippet($data.codeSnippets().getItem(1)), preventDefault:true" href="#javascript">Person.js</a>
+    below. (see <a href="Modelling.html">Modelling</a> for more details).
 </span>
 <div class="example" id="example1">
     <label>First name:</label>
     <input data-bind="value:firstName">
-    <p></p>
     <label>Last name:</label>
     <input data-bind="value:lastName">
     <hr>
@@ -29,7 +31,8 @@ script: TheBasics.js
 </div>
 
 <span id="exampleExpressions-description">
-    Binding expressions are not limited to simple property accessor expressions, for example the 'Hello' message above could
+    <h3>Complex Expressions</h3>
+    Bindings are not limited to simple property accessor expressions, for example the 'Hello' message above could
     be expressed as <strong>{text:firstName() + ' ' + lastName()}</strong>.<p></p><strong>Note:</strong>  Model properties
     used within complex expressions must by default be accessed using the function call syntax, e.g. lastName() rather than lastName.
     This restriction can be overcome on more modern browsers (> IE8) by altering Photon's model generation options
@@ -39,23 +42,22 @@ script: TheBasics.js
 <div class="example" id="exampleExpressions">
     <label>First name:</label>
     <input data-bind="value:firstName">
-    <p></p>
     <label>Last name:</label>
     <input data-bind="value:lastName">
     <hr>
     <p></p>
     Hello <span data-bind="text:firstName() + ' ' + lastName()"></span>!
 </div>
-
 <span id="example2-description" >
+    <h3>Multiple Bindings</h3>
     Multiple bindings can be associated with an element by wrapping them in '{}' characters.
 </span>
 <div class="example" id="example2">
     <label>Value:</label>
     <input data-bind="{value:value}{maxLength:maxLength}" >
 </div>
-
 <span id="example3-description" >
+     <h3>Converters</h3>
     Source values can be converted using the convertFrom and convertTo options.
 </span>
 <div class="example" id="example3">
@@ -64,4 +66,41 @@ script: TheBasics.js
         convertFrom:!$value, convertTo:!$value}" >
     <p></p>
     <span data-bind="{text:'Is ReadOnly:' + isReadOnly()}" ></span>
+</div>
+
+<span id="exampleDataContext-description" >
+    <h3>Data Contexts</h3>
+    When working with nested object structures it can sometimes be useful to change the data source used to evaluate
+    expressions. To do this, use the special 'data-context' property.
+</span>
+<div class="example" id="exampleDataContext">
+    <div>
+        <label>First name:</label>
+        <input data-bind="value:firstName">
+        <label>Last name:</label>
+        <input data-bind="value:lastName">
+        <div data-bind="data-context:address()">
+            <h2>Address</h2>
+            <label>Line1:</label>
+            <input data-bind="value:line1">
+            <label>Line2:</label>
+            <input data-bind="value:line2">
+            <label>Town:</label>
+            <input data-bind="value:town">
+            <label>County:</label>
+            <input data-bind="value:county">
+            <label>Zip/Post Code:</label>
+            <input data-bind="value:postCode">
+            <p></p>
+            Full Address: <span data-bind="text:[
+                    line1(),
+                    line2(),
+                    town(),
+                    county(),
+                    postCode()
+                ]
+                .join(', ')
+                .replace(/, (, )+/, '')"></span>
+        </div>
+    </div>
 </div>

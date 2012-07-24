@@ -9,7 +9,7 @@
     </div>
 
     <!-- Template: examples -->
-    <div id="examples" data-flow="each:examples()"
+    <div id="examples"
          data-bind="data-template:{name:'exampleTemplates.container', each:examples()}">
     </div>
 
@@ -23,7 +23,7 @@
     <pre><code data-bind="highlight-css:$data"></code></pre>
 
     <!-- Template: container -->
-    <span class="span12" data-bind="data-template:{ name:'exampleTemplates.' + id() + '-description' }"></span>
+    <span class="span12" data-bind="data-template:{ name:'exampleTemplates.' + id() + '-description', data : $data }"></span>
         <div class="span8" style="padding-top:20px;padding-bottom:20px">
             <ul class="nav nav-tabs" data-flow="each:codeSnippets()">
                 <li data-bind="{class-active:$dataContext(1).activeCodeSnippet() === $data}"
@@ -70,5 +70,4 @@
                 </div>
             </div>
         </div>
-
 </script>

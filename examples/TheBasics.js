@@ -47,6 +47,27 @@ require(["exampleWidget"], function (exampleWidget) {
         });
     }
 
+    function addressScript(photon, example) {
+        example.Address = photon.observable.model.define({
+            line1 : '',
+            line2 : '',
+            town : '',
+            county : '',
+            postCode: ''
+        });
+    };
+
+    function personWithAddressScript(photon, example) {
+        example.Person = photon.observable.model.define({
+            firstName:'',
+            lastName:'',
+            address : {
+                initializer : function() {
+                    return new example.Address();
+                }
+            }
+        });
+    }
 
     exampleWidget.add([
         {
@@ -119,6 +140,25 @@ require(["exampleWidget"], function (exampleWidget) {
             ],
             css:'',
             html:'example3'
+        },
+        {
+            id:'exampleDataContext',
+            javaScript:[
+                {
+                    title:'Address.js',
+                    code:addressScript
+                },
+                {
+                    title:'Person.js',
+                    code:personWithAddressScript
+                },
+                {
+                    title:'Page.js',
+                    code:pageScript
+                }
+            ],
+            css:'',
+            html:'exampleDataContext'
         }
     ]);
 });
