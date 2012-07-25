@@ -43,6 +43,11 @@ require(["photon", "jquery", "bootstrapDropDown"], function (photon, $) {
                             href:'examples/TheBasics.html'
                         },
                         {
+                            id:'modelling',
+                            title:'Modelling',
+                            href:'examples/Modelling.html'
+                        },
+                        {
                             id:'flowBinding',
                             title:'Flow Control',
                             href:'examples/FlowControl.html'
@@ -55,11 +60,6 @@ require(["photon", "jquery", "bootstrapDropDown"], function (photon, $) {
                             id:'cssClassBinding',
                             title:'Class Binding',
                             href:'examples/ClassBinding.html'
-                        },
-                        {
-                            id:'modelling',
-                            title:'Modelling',
-                            href:'examples/Modelling.html'
                         }
                     ]
                 }
