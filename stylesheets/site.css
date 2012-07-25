@@ -57,6 +57,10 @@ div.sample {
     color: #65B042;
 }
 
+.type {
+    color: #3387CC;
+}
+
 input {
     margin-bottom: 3px;
 }

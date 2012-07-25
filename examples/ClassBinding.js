@@ -32,11 +32,13 @@ require(["exampleWidget"], function (exampleWidget) {
             javaScript:[
                 {
                     title:'Account.js',
-                    code:modelWithDerivedPropertyScript
+                    code:modelWithDerivedPropertyScript,
+                    isRunnable:true
                 },
                 {
                     title:'Page.js',
-                    code:pageScript
+                    code:pageScript,
+                    isRunnable:true
                 }
             ],
             css:'exampleStyles',
@@ -48,11 +50,13 @@ require(["exampleWidget"], function (exampleWidget) {
             javaScript:[
                 {
                     title:'Account.js',
-                    code:modelBasicScript
+                    code:modelBasicScript,
+                    isRunnable:true
                 },
                 {
                     title:'Page.js',
-                    code:pageScript
+                    code:pageScript,
+                    isRunnable:true
                 }
             ],
             css:'exampleStyles',

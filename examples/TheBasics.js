@@ -92,7 +92,8 @@ require(["exampleWidget"], function (exampleWidget) {
             javaScript:[
                 {
                     title:'Page.js',
-                    code:pojoPageScript
+                    code:pojoPageScript,
+                    isRunnable:true
                 }
             ],
             css:'',
@@ -103,11 +104,13 @@ require(["exampleWidget"], function (exampleWidget) {
             javaScript:[
                 {
                     title:'Person.js',
-                    code:personScript
+                    code:personScript,
+                    isRunnable:true
                 },
                 {
                     title:'Page.js',
-                    code:pageScript
+                    code:pageScript,
+                    isRunnable:true
                 }
             ],
             css:'',
@@ -118,11 +121,13 @@ require(["exampleWidget"], function (exampleWidget) {
             javaScript:[
                 {
                     title:'Person.js',
-                    code:personScript
+                    code:personScript,
+                    isRunnable:true
                 },
                 {
                     title:'Page.js',
-                    code:pageScript
+                    code:pageScript,
+                    isRunnable:true
                 }
             ],
             css:'',
@@ -133,11 +138,13 @@ require(["exampleWidget"], function (exampleWidget) {
             javaScript:[
                 {
                     title:'TextValue.js',
-                    code:multipleBindingModelScript
+                    code:multipleBindingModelScript,
+                    isRunnable:true
                 },
                 {
                     title:'Page.js',
-                    code:multipleBindingPageScript
+                    code:multipleBindingPageScript,
+                    isRunnable:true
                 }
             ],
             css:'',
@@ -148,11 +155,13 @@ require(["exampleWidget"], function (exampleWidget) {
             javaScript:[
                 {
                     title:'Model.js',
-                    code:converterModelScript
+                    code:converterModelScript,
+                    isRunnable:true
                 },
                 {
                     title:'Page.js',
-                    code:converterPageScript
+                    code:converterPageScript,
+                    isRunnable:true
                 }
             ],
             css:'',
@@ -163,15 +172,18 @@ require(["exampleWidget"], function (exampleWidget) {
             javaScript:[
                 {
                     title:'Address.js',
-                    code:addressScript
+                    code:addressScript,
+                    isRunnable:true
                 },
                 {
                     title:'Person.js',
-                    code:personWithAddressScript
+                    code:personWithAddressScript,
+                    isRunnable:true
                 },
                 {
                     title:'Page.js',
-                    code:pageScript
+                    code:pageScript,
+                    isRunnable:true
                 }
             ],
             css:'',
@@ -182,11 +194,13 @@ require(["exampleWidget"], function (exampleWidget) {
             javaScript:[
                 {
                     title:'Node.js',
-                    code:nodeScript
+                    code:nodeScript,
+                    isRunnable:true
                 },
                 {
                     title:'Page.js',
-                    code:nodePageScript
+                    code:nodePageScript,
+                    isRunnable:true
                 }
             ],
             css:'',

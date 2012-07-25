@@ -3,4 +3,51 @@ layout: example
 title: Modelling
 script: Modelling.js
 ---
-Coming soon!!
+<span id="exampleSimple-description">
+    The <span class="type">Model</span> type is a powerful base class for defining observable objects.
+    <span class="type">Model</span> types can be defined by calling the
+    <span class="type">photon.observable.Model.define</span> function passing in an object
+    describing the members that make up the type. The example below defines a
+    simple <span class="type">Point</span> type with two observable properties, x and y, whose values will be
+    initialized to 0.
+</span>
+<span id="exampleAccessorFunctions-description">
+    <h3>Accessor Functions</h3>
+    By default Photon will generate property accessor functions for the defined properties. By ensuring
+    that properties are manipulating through accessor functions the model can automatically perform
+    common operations, such as change notification, validation, coercion, etc. When using accessor functions
+    a property is read using <span class="expression">property()</span> and written using
+    <span class="expression">property(value)</span>.
+</span>
+<span id="exampleAccessorProperties-description">
+    <h3>Accessor Properties</h3>
+    Modern browsers support the ability to define properties that are automatically mapped to accessor functions
+    (sometimes called getters & setters). To enable this in Photon set <span class="expression">
+    photon.observable.model.defaultPropertyMode</span> to <span class="expression">'property'</span> before
+    defining your types.
+    <p></p>
+    WARNING: Be very sure when turning this feature on that you do not need to support older browsers (< IE9). Be
+    aware that you cannot easily mix the two property styles, so turning the option off/on depending on browser
+    will NOT work.
+</span>
+<span id="exampleOverridingInitialValues-description">
+    <h3>Overriding Initial Values</h3>
+    Initial values can be overridden when creating instances by supplying an
+    <span class="expression">initialValues</span> parameter to the constructor (this feature can be disabled
+    by using a custom constructor, see below for details).
+</span>
+<span id="exampleCoercers1-description">
+    <h3>Coercion</h3>
+    Property coercers provide a mechanism for ensuring a property value always meets our expectations. It can be used
+    to ensure a property value is of a particular type, within a certain range, or is formatted correctly.
+</span>
+<div class="example" id="exampleCoercers1">
+    Try typing in something that's not a number.
+    <p></p>
+    <label>X:</label>
+    <input data-bind="value:x" >
+    <label>Y:</label>
+    <input data-bind="value:y">
+    <hr>
+    <span data-bind="text:$imports.photon.string.format('Point: {0},{1}', x(), y())"></span>
+</div>

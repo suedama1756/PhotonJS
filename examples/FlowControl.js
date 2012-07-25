@@ -42,15 +42,18 @@ require(["exampleWidget"], function (exampleWidget) {
             javaScript:[
                 {
                     title:'Person.js',
-                    code:PersonScript
+                    code:PersonScript,
+                    isRunnable:true
                 },
                 {
                     title:'PersonCollection.js',
-                    code:RootModelScript
+                    code:RootModelScript,
+                    isRunnable:true
                 },
                 {
                     title:'Page.js',
-                    code:PageScript
+                    code:PageScript,
+                    isRunnable:true
                 }
             ],
             html:'example1',

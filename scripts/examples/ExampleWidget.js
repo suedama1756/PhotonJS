@@ -142,9 +142,13 @@ define(['photon'], function (photon) {
                     var $example = $('#' + configuration.html);
 
                     this.configureExampleTab_(model, $example, buildInfo);
-                    this.configureHtmlTab_(model, $example, buildInfo);
+                    if ($example.length) {
+                        this.configureHtmlTab_(model, $example, buildInfo);
+                    }
                     this.configureScriptTab_(model, configuration);
-                    this.configureCSSTab_(model, configuration);
+                    if ($example.length) {
+                        this.configureCSSTab_(model, configuration);
+                    }
 
                     var lines = [
                         '<!-- Hack due to jsFiddle issue: http://goo.gl/BUfGZ -->',
@@ -167,7 +171,9 @@ define(['photon'], function (photon) {
                             model.id());
 
                     // add example html to the template cache
-                    templateCache.addHtml(templateName, exampleHtml);
+                    if (exampleHtml) {
+                        templateCache.addHtml(templateName, exampleHtml);
+                    }
                     var $exampleDescription = $(photon.string.format("#{0}-description", model.id()));
                     if ($exampleDescription.length) {
                         templateCache.addHtml(templateName + "-description", $exampleDescription.html());
@@ -207,7 +213,9 @@ define(['photon'], function (photon) {
                             throw new Error(photon.string.format('Unable to find global example startup method \'{0}\'.', model.id()));
                         }
 
-                        exampleFn(mockPhoton, exampleNs);
+                        if (option.isRunnable) {
+                            exampleFn(mockPhoton, exampleNs);
+                        }
 
                         var script = formatScript(exampleFn);
                         model.codeSnippets().push(new example.models.CodeSnippet({

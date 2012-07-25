@@ -31,11 +31,13 @@ require(["exampleWidget"], function (exampleWidget) {
             javaScript:[
                 {
                     title:'NumberSelector.js',
-                    code:numberSelectorScript
+                    code:numberSelectorScript,
+                    isRunnable:true
                 },
                 {
                     title:'Page.js',
-                    code:pageScript
+                    code:pageScript,
+                    isRunnable:true
                 }
             ],
             css:'',
