@@ -92,7 +92,7 @@ photon.defineType(
            if (!this.isInitialized_) {
                this.dependencyTracker_ = new photon.observable.DependencyTracker(
                    function() {
-                       this.updateSourceValue(null);
+                       this.updateSourceValue(this.dependencyTracker_);
                    }, this);
                photon.addDisposable(this.target_, this.dependencyTracker_);
 
