@@ -126,6 +126,9 @@ require(["exampleWidget"], function (exampleWidget) {
                 afterChange : 'nameChanged_'
             },
             lastChange : '',
+            /**
+             * @private
+             */
             nameChanged_ : function(oldValue, newValue) {
                 var message = photon.string.format("Name changed from '{0}' to '{1}'", oldValue, newValue);
                 this.lastChange(message);
