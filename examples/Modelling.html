@@ -51,3 +51,23 @@ script: Modelling.js
     <hr>
     <span data-bind="text:$imports.photon.string.format('Point: {0},{1}', x(), y())"></span>
 </div>
+<div id="exampleChainingCoercers-description">
+    Multiple coercers can be chained together.
+</div>
+<div class="example" id="exampleChainingCoercers">
+    Text entered will be trimmed and converted to upper case.
+    <p></p>
+    <label>Name:</label>
+    <input data-bind="value:name">
+</div>
+<div id="exampleSharedCoercers-description">
+    Coercers can also be shared for convenient re-use by attaching them to the
+    <span class="class">photon.observable.model.coercers</span> extension point. Once
+    attached they can be referenced by name.
+</div>
+<div class="example" id="exampleSharedCoercers">
+    Text entered will be trimmed and converted to upper case.
+    <p></p>
+    <label>Name:</label>
+    <input data-bind="value:name">
+</div>
