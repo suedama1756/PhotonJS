@@ -334,7 +334,21 @@ define(['photon'], function (photon) {
             if (exampleViewModel) {
                 rootModel.examples().push(exampleViewModel);
                 if (exampleViewModel.codeSnippets().length()) {
-                    exampleViewModel.activeCodeSnippet(exampleViewModel.codeSnippets().getItem(0));
+                    var activeSnippet = null;
+                    if (item.defaultActiveCodeSnippet) {
+
+                        var itemIndex = exampleViewModel.codeSnippets().findIndex(function (codeSnippet) {
+                            return codeSnippet.title() === item.defaultActiveCodeSnippet;
+                        });
+
+                        activeSnippet = exampleViewModel.codeSnippets().getItem(itemIndex);
+                    }
+
+                    if (!activeSnippet) {
+                        activeSnippet = exampleViewModel.codeSnippets().getItem(0);
+                    }
+
+                    exampleViewModel.activeCodeSnippet(activeSnippet);
                 }
             }
         });

@@ -106,6 +106,33 @@ require(["exampleWidget"], function (exampleWidget) {
         });
     }
 
+    function exampleChangeNotificationFunctionScript(photon, example) {
+        example.Person = photon.observable.model.define({
+            name : {
+                initialValue : '',
+                afterChange : function(oldValue, newValue) {
+                    var message = photon.string.format("Name changed from '{0}' to '{1}'", oldValue, newValue);
+                    this.lastChange(message);
+                }
+            },
+            lastChange : ''
+        })
+    }
+
+    function exampleChangeNotificationFunctionNameScript(photon, example) {
+        example.Person = photon.observable.model.define({
+            name : {
+                initialValue : '',
+                afterChange : 'nameChanged_'
+            },
+            lastChange : '',
+            nameChanged_ : function(oldValue, newValue) {
+                var message = photon.string.format("Name changed from '{0}' to '{1}'", oldValue, newValue);
+                this.lastChange(message);
+            }
+        })
+    }
+
 
     function personPageScript(photon, example) {
         $(function () {
@@ -212,6 +239,41 @@ require(["exampleWidget"], function (exampleWidget) {
                     }
                 ],
                 html:'exampleSharedCoercers'
+            },
+            {
+                id:'exampleChangeNotificationFunction',
+                javaScript:[
+                    {
+                        title:'Person.js',
+                        code:exampleChangeNotificationFunctionScript,
+                        isRunnable:true,
+                        isDefault:true
+                    },
+                    {
+                        title:'Page.js',
+                        code:personPageScript,
+                        isRunnable:true
+                    }
+                ],
+                html:'exampleChangeNotificationFunction',
+                defaultActiveCodeSnippet : 'Person.js'
+            },
+            {
+                id:'exampleChangeNotificationFunctionName',
+                javaScript:[
+                    {
+                        title:'Person.js',
+                        code:exampleChangeNotificationFunctionNameScript,
+                        isRunnable:true,
+                    },
+                    {
+                        title:'Page.js',
+                        code:personPageScript,
+                        isRunnable:true
+                    }
+                ],
+                html:'exampleChangeNotificationFunctionName',
+                defaultActiveCodeSnippet : 'Person.js'
             }
         ]
     )

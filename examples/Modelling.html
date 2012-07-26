@@ -52,6 +52,7 @@ script: Modelling.js
     <span data-bind="text:$imports.photon.string.format('Point: {0},{1}', x(), y())"></span>
 </div>
 <div id="exampleChainingCoercers-description">
+    <h3>Chaining Coercers</h3>
     Multiple coercers can be chained together.
 </div>
 <div class="example" id="exampleChainingCoercers">
@@ -61,6 +62,7 @@ script: Modelling.js
     <input data-bind="value:name">
 </div>
 <div id="exampleSharedCoercers-description">
+    <h3>Shared Coercers</h3>
     Coercers can also be shared for convenient re-use by attaching them to the
     <span class="class">photon.observable.model.coercers</span> extension point. Once
     attached they can be referenced by name.
@@ -70,4 +72,25 @@ script: Modelling.js
     <p></p>
     <label>Name:</label>
     <input data-bind="value:name">
+</div>
+<div id="exampleChangeNotificationFunction-description">
+    <h3>Change Notification</h3>
+    To <strong>internally</strong> subscribe to changes in the model you can specify
+    <span class="expression">beforeChange</span> and <span class="expression">afterChange</span>
+    handlers (use <span class="expression">subscribe</span> for external subscriptions).
+</div>
+<div class="example" id="exampleChangeNotificationFunction">
+    <label>Name:</label>
+    <input data-bind="value:name">
+    <span data-bind="text:lastChange()"></span>
+</div>
+<div id="exampleChangeNotificationFunctionName-description">
+    <h3>Named Change Handlers</h3>
+    If you want to share handlers, or just don't like the idea of setting handlers inline you can alternatively
+    specify the name of the handler function to invoke.
+</div>
+<div class="example" id="exampleChangeNotificationFunctionName">
+    <label>Name:</label>
+    <input data-bind="value:name">
+    <span data-bind="text:lastChange()"></span>
 </div>

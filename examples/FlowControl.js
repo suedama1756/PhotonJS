@@ -1,7 +1,7 @@
 require(["exampleWidget"], function (exampleWidget) {
     function PersonScript(photon, example) {
         example.Person = photon.observable.model.define({
-            firstName:'',
+            value:'',
             lastName:''
         });
     }
