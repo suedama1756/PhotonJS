@@ -51,7 +51,7 @@ photon.defineType(
         updateSource:function () {
             var expression = this.getExpression();
             expression.setSourceValue(this.getDataContext(), null,
-                expression.getPropertyHandler().getValue(this));
+                this.sourceValue_ = expression.getPropertyHandler().getValue(this));
         },
         getSourceValue:function () {
            return this.getExpression().getSourceValue(this.getDataContext(),
