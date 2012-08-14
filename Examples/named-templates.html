@@ -1,0 +1,46 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <script src="../scripts/jquery-1.7.2.js" type="text/javascript"></script>
+    <script src="../output/photon-debug.js" type="text/javascript"></script>
+    <script type="text/html" id="template">
+        <span data-bind="innerText:$data"></span><p></p>
+    </script>
+    <script>
+        var Model = photon.observable.model.define(
+                {
+                    items : {
+                       initializer : function() {
+                           return [];
+                       }
+                    },
+                   randomize : function(count) {
+                        var items = [], length = Number(count);
+                       if (isNaN(length)) {
+                           length = 0;
+                       }
+                        for (var i=0; i<length; i++) {
+                            items[i] = Math.floor(Math.random() * 10);
+                        }
+                        if (console) {
+                            console.log(items);
+                        }
+                        this.items(items);
+                    }
+                }
+        );
+        $(function() {
+            photon.binding.applyBindings(
+                new Model());
+        });
+    </script>
+</head>
+<body>
+    <button data-action="randomize($('#count').val())">
+       Render
+    </button>
+    <input id="count">
+    <div data-bind="data-template:{name:'template', each:items()}"></div>
+</body>
+</html>
