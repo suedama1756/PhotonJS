@@ -18,6 +18,10 @@ module.exports = function (grunt) {
             photon:{
                 files:['../source/core/**/*.js', '../source/core/**/*.jsm'],
                 tasks:'module closureCompiler lint'
+            },
+            site : {
+                files:['../output/**/*.js'],
+                tasks:'copy:site'
             }
         },
         lint:{
@@ -33,12 +37,22 @@ module.exports = function (grunt) {
                     'compilation_level':'SIMPLE_OPTIMIZATIONS'
                 }
             }
+        },
+        copy : {
+            site : {
+                files : {
+                    '../../Site/scripts/': ['../output/**/*.js', '../output/**/*.js.map']
+                }
+            }
         }
     });
 
     // default task.
-    grunt.registerTask('default', 'module closureCompiler lint');
+    grunt.registerTask('default', 'module closureCompiler lint copy');
 
     // load module-grunt tasks
     grunt.loadTasks('../../Build/node_modules/module-grunt');
+
+    grunt.loadTasks('grunt-contrib/tasks');
+
 };
