@@ -1,6 +1,6 @@
 photon.templating.ConditionalRenderer = function (referenceElement, renderTarget, template) {
     photon.templating.ConditionalRenderer.base(this, referenceElement, renderTarget, template);
-}
+};
 
 photon.defineType(photon.templating.ConditionalRenderer,
     photon.templating.Renderer,
@@ -14,7 +14,7 @@ photon.defineType(photon.templating.ConditionalRenderer,
                 if (renderedNodes) {
                     return;
                 }
-                var renderedNodes = this.renderedNodes_ = this.renderTarget_ === photon.templating.RenderTarget.Child ?
+                this.renderedNodes_ = this.renderTarget_ === photon.templating.RenderTarget.Child ?
                     this.template_.insertBefore(referenceElement, null) :
                     this.template_.insertBefore(referenceElement.parentNode, referenceElement.nextSibling, referenceElement);
             }

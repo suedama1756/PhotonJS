@@ -1,22 +1,24 @@
 (function(window, document){
     (function(factory) {
-        if (typeof define === 'function' && define['amd']) {
+        if (typeof define === 'function' && define.amd) {
             define(['exports', 'jquery'], factory);
         } else if (window) {
             var ns = window.photon = window.photon || {};
             factory(ns, window.jQuery);
         }
     })(function(photon, $) {
-        defineNamespace = function (namespace, properties) {
-            var parts = namespace.split(".");
-            var currentPart = photon;
+        photon.version = '0.7.0.1';
+        /*jslint evil: true */
+        
+        var defineNamespace = function (namespace, properties) {
+            var parts = namespace.split("."), currentPart = photon;
             for (var i = 0, n = parts.length; i < n; i++) {
                 currentPart = (currentPart[parts[i]] = currentPart[parts[i]] || {});
             }
             return photon.extend(currentPart, properties);
         };
         
-        provide = function (namespace, properties) {
+        var provide = function (namespace, properties) {
             var parts = namespace.split(".");
             if (parts[0] !== "photon") {
               throw new Error();
@@ -209,7 +211,7 @@
          *
          * @param {object} target The target object.
          * @param {object} source The source object.
-         * @param {Function} [filter] An optional filter function that can be used to filter which source properties should be copied.
+         * @param {function} [filter] An optional filter function that can be used to filter which source properties should be copied.
          * @param {function(object, string)} [map] An optional map function that can be used to map the source properties.
          */
         photon.extend = function (target, source, filter, map) {
@@ -999,7 +1001,7 @@
             return result;
         };
         
-        photon.dom.getHtml = function(node) {
+        photon.dom.getHtml = function (node) {
             if (photon.isDocumentFragment(node)) {
                 // must lift into "real" element to get innerHTML
                 var tempDiv = document.createElement("div");
@@ -1016,7 +1018,7 @@
                 return result;
             }
             return node.innerHTML;
-        }
+        };
         
         var parseHtmlWrapper = {
                 option: [ 1, "<select multiple='multiple'>", "</select>" ],
@@ -1351,8 +1353,8 @@
                     metaDataRecursion++;
                     try {
                         if (property.metaData) {
-                            var metaModelType = photon.observable.model.define(property.metaData);
-                            property.metaData = new metaModelType();
+                            var MetaModelType = photon.observable.model.define(property.metaData);
+                            property.metaData = new MetaModelType();
                         }
                     } finally {
                         metaDataRecursion--;
@@ -1612,21 +1614,21 @@
                 initialValue:false
             },
         
-            "ObservableArray": {
+            "Collection": {
                 coerce:function(newValue, oldValue) {
                     if (photon.isNullOrUndefined(newValue)) {
                         return newValue;
                     }
         
                     if (!oldValue) {
-                        oldValue = new photon.observable.Array();
+                        oldValue = new photon.observable.Collection();
                     }
                     oldValue.set(newValue);
         
                     return oldValue;
                 },
                 initializer:function() {
-                    return new photon.observable.Array();
+                    return new photon.observable.Collection();
                 }
             }
         });
@@ -1730,11 +1732,11 @@
             /**
              * @param {Array} array
              */
-            photon.observable.Array = function (array) {
+            photon.observable.Collection = function (array) {
                 this.array_ = array || [];
             },
             /**
-             * @lends photon.observable.Array.prototype
+             * @lends photon.observable.Collection.prototype
              */
             {
                 isObservable:true,
@@ -1805,10 +1807,10 @@
                  * Slices the array between the specified indexes.
                  * @param start
                  * @param end
-                 * @return {photon.observable.Array} the sliced array.
+                 * @return {photon.observable.Collection} the sliced array.
                  */
                 slice:function (start, end) {
-                    return new photon.observable.Array(this.array_.slice(start, end));
+                    return new photon.observable.Collection(this.array_.slice(start, end));
                 },
                 /**
                  * Splices the array between the specified indices.
@@ -1872,13 +1874,13 @@
                 /**
                  * Concatenates the array with the items passed in.
                  * @param items
-                 * @return {photon.observable.Array}
+                 * @return {photon.observable.Collection}
                  */
                 concat:function () {
-                    return new photon.observable.Array(arrayNativePrototype.concat.apply(this.array_, arguments));
+                    return new photon.observable.Collection(arrayNativePrototype.concat.apply(this.array_, arguments));
                 },
                 join:function (separator) {
-                    return new photon.observable.Array(this.array_.join(separator));
+                    return new photon.observable.Collection(this.array_.join(separator));
                 },
                 valueOf:function () {
                     return this.array_.valueOf();
@@ -1938,7 +1940,6 @@
                     return this.array_;
                 }
             });
-        
         (function () {
             var captures = [];
             var currentCapture = null;
@@ -2599,11 +2600,8 @@
                             parts.unshift(this.bindingType_.getDefaultExpressionType());
                         }
         
-                        // get builder type
-                        var expressionBuilderType = this.bindingType_.getExpressionBuilderType(parts[0]);
-        
-                        // create!!
-                        return new expressionBuilderType(parts[0], parts[1]);
+                        var ExpressionBuilderType = this.bindingType_.getExpressionBuilderType(parts[0]);
+                        return new ExpressionBuilderType(parts[0], parts[1]);
                     },
                     /**
                      * Reads the next binding expression
@@ -3943,64 +3941,35 @@
         };
         
         (function () {
-            var fnDataElementSelector = document.querySelectorAll
-                ?
-                //        function (element, bindingTypes, callback) {
-                //            for (var i = 0, n = bindingTypes.length; i < n; i++) {
-                //                var bindingType = bindingTypes[i];
-                //                photon.array.forEach(
-                //                    element.querySelectorAll("*[" + bindingType + "]"),
-                //                    function (element) {
-                //                        callback(element, bindingType, element.getAttribute(bindingType));
-                //                    }
-                //                );
-                //            }
-                //        }
-                // TODO: Still need to do more work to find best overall solution
+            function processElement(element, bindingTypes, callback) {
+                for (var j = 0, nj = bindingTypes.length; j < nj; j++) {
+                    var bindingType = bindingTypes[j];
+                    var bindingValue = element.getAttribute(bindingType);
+                    if (bindingValue) {
+                        callback(element, bindingType, bindingValue);
+                    }
+                }
+            }
+        
+            // TODO: Still need to do more work to find best overall solution
+            var fnDataElementSelector = document.querySelectorAll ?
                 function (element, bindingTypes, callback) {
                     var types = "*[" + bindingTypes.join("], *[") + "]";
                     if (element.nodeType === 1) {
-                        for (var j = 0, nj = bindingTypes.length; j < nj; j++) {
-                            var bindingType = bindingTypes[j];
-                            var bindingValue = element.getAttribute(bindingType);
-                            if (bindingValue) {
-                                callback(element, bindingType, bindingValue);
-                            }
-                        }
+                        processElement(element, bindingTypes, callback);
                     }
-                    photon.array.forEach(
-                        element.querySelectorAll(types), function (currentElement) {
-                            for (var j = 0, nj = bindingTypes.length; j < nj; j++) {
-                                var bindingType = bindingTypes[j];
-                                var bindingValue = currentElement.getAttribute(bindingType);
-                                if (bindingValue) {
-                                    callback(currentElement, bindingType, bindingValue);
-                                }
-                            }
-                        });
-        
+                    photon.array.forEach(element.querySelectorAll(types), function(childElement) {
+                        processElement(childElement, bindingTypes, callback);
+                    });
                 }
                 :
                 function (element, bindingTypes, callback) {
                     if (element.nodeType === 1) {
-                        for (var j = 0, nj = bindingTypes.length; j < nj; j++) {
-                            var bindingType = bindingTypes[j];
-                            var bindingValue = element.getAttribute(bindingType);
-                            if (bindingValue) {
-                                callback(element, bindingType, bindingValue);
-                            }
-                        }
+                        processElement(element, bindingTypes, callback);
                     }
                     var elements = element.getElementsByTagName("*");
                     for (var i = 0, ni = elements.length; i < ni; i++) {
-                        var currentElement = elements[i];
-                        for (var j = 0, nj = bindingTypes.length; j < nj; j++) {
-                            var bindingType = bindingTypes[j];
-                            var bindingValue = currentElement.getAttribute(bindingType);
-                            if (bindingValue) {
-                                callback(currentElement, bindingType, bindingValue);
-                            }
-                        }
+                        processElement(element, bindingTypes, callback);
                     }
                 };
         
@@ -4834,7 +4803,7 @@
             this.referenceElement_ = referenceElement;
             this.renderTarget_ = renderTarget;
             this.template_ = template;
-        }
+        };
         
         photon.defineType(photon.templating.Renderer,
             /**
@@ -4888,7 +4857,7 @@
         
         photon.templating.ConditionalRenderer = function (referenceElement, renderTarget, template) {
             photon.templating.ConditionalRenderer.base(this, referenceElement, renderTarget, template);
-        }
+        };
         
         photon.defineType(photon.templating.ConditionalRenderer,
             photon.templating.Renderer,
@@ -4902,7 +4871,7 @@
                         if (renderedNodes) {
                             return;
                         }
-                        var renderedNodes = this.renderedNodes_ = this.renderTarget_ === photon.templating.RenderTarget.Child ?
+                        this.renderedNodes_ = this.renderTarget_ === photon.templating.RenderTarget.Child ?
                             this.template_.insertBefore(referenceElement, null) :
                             this.template_.insertBefore(referenceElement.parentNode, referenceElement.nextSibling, referenceElement);
                     }
@@ -4973,8 +4942,8 @@
                         startA,
                         referenceElement = this.referenceElement_,
                         nodeSets = this.renderedNodes_,
-                        nodeSet,
                         offset = 0,
+                        nodeSet,
                         defaultReferenceNode = null,
                         templatePool = new TemplatePool(this.template_),
                         parentNode = this.renderTarget_ === photon.templating.RenderTarget.Child ?
@@ -4999,12 +4968,12 @@
                         // update node sets
                         nodeSets.splice(startA, diff.deletedA - setLength);
         
+        
+        
                         // apply set operations
                         for (var setIndex = 0; setIndex < setLength; setIndex++) {
-                            var nodeSet = nodeSets[startA++];
-                            var node = photon.array.find(nodeSet, function(node) {
-                                return photon.binding.DataContext.getLocalForElement(node) != null
-                            })
+                            nodeSet = nodeSets[startA++];
+                            var node = photon.array.find(nodeSet, photon.binding.DataContext.getLocalForElement);
                             if (node) {
                                 photon.binding.DataContext.getLocalForElement(node).setSource(newItems[diff.startB + setIndex]);
                             }
@@ -5019,7 +4988,7 @@
         
                     if (this.renderTarget_ === photon.templating.RenderTarget.NextSibling) {
                         if (nodeSets.length > 0) {
-                            var nodeSet = nodeSets[nodeSets.length - 1];
+                            nodeSet = nodeSets[nodeSets.length - 1];
                             defaultReferenceNode = nodeSet[nodeSet.length - 1].nextSibling;
                         }
                         else {
@@ -5072,7 +5041,7 @@
             {
                 dispose:function () {
                     this.removeFromParent_();
-                    delete this.parent_
+                    delete this.parent_;
                 },
                 removeFromParent_:function () {
                     var parent = this.parent_;
@@ -5623,6 +5592,15 @@
         photon.binding.data.properties["select.items"] = new photon.ui.SelectorItemsProperty();
         photon.binding.data.properties["select.value"] = new photon.ui.SelectorValueProperty();
         photon.binding.data.properties["select.display"] = new photon.ui.SelectorDisplayProperty();
+        /**
+         * @deprecated Use photon.observable.Collection
+         */
+        photon.observable.Array = photon.observable.Collection;
+        
+        /**
+         * @deprecated Use photon.observable.model.types.Collection;
+         */
+        photon.observable.model.types.ObservableArray = photon.observable.model.types.Collection;
     });
 })(window, document);
 //@ sourceMappingURL=photon-debug.js.map

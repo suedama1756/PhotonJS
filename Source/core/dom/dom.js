@@ -8,7 +8,7 @@ photon.dom.wrap = function(element, tagName, doc) {
     return result;
 };
 
-photon.dom.getHtml = function(node) {
+photon.dom.getHtml = function (node) {
     if (photon.isDocumentFragment(node)) {
         // must lift into "real" element to get innerHTML
         var tempDiv = document.createElement("div");
@@ -25,7 +25,7 @@ photon.dom.getHtml = function(node) {
         return result;
     }
     return node.innerHTML;
-}
+};
 
 var parseHtmlWrapper = {
         option: [ 1, "<select multiple='multiple'>", "</select>" ],

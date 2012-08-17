@@ -103,11 +103,8 @@
                     parts.unshift(this.bindingType_.getDefaultExpressionType());
                 }
 
-                // get builder type
-                var expressionBuilderType = this.bindingType_.getExpressionBuilderType(parts[0]);
-
-                // create!!
-                return new expressionBuilderType(parts[0], parts[1]);
+                var ExpressionBuilderType = this.bindingType_.getExpressionBuilderType(parts[0]);
+                return new ExpressionBuilderType(parts[0], parts[1]);
             },
             /**
              * Reads the next binding expression

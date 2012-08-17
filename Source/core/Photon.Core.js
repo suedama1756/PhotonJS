@@ -1,13 +1,14 @@
-﻿defineNamespace = function (namespace, properties) {
-    var parts = namespace.split(".");
-    var currentPart = photon;
+﻿/*jslint evil: true */
+
+var defineNamespace = function (namespace, properties) {
+    var parts = namespace.split("."), currentPart = photon;
     for (var i = 0, n = parts.length; i < n; i++) {
         currentPart = (currentPart[parts[i]] = currentPart[parts[i]] || {});
     }
     return photon.extend(currentPart, properties);
 };
 
-provide = function (namespace, properties) {
+var provide = function (namespace, properties) {
     var parts = namespace.split(".");
     if (parts[0] !== "photon") {
       throw new Error();
@@ -200,7 +201,7 @@ photon.getUID = function(obj) {
  *
  * @param {object} target The target object.
  * @param {object} source The source object.
- * @param {Function} [filter] An optional filter function that can be used to filter which source properties should be copied.
+ * @param {function} [filter] An optional filter function that can be used to filter which source properties should be copied.
  * @param {function(object, string)} [map] An optional map function that can be used to map the source properties.
  */
 photon.extend = function (target, source, filter, map) {

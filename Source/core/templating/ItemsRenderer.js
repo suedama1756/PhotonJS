@@ -57,8 +57,8 @@ photon.defineType(
                 startA,
                 referenceElement = this.referenceElement_,
                 nodeSets = this.renderedNodes_,
-                nodeSet,
                 offset = 0,
+                nodeSet,
                 defaultReferenceNode = null,
                 templatePool = new TemplatePool(this.template_),
                 parentNode = this.renderTarget_ === photon.templating.RenderTarget.Child ?
@@ -83,12 +83,12 @@ photon.defineType(
                 // update node sets
                 nodeSets.splice(startA, diff.deletedA - setLength);
 
+
+
                 // apply set operations
                 for (var setIndex = 0; setIndex < setLength; setIndex++) {
-                    var nodeSet = nodeSets[startA++];
-                    var node = photon.array.find(nodeSet, function(node) {
-                        return photon.binding.DataContext.getLocalForElement(node) != null
-                    })
+                    nodeSet = nodeSets[startA++];
+                    var node = photon.array.find(nodeSet, photon.binding.DataContext.getLocalForElement);
                     if (node) {
                         photon.binding.DataContext.getLocalForElement(node).setSource(newItems[diff.startB + setIndex]);
                     }
@@ -103,7 +103,7 @@ photon.defineType(
 
             if (this.renderTarget_ === photon.templating.RenderTarget.NextSibling) {
                 if (nodeSets.length > 0) {
-                    var nodeSet = nodeSets[nodeSets.length - 1];
+                    nodeSet = nodeSets[nodeSets.length - 1];
                     defaultReferenceNode = nodeSet[nodeSet.length - 1].nextSibling;
                 }
                 else {

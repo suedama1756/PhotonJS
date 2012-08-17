@@ -32,21 +32,21 @@ photon.extend(photon.observable.model.types, {
         initialValue:false
     },
 
-    "ObservableArray": {
+    "Collection": {
         coerce:function(newValue, oldValue) {
             if (photon.isNullOrUndefined(newValue)) {
                 return newValue;
             }
 
             if (!oldValue) {
-                oldValue = new photon.observable.Array();
+                oldValue = new photon.observable.Collection();
             }
             oldValue.set(newValue);
 
             return oldValue;
         },
         initializer:function() {
-            return new photon.observable.Array();
+            return new photon.observable.Collection();
         }
     }
 });
