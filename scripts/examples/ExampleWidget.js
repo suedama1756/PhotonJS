@@ -19,7 +19,7 @@ define(['photon'], function (photon) {
     function modelsRootScript(photon, example) {
         example.models.Root = photon.observable.model.define({
             examples:{
-                type:'ObservableArray'
+                type:'Collection'
             }
         });
     }
@@ -28,7 +28,7 @@ define(['photon'], function (photon) {
         example.models.Example = photon.observable.model.define({
             id:null,
             codeSnippets:{
-                type:'ObservableArray'
+                type:'Collection'
             },
             activeCodeSnippet:null,
             data:null,

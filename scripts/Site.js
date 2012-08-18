@@ -19,7 +19,7 @@ require(["photon", "jquery", "bootstrapDropDown"], function (photon, $) {
 
         photon.observable.model.define(NavigationBar, {
             items:{
-                type:'ObservableArray'
+                type:'Collection'
             },
             activeItem:null
         });

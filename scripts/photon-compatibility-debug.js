@@ -5592,6 +5592,15 @@
         photon.binding.data.properties["select.items"] = new photon.ui.SelectorItemsProperty();
         photon.binding.data.properties["select.value"] = new photon.ui.SelectorValueProperty();
         photon.binding.data.properties["select.display"] = new photon.ui.SelectorDisplayProperty();
+        /**
+         * @deprecated Use photon.observable.Collection
+         */
+        photon.observable.Array = photon.observable.Collection;
+        
+        /**
+         * @deprecated Use photon.observable.model.types.Collection;
+         */
+        photon.observable.model.types.ObservableArray = photon.observable.model.types.Collection;
     });
 })(window, document);
-//@ sourceMappingURL=photon-debug.js.map
+//@ sourceMappingURL=photon-compatibility-debug.js.map

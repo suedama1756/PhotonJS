@@ -10,7 +10,7 @@ require(["exampleWidget"], function (exampleWidget) {
         example.PersonCollection = photon.observable.model.define({
             itemToAdd:null,
             items:{
-                type:'ObservableArray'
+                type:'Collection'
             },
             add:function () {
                 if (this.itemToAdd()) {
