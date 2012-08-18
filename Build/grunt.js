@@ -12,6 +12,20 @@ module.exports = function (grunt) {
                     addSourceMapDirective : true,
                     sourceMapRoot:'../source/core'
                 }
+            },
+            compatibility:{
+                jsm:'../source/core/photon.jsm',
+                options:{
+                    configuration:'debug',
+                    version:'0.7.0.1',
+                    srcOutput:'../../output/photon-compatibility-debug.js',
+                    mapOutput:'../../output/photon-compatibility-debug.js.map',
+                    addSourceMapDirective : true,
+                    sourceMapRoot:'../source/core',
+                    properties : {
+                        compatibility : true
+                    }
+                }
             }
         },
         watch:{
@@ -32,6 +46,14 @@ module.exports = function (grunt) {
             photon:{
                 js:['../output/photon-debug.js'],
                 jsOutputFile:'../output/photon-min.js',
+                closurePath:'./tools/Closure',
+                options:{
+                    'compilation_level':'SIMPLE_OPTIMIZATIONS'
+                }
+            },
+            compatibility:{
+                js:['../output/photon-compatibility-debug.js'],
+                jsOutputFile:'../output/photon-compatibility-min.js',
                 closurePath:'./tools/Closure',
                 options:{
                     'compilation_level':'SIMPLE_OPTIMIZATIONS'
