@@ -154,8 +154,8 @@ define(['photon'], function (photon) {
                         '<!-- Hack due to jsFiddle issue: http://goo.gl/BUfGZ -->',
                         '</style>',
                         '<link rel="stylesheet"; href="http://twitter.github.com/bootstrap/assets/css/bootstrap.css">',
-                        '<script src="http://suedama1756.github.com/Photon/libs/jquery/jquery-1.7.2.js"></script>',
-                        '<script src="http://suedama1756.github.com/Photon/scripts/Photon-debug.js"></script>',
+                        '<script src="http://PhotonJS.org/libs/jquery/jquery-1.7.2.js"></script>',
+                        '<script src="http://PhotonJS.org/libs/scripts/Photon-debug.js"></script>',
                         '<style>',
                         model.jsFiddle().css];
 
