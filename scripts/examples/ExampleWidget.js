@@ -170,7 +170,7 @@ define(['photon'], function (photon) {
                         templateName = photon.string.format("exampleTemplates.{0}",
                             model.id());
 
-                    // add example html to the template cache
+                    // add example html to template cache
                     if (exampleHtml) {
                         templateCache.addHtml(templateName, exampleHtml);
                     }
