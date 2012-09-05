@@ -13,7 +13,7 @@ photon.slickGrid.defaultEditor = function (args) {
     var defaultValue;
 
     this.init = function () {
-        $input = $("<INPUT type=text class='editor-text' />");
+        $input = $("<input type=text class='editor-text' />");
 
         $input.bind("keydown.nav", function (e) {
             if (e.keyCode === $.ui.keyCode.LEFT || e.keyCode === $.ui.keyCode.RIGHT) {

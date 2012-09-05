@@ -1,12 +1,13 @@
 /*global module:false*/
 module.exports = function (grunt) {
+    var version = '0.7.0.1';
+
     grunt.initConfig({
         module:{
             photon:{
                 jsm:'../source/core/photon.jsm',
                 options:{
-                    configuration:'debug',
-                    version:'0.7.0.1',
+                    version:version,
                     srcOutput:'../../output/photon-debug.js',
                     mapOutput:'../../output/photon-debug.js.map',
                     addSourceMapDirective : true,
@@ -16,8 +17,7 @@ module.exports = function (grunt) {
             compatibility:{
                 jsm:'../source/core/photon.jsm',
                 options:{
-                    configuration:'debug',
-                    version:'0.7.0.1',
+                    version:version,
                     srcOutput:'../../output/photon-compatibility-debug.js',
                     mapOutput:'../../output/photon-compatibility-debug.js.map',
                     addSourceMapDirective : true,
@@ -25,6 +25,14 @@ module.exports = function (grunt) {
                     properties : {
                         compatibility : true
                     }
+                }
+            },
+            slickGrid : {
+                jsm:'../source/integration/SlickGrid/Photon.SlickGrid.jsm',
+                options : {
+                    srcOutput:'../../../output/photon.slick.grid-debug.js',
+                    mapOutput:'../../../output/photon.slick.grid-debug.js.map',
+                    addSourceMapDirective : true
                 }
             }
         },
