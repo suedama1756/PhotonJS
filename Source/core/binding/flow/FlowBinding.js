@@ -50,6 +50,7 @@ photon.defineType(
             }
         },
         updateFlowData:function (dependencyTracker) {
+            window.$templateParent = this.templateParent_;
             var data = this.getExpression().getFlowData(
                 this.getDataContext(), dependencyTracker);
             this.renderer_.setData(data);

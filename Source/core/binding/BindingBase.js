@@ -2,6 +2,7 @@ photon.defineType(
     photon.binding.BindingBase = function (target, expression) {
         this.target_ = target;
         this.expression_ = expression;
+        this.templateParent_ = photon.controlScope ? photon.controlScope[0] : undefined;
     },
     /**
      * @lends photon.binding.BindingBase.prototype

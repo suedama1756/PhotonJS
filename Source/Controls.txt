@@ -1,0 +1,44 @@
+Road map of features to support controls
+
+The end goal for controls is to support a higher level syntax for defining controls and bindings.
+
+<tab pages="{items}">
+
+</tab>
+
+
+or
+
+<list items="{items}" selectedItem="{selectedItem, mode=TwoWay}">
+
+</list>
+
+To get to this we have a progression of features built on top of the current set of features.
+
+1.  Support for defining controls
+
+    <select data-bind="{list-items:items}{list-selectedItem:selectedItem,mode:TwoWay}">
+
+    <div data-bind="{tab-items:items}{tab-selectedItem:selectedItem}" >
+
+2.  We may want to support controls and deal with them programatically
+
+    <select data-control="list" >
+
+3.  Support custom tags and attributes
+
+    <list items="{{items}}" selectedItem="{{selectedItem, mode=TwoWay}}>
+
+    Template: <div
+                 <div
+                    <div data-flow={each:$control.items}>
+
+cockColor={templateBinding text
+
+
+There appears to be a couple of options available for handing $templateParent:
+
+1.  Allow the templateParent to be looked up as part of the applyBinding cycle, and applied.
+
+2.  Only make a template parent available as part of applying a template, this would mean that
+a tab control would actually have to have a tab.

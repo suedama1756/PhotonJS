@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <link rel="stylesheet" href="css/bootstrap.css" type="text/css">
+    <script src="../scripts/jquery-1.7.2.js" type="text/javascript"></script>
+    <script src="../output/photon-debug.js" type="text/javascript"></script>
+    <script type="text/html" id="controls">
+        <!-- Template: tab -->
+        <ul class="nav nav-tabs" data-flow="each:$templateParent.pages()">
+            <li data-bind="{class-active:$templateParent.selectedPage() === $data}" data-action="$templateParent.selectedPage($data), preventDefault:true">
+                <a data-bind="
+                        {attribute-href:'#' + $data}
+                        {text:$data}">
+                </a>
+            </li>
+        </ul>
+        <div class="tab-content" data-flow="each:$templateParent.pages()">
+            <div class="tab-pane" data-bind="{class-active:$templateParent.selectedPage() === $data}{attribute-id:$data}">
+                <span data-bind="text:$data"></span>
+            </div>
+        </div>
+        <!-- Template: tab.page -->
+
+    </script>
+    <script>
+        $(function () {
+            var cache = photon.templating.getCache();
+            cache.addResourceElement("controls");
+
+            var Model = photon.observable.model.define({
+                pages : {
+                    type : 'Collection'
+                },
+                selectedPage : null
+            });
+            var model = new Model({pages:[1,2]});
+            photon.binding.applyBindings(model);
+        });
+
+        /*
+            1.  Properties should be defined separately
+            2.  Should be able to route property changes directly, rather than through onPropertyChanged
+            3.  Should support replacing tag with template, as well as append child.
+            4.  Is there any reason why we should be restricted to the template parent?
+            5.  When a set of bindings are pre-processed we can make available to them the current $control
+            6.  We can support a applyTemplate method, this method can then set the scope of the $control variable
+                for all bindings within the range?
+
+                The concept of a template for a control is great, but are we not more flexible by just supporting
+                a scoped $control variable?
+
+                A scoped $control variable also has a disadvantage in that you may inadvertently inherit it, although
+                this could also be seen as an advantage.
+
+                So there are a few approaches on the table.
+
+                Support an applyTemplate method, within the applyTemplate method we support setting the $control
+                property for any bindings discovered within the currently applying template. This should
+                be safe as control structures do not change?
+
+                It is possible to manipulate the DOM directly, and even inject a control somewhere in the middle
+                of another control. When this is done what does $control mean?
+
+                This is probably a good argument for stating that a control should state a template, and any bindings
+                applied directly in that template are for that template. So with this in mind, how do we proceed.
+
+                There would appear to be a huge amount of complexity in allowing controls to
+
+                First: how do we make control bindings perform the following:
+
+                    1.  Replace the current node with the appropriate template
+                    2.  Continue to apply bindings on the original element to the control.
+                    3.  Correctly handle any nested content into the controls (Content).
+
+                By supporting the replacement of place-holder nodes based on attributes we do
+                not hit any issues with things not looking like standard HTML in old browsers.
+
+                Replacing the node does however introduce some limitations..., a node may not be replaced
+                by a single node. Should we enforce this, only if we really need to?
+
+                If we have a class binding on the top element of a control what do we do with it? Do we
+                apply that class to each root element of the template? If yes, how do we know to do this? If no,
+                then we potentially have to mess around with templates for no reason...
+
+
+
+                We should split between, compilation and applying bindings.
+
+                If not, then what do we do about bindings that are not targeted at the specified control?
+
+                We should also consider the difference between writing a control, and specifying a controller.
+
+                A controller is like a code behind for the control, it can be used to perform additional tasks on the
+                UI, e.g. focus a control, reset scroll position, etc.
+
+                Controllers are easy to support.
+
+
+
+         */
+
+        photon.controlScope = [];
+
+        photon.ui.defineControl('tab',
+                function (target) {
+                    photon.ui.Control.call(this, target);
+                    target.control = this;
+                    this.applyTemplate('controls.tab');
+                },
+                photon.ui.Control,
+                {
+                    properties:{
+                        selectedPage:null,
+                        pages:null
+                    }
+                });
+    </script>
+</head>
+<body>
+<div data-bind="{tab-pages:pages}{tab-selectedPage:selectedPage}">
+
+</div>
+</body>
+</html>

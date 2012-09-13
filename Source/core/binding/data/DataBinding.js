@@ -54,7 +54,9 @@ photon.defineType(
                 this.sourceValue_ = expression.getPropertyHandler().getValue(this));
         },
         getSourceValue:function () {
-           return this.getExpression().getSourceValue(this.getDataContext(),
+            // TODO: hacky way to make template parent available, we need a generic way to make additional properties available, this could probably be best done by supplying the binding iteself
+            window.$templateParent = this.templateParent_;
+            return this.getExpression().getSourceValue(this.getDataContext(),
                this.dependencyTracker_);
         },
         getBindingMode:function () {

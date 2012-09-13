@@ -36,7 +36,7 @@ photon.defineType(
             if (expression.getPreventDefault()) {
                 event.preventDefault();
             }
-
+            window.$templateParent = this.templateParent_;
             photon.binding.evaluateInContext(
                 this.dataContext_, expression.getAction(), null, event
             );

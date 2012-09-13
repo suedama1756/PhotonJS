@@ -66,7 +66,8 @@
             'Binding/DataContext.js',
             'Binding/NodeBindingInfo.js',
             'ui/ui.js',
-            'ui/Selector.js'
+            'ui/Selector.js',
+            'ui/Controls.js'
         ],
         dependencies:{
             '$':{

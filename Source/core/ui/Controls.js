@@ -39,7 +39,7 @@
                 for (var i = 0, n = list.length; i < n; i++) {
                     list[i].invalidated();
                 }
-            }, 0)
+            }, 0);
         }
         invalidateControls.push(control);
     };
@@ -92,6 +92,7 @@
     };
 
     photon.ui.Control = function (target) {
+        photon.ui.Control.base(this);
         this.target_ = target;
         this.initializeCount_ = 0;
         var self = this;
@@ -103,6 +104,24 @@
     photon.observable.model.define(
         photon.ui.Control,
         {
+            applyTemplate : function(template) {
+                if (photon.isString(template)) {
+                    template = photon.templating.getCache().getTemplate(template);
+                }
+
+                var fragment = template.getFragment(), target = this.target_;
+
+                photon.controlScope.push(this);
+
+                while (fragment.firstChild) {
+                    var element =  fragment.firstChild;
+                    target.appendChild(element);
+
+                    photon.binding.updateBindings(element);
+                }
+
+                photon.controlScope.pop();
+            },
             getTarget:function () {
                 return this.target_;
             },

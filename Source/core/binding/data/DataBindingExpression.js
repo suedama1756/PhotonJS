@@ -67,7 +67,7 @@ photon.defineType(
         getPropertyName:function() {
             return this.propertyName_;
         },
-        getSourceValue : function(dataContext, dependencyTracker) {
+        getSourceValue : function(dataContext, templateParent, dependencyTracker) {
             return photon.binding.evaluateInContext(dataContext,
                 this.getter_, dependencyTracker);
         },
