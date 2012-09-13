@@ -1,15 +1,15 @@
 (function(document){
     (function(factory) {
         if (typeof define === 'function' && define.amd) {
-            define(['exports', 'photon', 'jquery', 'slick.core', 'slick.grid'], factory);
+            define(['exports', 'photon', 'slick.core', 'jquery', 'slick.grid'], factory);
         } else if (window) {
             var nsi = 'photon.slickGrid'.split('.'), ns = window;
             for (var i= 0, n=nsi.length; i<n; i++) {
                 ns = ns[nsi[i]] = ns[nsi[i]] || {};
             }
-            factory(ns, window.photon, window.jQuery);
+            factory(ns, window.photon, window.Slick, window.jQuery);
         }
-    })(function(slickGrid, photon, $) {
+    })(function(slickGrid, photon, slick, $) {
         photon.slickGrid = photon.slickGrid || {};
         
         photon.slickGrid.create = function (container, data, columns, options) {
