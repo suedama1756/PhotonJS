@@ -10,7 +10,7 @@ mkdir PhotonJS
 cd PhotonJS
 git clone https://github.com/suedama1756/PhotonJS.git Lib
 git clone https://github.com/suedama1756/PhotonJS.Build.git Build
-cd Lib/Build
+cd Lib/build
 sh ./build.sh
 cd ../output
 ls
