@@ -1,0 +1,2 @@
+1.  Work out how to pull in dependencies directly from forks in GIT, e.g. for Jasmine Adapter, and pull into project
+    directly. Is this what GIT sub modules are for?

@@ -1,0 +1,2 @@
+(function(b){(function(a){if("function"===typeof define&&define.amd)define(["exports","jquery"],a);else if(b){var g=b.photon=b.photon||{};a(g,b.jQuery)}})(function(a){function b(d,e,a,c){for(var f in e)if(!a||a(e,f))d[f]=c?c(e,f):e[f];return d}a.version="0.7.0.1";var c=Object.prototype.toString;b.filterHasOwnProperty=function(d,a){return d.hasOwnProperty(a)};b(a,{isString:function(a){return"[object String]"===c.call(a)},isNumber:function(a){return"[object Number]"===c.call(a)},isBoolean:function(a){return"[object Boolean]"===
+c.call(a)}})})})(window,document);
