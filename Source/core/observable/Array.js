@@ -80,7 +80,8 @@ photon.defineType(
          * @return {photon.observable.Array} the sliced array.
          */
         slice:function (start, end) {
-            return new photon.observable.Array(this.array_.slice(start, end));
+            return new photon.observable.Array(
+                arrayNativePrototype.slice.apply(this.array_, arguments));
         },
         /**
          * Splices the array between the specified indices.
