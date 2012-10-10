@@ -155,8 +155,8 @@ provide("photon.observable.model",
             metaDataRecursion++;
             try {
                 if (property.metaData) {
-                    var metaModelType = photon.observable.model.define(property.metaData);
-                    property.metaData = new metaModelType();
+                    var MetaModelType = photon.observable.model.define(property.metaData);
+                    property.metaData = new MetaModelType();
                 }
             } finally {
                 metaDataRecursion--;

@@ -8,7 +8,7 @@ photon.defineType(
     {
         dispose:function () {
             this.removeFromParent_();
-            delete this.parent_
+            delete this.parent_;
         },
         removeFromParent_:function () {
             var parent = this.parent_;

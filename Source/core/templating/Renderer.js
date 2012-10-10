@@ -2,7 +2,7 @@ photon.templating.Renderer = function (referenceElement, renderTarget, template)
     this.referenceElement_ = referenceElement;
     this.renderTarget_ = renderTarget;
     this.template_ = template;
-}
+};
 
 photon.defineType(photon.templating.Renderer,
     /**

@@ -2,11 +2,11 @@ photon.defineType(
     /**
      * @param {Array} array
      */
-    photon.observable.Array = function (array) {
+    photon.observable.Collection = function (array) {
         this.array_ = array || [];
     },
     /**
-     * @lends photon.observable.Array.prototype
+     * @lends photon.observable.Collection.prototype
      */
     {
         isObservable:true,
@@ -77,11 +77,10 @@ photon.defineType(
          * Slices the array between the specified indexes.
          * @param start
          * @param end
-         * @return {photon.observable.Array} the sliced array.
+         * @return {photon.observable.Collection} the sliced array.
          */
         slice:function (start, end) {
-            return new photon.observable.Array(
-                arrayNativePrototype.slice.apply(this.array_, arguments));
+            return new photon.observable.Collection(arrayNativePrototype.slice.apply(this.array_, arguments));
         },
         /**
          * Splices the array between the specified indices.
@@ -145,13 +144,13 @@ photon.defineType(
         /**
          * Concatenates the array with the items passed in.
          * @param items
-         * @return {photon.observable.Array}
+         * @return {photon.observable.Collection}
          */
         concat:function () {
-            return new photon.observable.Array(arrayNativePrototype.concat.apply(this.array_, arguments));
+            return new photon.observable.Collection(arrayNativePrototype.concat.apply(this.array_, arguments));
         },
         join:function (separator) {
-            return new photon.observable.Array(this.array_.join(separator));
+            return new photon.observable.Collection(this.array_.join(separator));
         },
         valueOf:function () {
             return this.array_.valueOf();

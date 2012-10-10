@@ -47,64 +47,35 @@ photon.getData = function (node) {
 };
 
 (function () {
-    var fnDataElementSelector = document.querySelectorAll
-        ?
-        //        function (element, bindingTypes, callback) {
-        //            for (var i = 0, n = bindingTypes.length; i < n; i++) {
-        //                var bindingType = bindingTypes[i];
-        //                photon.array.forEach(
-        //                    element.querySelectorAll("*[" + bindingType + "]"),
-        //                    function (element) {
-        //                        callback(element, bindingType, element.getAttribute(bindingType));
-        //                    }
-        //                );
-        //            }
-        //        }
-        // TODO: Still need to do more work to find best overall solution
+    function processElement(element, bindingTypes, callback) {
+        for (var j = 0, nj = bindingTypes.length; j < nj; j++) {
+            var bindingType = bindingTypes[j];
+            var bindingValue = element.getAttribute(bindingType);
+            if (bindingValue) {
+                callback(element, bindingType, bindingValue);
+            }
+        }
+    }
+
+    // TODO: Still need to do more work to find best overall solution
+    var fnDataElementSelector = document.querySelectorAll ?
         function (element, bindingTypes, callback) {
             var types = "*[" + bindingTypes.join("], *[") + "]";
             if (element.nodeType === 1) {
-                for (var j = 0, nj = bindingTypes.length; j < nj; j++) {
-                    var bindingType = bindingTypes[j];
-                    var bindingValue = element.getAttribute(bindingType);
-                    if (bindingValue) {
-                        callback(element, bindingType, bindingValue);
-                    }
-                }
+                processElement(element, bindingTypes, callback);
             }
-            photon.array.forEach(
-                element.querySelectorAll(types), function (currentElement) {
-                    for (var j = 0, nj = bindingTypes.length; j < nj; j++) {
-                        var bindingType = bindingTypes[j];
-                        var bindingValue = currentElement.getAttribute(bindingType);
-                        if (bindingValue) {
-                            callback(currentElement, bindingType, bindingValue);
-                        }
-                    }
-                });
-
+            photon.array.forEach(element.querySelectorAll(types), function(childElement) {
+                processElement(childElement, bindingTypes, callback);
+            });
         }
         :
         function (element, bindingTypes, callback) {
             if (element.nodeType === 1) {
-                for (var j = 0, nj = bindingTypes.length; j < nj; j++) {
-                    var bindingType = bindingTypes[j];
-                    var bindingValue = element.getAttribute(bindingType);
-                    if (bindingValue) {
-                        callback(element, bindingType, bindingValue);
-                    }
-                }
+                processElement(element, bindingTypes, callback);
             }
             var elements = element.getElementsByTagName("*");
             for (var i = 0, ni = elements.length; i < ni; i++) {
-                var currentElement = elements[i];
-                for (var j = 0, nj = bindingTypes.length; j < nj; j++) {
-                    var bindingType = bindingTypes[j];
-                    var bindingValue = currentElement.getAttribute(bindingType);
-                    if (bindingValue) {
-                        callback(currentElement, bindingType, bindingValue);
-                    }
-                }
+                processElement(element, bindingTypes, callback);
             }
         };
 

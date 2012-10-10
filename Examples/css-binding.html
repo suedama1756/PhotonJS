@@ -1,0 +1,30 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title></title>
+    <script src="../scripts/jquery-1.7.2.js" type="text/javascript"></script>
+    <script src="../output/photon-debug.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        var Model = photon.observable.model.define({
+            amount:0
+        });
+        $(function () {
+            photon.binding.applyBindings(new Model());
+        });
+    </script>
+    <style type="text/css">
+        .red {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+<div>
+    <input data-bind="{value:amount}{class-red:amount() < 0}">
+
+    <p></p>
+    <span data-bind="{innerText:'You are in the ' + (amount() >= 0 ? 'black' : 'red')}{class-red:amount() < 0}"></span>
+</div>
+</body>
+</html>
