@@ -7,7 +7,7 @@
             factory(ns, window.jQuery);
         }
     })(function(photon, $) {
-        photon.version = '0.7.0.1';
+        "use strict";    photon.version = '0.7.0.1';
         /*jslint evil: true */
         
         var defineNamespace = function (namespace, properties) {

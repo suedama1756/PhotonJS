@@ -1,8 +1,12 @@
-(function module(properties) {
-    var result = {
+//noinspection JSLint,UnterminatedStatementJS
+(function module() {
+    return {
         name:'photon',
         files:[
-            'Photon.js'
+            'photon.js',
+            'type.js',
+            'enumerable.js'
+
         ],
         dependencies:{
             '$':{
@@ -14,6 +18,4 @@
             dependencies:['window', 'document']
         }
     };
-
-    return result;
 })

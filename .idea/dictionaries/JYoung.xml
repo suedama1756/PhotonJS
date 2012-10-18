@@ -3,9 +3,15 @@
     <words>
       <w>booleans</w>
       <w>contrib</w>
+      <w>ctor</w>
+      <w>falsy</w>
+      <w>iteratable</w>
+      <w>jshint</w>
       <w>jslint</w>
       <w>newcap</w>
+      <w>noop</w>
       <w>tmpl</w>
+      <w>undef</w>
     </words>
   </dictionary>
 </component>

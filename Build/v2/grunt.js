@@ -31,14 +31,14 @@ module.exports = function (grunt) {
                 jsOutputFile:'../../output/photon-2.0-min.js',
                 closurePath:'../tools/Closure',
                 options:{
-                    'compilation_level':'SIMPLE_OPTIMIZATIONS'
+                    'compilation_level':'ADVANCED_OPTIMIZATIONS'
                 }
             }
         }
     });
 
     // default task.
-    grunt.registerTask('default', 'module closureCompiler lint copy');
+    grunt.registerTask('default', 'module closureCompiler lint');
 
     // load module-grunt tasks
     grunt.loadTasks('../../../Build/node_modules/module-grunt');

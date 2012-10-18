@@ -2075,12 +2075,12 @@ jasmine.Runner.prototype.execute = function() {
 };
 
 jasmine.Runner.prototype.beforeEach = function(beforeEachFunction) {
-  beforeEachFunction.typeName = 'beforeEach';
+  beforeEachFunction.name = 'beforeEach';
   this.before_.splice(0,0,beforeEachFunction);
 };
 
 jasmine.Runner.prototype.afterEach = function(afterEachFunction) {
-  afterEachFunction.typeName = 'afterEach';
+  afterEachFunction.name = 'afterEach';
   this.after_.splice(0,0,afterEachFunction);
 };
 
@@ -2409,12 +2409,12 @@ jasmine.Suite.prototype.finish = function(onComplete) {
 };
 
 jasmine.Suite.prototype.beforeEach = function(beforeEachFunction) {
-  beforeEachFunction.typeName = 'beforeEach';
+  beforeEachFunction.name = 'beforeEach';
   this.before_.unshift(beforeEachFunction);
 };
 
 jasmine.Suite.prototype.afterEach = function(afterEachFunction) {
-  afterEachFunction.typeName = 'afterEach';
+  afterEachFunction.name = 'afterEach';
   this.after_.unshift(afterEachFunction);
 };
 

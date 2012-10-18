@@ -1,2 +1,5 @@
 1.  Work out how to pull in dependencies directly from forks in GIT, e.g. for Jasmine Adapter, and pull into project
     directly. Is this what GIT sub modules are for?
+
+2.  Need to get JSLint to work against individual files rather than the concatenated one.
+3.  Need to get JSLine to be friendly with JSDoc concepts, such as type definitions.
