@@ -2,6 +2,7 @@
   <dictionary name="JYoung">
     <words>
       <w>booleans</w>
+      <w>comparer</w>
       <w>contrib</w>
       <w>ctor</w>
       <w>falsy</w>

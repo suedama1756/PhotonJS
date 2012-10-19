@@ -1,3 +1,5 @@
+/*jslint sub:true */
+
 var toString = Object.prototype.toString;
 
 var undef;

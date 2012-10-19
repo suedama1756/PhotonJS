@@ -8,6 +8,8 @@
         }
     })(function(photon, $) {
         "use strict";    photon.version = '0.7.0.1';
+        /*jslint sub:true */
+        
         var toString = Object.prototype.toString;
         
         var undef;
@@ -420,15 +422,39 @@
                 return lastFound;
             }
         
+            function aggregate(enumerable, accumulator, seed) {
+                var enumerator = enumerable['getEnumerator']();
+                while (enumerator['moveNext']()) {
+                    seed = accumulator(seed, enumerator['current']());
+                }
+                return seed;
+            }
+        
             function valueOrThrow(value) {
                 if (value === NO_VALUE) {
-                    throw new Error();
+                    throw new Error('No match found.');
                 }
                 return value;
             }
         
             function valueOrDefault(value, defaultValue) {
                 return value === NO_VALUE ? defaultValue : value;
+            }
+        
+            function defaultComparer(x, y) {
+                if (x === y) {
+                    return 0;
+                }
+        
+                if (x < y) {
+                    return -1;
+                }
+        
+                if (x > y) {
+                    return 1;
+                }
+        
+                return -2;
             }
         
             function Enumerable(getEnumerator) {
@@ -461,7 +487,46 @@
                         return valueOrDefault(findLast(this['getEnumerator'](), predicate), defaultValue);
                     },
                     'any':function (predicate) {
-                        return findNext(this, predicate) !== NO_VALUE;
+                        return findNext(this['getEnumerator'](), predicate) !== NO_VALUE;
+                    },
+                    'min' : function(comparer) {
+                        comparer = comparer || defaultComparer;
+                        return aggregate(this, function(accumulated, next) {
+                            return isUndefined(accumulated) || comparer(next, accumulated) === -1 ?
+                                next :
+                                accumulated;
+                        });
+                    },
+                    'max' : function(comparer) {
+                        comparer = comparer || defaultComparer;
+                        return aggregate(this, function(accumulated, next) {
+                            return isUndefined(accumulated) || comparer(next, accumulated) === 1 ?
+                                next :
+                                accumulated;
+                        });
+                    },
+                    'sum' : function() {
+                        return aggregate(this, function(accumulated, next) {
+                            return accumulated + Number(next);
+                        }, 0);
+                    },
+                    'average' : function() {
+                        var count = 0;
+                        return aggregate(this, function(accumulated, next) {
+                            count++;
+                            return accumulated + Number(next);
+                        }, 0) / count;
+                    },
+                    'aggregate' : function(accumulator, seed) {
+                        return aggregate(this, accumulator, seed);
+                    },
+                    'count' : function() {
+                        return aggregate(this, function(accumulated) {
+                            return accumulated + 1;
+                        }, 0)
+                    },
+                    'reverse' : function() {
+                        return enumerable(this['toArray']().reverse());
                     },
                     'toArray':function () {
                         var result = [], i = 0, enumerator = this['getEnumerator']();
