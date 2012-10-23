@@ -5,10 +5,13 @@
       <w>comparer</w>
       <w>contrib</w>
       <w>ctor</w>
+      <w>extremum</w>
       <w>falsy</w>
+      <w>iter</w>
       <w>iteratable</w>
       <w>jshint</w>
       <w>jslint</w>
+      <w>minified</w>
       <w>newcap</w>
       <w>noop</w>
       <w>tmpl</w>

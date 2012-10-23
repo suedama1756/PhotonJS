@@ -42,6 +42,20 @@ function isNullOrUndefined(obj) {
     return obj === null || obj === undef;
 }
 
+var toNumber = Number;
+
+/**
+ * @const
+ * @type string
+ */
+var UID_PROPERTY = '0c8c22e83e7245adb341d6df8973ea63';
+
+var nextUID = 0;
+
+function getUID(obj) {
+    return obj[UID_PROPERTY] || (obj[UID_PROPERTY] = ++nextUID);
+}
+
 /**
  * Extends a target object by copying properties from the source.
  *
@@ -121,6 +135,7 @@ extend(photon, {
     "isFunction":isFunction,
     "isUndefined":isUndefined,
     "isNullOrUndefined":isNullOrUndefined,
-    "extend":extend
+    "extend":extend,
+    "getUID":getUID
 });
 

@@ -1,3 +1,5 @@
+// Even if we use the enumerator type we must wrap it before returning as an 'real' enumerator (to ensure privacy is maintained)
+
 var enumerable = (function () {
     /**
      * @const
@@ -13,11 +15,6 @@ var enumerable = (function () {
      * @const
      * @type {Number}
      */
-    var STATE_DEFERRED = 2;
-    /**
-     * @const
-     * @type {Number}
-     */
     var STATE_COMPLETE = 3;
     /**
      * @const
@@ -25,135 +22,113 @@ var enumerable = (function () {
      */
     var NO_VALUE = {};
 
-    var EMPTY_ARRAY = [];
+    var EMPTY = new Enumerable(function () {
+        var e = iterator();
+        return exportEnumerator(
+            e.completed,
+            e.current);
+    });
 
     /**
-     * Throws an exception if the state is STATE_NOT_STARTED or STATE_COMPLETE
-     * @param state
-     * @return {number}
+     * Creates an enumerator from the specified moveNext and current functions. This function ensures enumerator
+     * functions are exported correctly in the minified code.
+     *
+     * @param {function} moveNext The 'moveNext' function for the enumerator.
+     * @param {function} current The 'current' function for the enumerator.
      */
-    function throwIfNotStartedOrComplete(state) {
-        if (state === STATE_NOT_STARTED) {
-            throw new Error('Enumeration has not started.');
-        }
-
-        if (state === STATE_COMPLETE) {
-            throw new Error('Enumeration has completed.');
-        }
-        return state;
-    }
-
-    /**
-     * Creates an enumerator from the specified moveNext and current functions
-     */
-    function createEnumerator(moveNext, current) {
+    function exportEnumerator(moveNext, current) {
         return {
             'moveNext':moveNext,
             'current':current
         };
     }
 
-    function pendingOrComplete(condition) {
-        return condition ? STATE_IN_PROGRESS : STATE_COMPLETE;
-    }
+    /**
+     *
+     * @param {Enumerable} [enumerable]
+     * @param {function} [selector]
+     * @return {Object}
+     */
+    function iterator(enumerable, selector) {
+        var enumerator = enumerable ? enumerable['getEnumerator']() : null,
+            state = STATE_NOT_STARTED,
+            current,
+            index = -1;
 
-    function where(enumerable, predicate) {
-        return function () {
-            var state = STATE_NOT_STARTED, current, enumerator = enumerable['getEnumerator']();
-            return createEnumerator(
-                function () {
-                    if (state !== STATE_COMPLETE) {
-                        state = STATE_COMPLETE;
-                        while (enumerator['moveNext']()) {
-                            var source = enumerator['current']();
-                            if (predicate(source)) {
-                                state = STATE_IN_PROGRESS;
-                                current = source;
-                                return true;
-                            }
-                        }
-                    }
+        function progress(value) {
+            current = selector ? selector(value, ++index) : value;
+            return !!(state = STATE_IN_PROGRESS);
+        }
 
-                    return false;
-                },
-                function () {
-                    throwIfNotStartedOrComplete(state);
-                    return current;
-                });
-        };
-    }
+        function completed() {
+            return !(state = STATE_COMPLETE);
+        }
 
-    function select(enumerable, selector) {
-        return function () {
-            var state = STATE_NOT_STARTED, pending, current, enumerator = enumerable['getEnumerator']();
-            return createEnumerator(
-                function () {
-                    if ((state = enumerator['moveNext']() ? STATE_DEFERRED : STATE_COMPLETE) === STATE_DEFERRED) {
-                        // take a copy of the source value as we have no versioning
-                        pending = enumerator['current']();
-                    }
+        function isComplete() {
+            return state === STATE_COMPLETE;
+        }
 
-                    return state !== STATE_COMPLETE;
-                },
-                function () {
-                    if (throwIfNotStartedOrComplete(state) === STATE_DEFERRED) {
-                        state = STATE_IN_PROGRESS;
-                        // transform source value
-                        current = selector(pending);
-                    }
+        function current() {
+            if (state === STATE_NOT_STARTED) {
+                throw new Error('Enumeration has not started.');
+            }
 
-                    return current;
-                });
-        };
-    }
+            if (state === STATE_COMPLETE) {
+                throw new Error('Enumeration has completed.');
+            }
 
-    function skip(enumerable, count) {
-        return function () {
-            var state = STATE_NOT_STARTED, current, enumerator = enumerable['getEnumerator']();
-            return createEnumerator(function () {
-                    if (state === STATE_NOT_STARTED) {
-                        //noinspection StatementWithEmptyBodyJS
-                        for (var i = 0; enumerator['moveNext']() && i < count; i++);
-                        state = pendingOrComplete(i === count);
-                    } else if (state === STATE_IN_PROGRESS) {
-                        state = pendingOrComplete(enumerator['moveNext']());
-                    }
-                    current = state === STATE_IN_PROGRESS ?
-                        enumerator['current']() :
-                        null;
-                    return state !== STATE_COMPLETE;
-                },
-                function () {
-                    throwIfNotStartedOrComplete(state);
-                    return current;
-                });
-        };
+            return current;
+        }
+
+        function moveNext() {
+            return state !== STATE_COMPLETE && enumerator['moveNext']() ?
+                progress(enumerator['current']()) :
+                completed();
+        }
+
+        return {
+            moveNext:moveNext,
+            current:current,
+            completed:completed,
+            isComplete:isComplete,
+            progress:progress
+        }
     }
 
     function fromArrayLike(array) {
         return function () {
-            var index = -1, state = STATE_NOT_STARTED, current;
-            return createEnumerator(
+            var i = -1, e = iterator();
+            return exportEnumerator(
                 function () {
-                    if (state !== STATE_COMPLETE) {
-                        state = STATE_COMPLETE;
-
+                    if (!e.isComplete()) {
                         var l = array.length;
-                        while (++index < l) {
-                            if (index in array) {
-                                current = array[index];
-                                state = STATE_IN_PROGRESS;
-                                return true;
+                        while (++i < l) {
+                            if (i in array) {
+                                return e.progress(array[i]);
                             }
                         }
                     }
 
-                    return false;
+                    return e.completed();
                 },
+                e.current);
+        };
+    }
+
+    function where(enumerable, predicateOrFactory, isFactory) {
+        return function () {
+            var i = iterator(enumerable), index = -1, predicate = isFactory ? predicateOrFactory() : predicateOrFactory;
+            return exportEnumerator(
                 function () {
-                    throwIfNotStartedOrComplete(state);
-                    return current;
-                });
+                    while (i.moveNext()) {
+                        if (predicate(i.current(), ++index)) {
+                            return true
+                        }
+                    }
+
+                    return i.completed();
+                },
+                i.current);
         };
     }
 
@@ -161,10 +136,10 @@ var enumerable = (function () {
         return true;
     }
 
-    function findNext(enumerator, predicate) {
+    function findNext(iter, predicate) {
         predicate = predicate || any;
-        while (enumerator['moveNext']()) {
-            var current = enumerator['current']();
+        while (iter.moveNext()) {
+            var current = iter.current();
             if (predicate(current)) {
                 return current;
             }
@@ -173,20 +148,12 @@ var enumerable = (function () {
         return NO_VALUE;
     }
 
-    function findLast(enumerator, predicate) {
+    function findLast(iter, predicate) {
         var lastFound = NO_VALUE, current;
-        while ((current = findNext(enumerator, predicate)) !== NO_VALUE) {
+        while ((current = findNext(iter, predicate)) !== NO_VALUE) {
             lastFound = current;
         }
         return lastFound;
-    }
-
-    function aggregate(enumerable, accumulator, seed) {
-        var enumerator = enumerable['getEnumerator']();
-        while (enumerator['moveNext']()) {
-            seed = accumulator(seed, enumerator['current']());
-        }
-        return seed;
     }
 
     function valueOrThrow(value) {
@@ -198,6 +165,14 @@ var enumerable = (function () {
 
     function valueOrDefault(value, defaultValue) {
         return value === NO_VALUE ? defaultValue : value;
+    }
+
+    function aggregate(enumerable, accumulator, seed) {
+        var enumerator = enumerable['getEnumerator']();
+        while (enumerator['moveNext']()) {
+            seed = accumulator(seed, enumerator['current']());
+        }
+        return seed;
     }
 
     function defaultComparer(x, y) {
@@ -216,6 +191,29 @@ var enumerable = (function () {
         return -2;
     }
 
+    function getObjectKey(obj) {
+        var type = Object.prototype.toString.call(obj);
+        return type === '[object Object]' || obj.valueOf() === obj ?
+            'o' + getUID(obj) :
+            type + obj.valueOf();
+    }
+
+    function getKey(obj) {
+        var type = typeof obj;
+        return type === 'object' && obj !== null ?
+            getObjectKey(obj) :
+            type.charAt(0) + obj;
+    }
+
+    function extremum(enumerable, comparer, direction) {
+        comparer = comparer || defaultComparer;
+        return aggregate(enumerable, function (accumulated, next) {
+            return isUndefined(accumulated) || comparer(next, accumulated) === direction ?
+                next :
+                accumulated;
+        });
+    }
+
     function Enumerable(getEnumerator) {
         this['getEnumerator'] = getEnumerator;
     }
@@ -226,87 +224,115 @@ var enumerable = (function () {
                 return new Enumerable(where(this, predicate));
             },
             'select':function (selector) {
-                return new Enumerable(select(this, selector));
+                var self = this;
+                return new Enumerable(function () {
+                    var iter = iterator(self, selector);
+                    return exportEnumerator(
+                        iter.moveNext,
+                        iter.current);
+                });
+            },
+            'distinct':function (keySelector) {
+                keySelector = keySelector || function (obj) {
+                    return obj;
+                };
+                return new Enumerable(where(this,
+                    function () {
+                        var seen = {};
+                        return function (item) {
+                            var key = getKey(keySelector(item));
+                            return seen.hasOwnProperty(key) ? false : seen[key] = true;
+                        };
+                    }, true));
+
             },
             'skip':function (count) {
-                return count > 0 ? new Enumerable(skip(this, count)) : this;
+                return count > 0 ? new Enumerable(where(this, function (x, i) {
+                    return i >= count;
+                })) : this;
+            },
+            'take':function (count) {
+                var self = this;
+                return new Enumerable(function() {
+                    var iter = iterator(self), taken = 0;
+                    return exportEnumerator(function() {
+                        if (taken < count && iter.moveNext()) {
+                            taken++;
+                            return true;
+                        }
+                        return iter.completed();
+
+                    }, iter.current);
+                });
             },
             'first':function (predicate) {
                 return valueOrThrow(
-                    findNext(this['getEnumerator'](), predicate));
+                    findNext(iterator(this), predicate));
             },
             'firstOrDefault':function (predicate, defaultValue) {
                 return valueOrDefault(
-                    findNext(this['getEnumerator'](), predicate), defaultValue);
+                    findNext(iterator(this), predicate), defaultValue);
             },
             'last':function (predicate) {
-                return valueOrThrow(findLast(this['getEnumerator'](), predicate));
+                return valueOrThrow(findLast(iterator(this), predicate));
             },
             'lastOrDefault':function (predicate, defaultValue) {
-                return valueOrDefault(findLast(this['getEnumerator'](), predicate), defaultValue);
+                return valueOrDefault(findLast(iterator(this), predicate), defaultValue);
             },
             'any':function (predicate) {
-                return findNext(this['getEnumerator'](), predicate) !== NO_VALUE;
+                return findNext(iterator(this), predicate) !== NO_VALUE;
             },
-            'min' : function(comparer) {
-                comparer = comparer || defaultComparer;
-                return aggregate(this, function(accumulated, next) {
-                    return isUndefined(accumulated) || comparer(next, accumulated) === -1 ?
-                        next :
-                        accumulated;
-                });
+            'min':function (comparer) {
+                return extremum(this, comparer, -1);
             },
-            'max' : function(comparer) {
-                comparer = comparer || defaultComparer;
-                return aggregate(this, function(accumulated, next) {
-                    return isUndefined(accumulated) || comparer(next, accumulated) === 1 ?
-                        next :
-                        accumulated;
-                });
+            'max':function (comparer) {
+                return extremum(this, comparer, 1);
             },
-            'sum' : function() {
-                return aggregate(this, function(accumulated, next) {
-                    return accumulated + Number(next);
+            'sum':function () {
+                return aggregate(this, function (accumulated, next) {
+                    return accumulated + toNumber(next);
                 }, 0);
             },
-            'average' : function() {
+            'average':function () {
                 var count = 0;
-                return aggregate(this, function(accumulated, next) {
+                return aggregate(this, function (accumulated, next) {
                     count++;
-                    return accumulated + Number(next);
+                    return accumulated + toNumber(next);
                 }, 0) / count;
             },
-            'aggregate' : function(accumulator, seed) {
+            'aggregate':function (accumulator, seed) {
                 return aggregate(this, accumulator, seed);
             },
-            'count' : function() {
-                return aggregate(this, function(accumulated) {
+            'count':function () {
+                return aggregate(this, function (accumulated) {
                     return accumulated + 1;
-                }, 0)
+                }, 0);
             },
-            'reverse' : function() {
+            'reverse':function () {
                 return enumerable(this['toArray']().reverse());
             },
             'toArray':function () {
-                var result = [], i = 0, enumerator = this['getEnumerator']();
-                while (enumerator['moveNext']()) {
-                    result[i++] = enumerator['current']();
+                var result = [], i = 0, e = iterator(this);
+                while (e.moveNext()) {
+                    result[i++] = e.current();
                 }
                 return result;
             }
         })['build']();
 
-    return function (iteratable) {
-        return isFunction(iteratable['moveNext']) && isFunction(iteratable['current']) ?
-            new Enumerable(iteratable) :
-            new Enumerable(fromArrayLike(isArrayLike(iteratable) ?
-                (isNullOrUndefined(iteratable) ?
-                    EMPTY_ARRAY :
-                    iteratable)
-                : [iteratable]));
+    return function (enumerable) {
+        if (isNullOrUndefined(enumerable)) {
+            return EMPTY;
+        }
+
+        if (isFunction(enumerable['getEnumerator'])) {
+            return new Enumerable(function () {
+                return enumerable['getEnumerator'];
+            });
+        }
+
+        return new Enumerable(isArrayLike(enumerable) ? fromArrayLike(enumerable) : [enumerable]);
     };
 })();
 
 photon['enumerable'] = enumerable;
-
-
