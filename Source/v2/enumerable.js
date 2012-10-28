@@ -52,11 +52,11 @@ var enumerable = (function () {
     function iterator(enumerable, selector) {
         var enumerator = enumerable ? enumerable['getEnumerator']() : null,
             state = STATE_NOT_STARTED,
-            current,
+            curr,
             index = -1;
 
         function progress(value) {
-            current = selector ? selector(value, ++index) : value;
+            curr = selector ? selector(value, ++index) : value;
             return !!(state = STATE_IN_PROGRESS);
         }
 
@@ -77,7 +77,7 @@ var enumerable = (function () {
                 throw new Error('Enumeration has completed.');
             }
 
-            return current;
+            return curr;
         }
 
         function moveNext() {
@@ -233,14 +233,11 @@ var enumerable = (function () {
                 });
             },
             'distinct':function (keySelector) {
-                keySelector = keySelector || function (obj) {
-                    return obj;
-                };
                 return new Enumerable(where(this,
                     function () {
                         var seen = {};
                         return function (item) {
-                            var key = getKey(keySelector(item));
+                            var key = getKey(keySelector ? keySelector(item) : item);
                             return seen.hasOwnProperty(key) ? false : seen[key] = true;
                         };
                     }, true));
@@ -253,9 +250,9 @@ var enumerable = (function () {
             },
             'take':function (count) {
                 var self = this;
-                return new Enumerable(function() {
+                return new Enumerable(function () {
                     var iter = iterator(self), taken = 0;
-                    return exportEnumerator(function() {
+                    return exportEnumerator(function () {
                         if (taken < count && iter.moveNext()) {
                             taken++;
                             return true;
@@ -263,6 +260,79 @@ var enumerable = (function () {
                         return iter.completed();
 
                     }, iter.current);
+                });
+            },
+            'groupBy':function (keySelector) {
+                var self = this;
+                return new Enumerable(function () {
+                    var groups = {},
+                        iter = iterator(self),
+                        current,
+                        pendingGroups = [],
+                        pendingGroupIndex = 0;
+
+                    function createGetEnumerator(items, itemLookup) {
+                        return function () {
+                            var groupIter = iterator(), itemIndex = 0;
+                            return exportEnumerator(function () {
+                                    return (itemIndex < items.length || moveNext(true, itemLookup)) ?
+                                        groupIter.progress(items[itemIndex++]) :
+                                        groupIter.completed();
+                                },
+                                groupIter.current);
+                        }
+                    }
+
+                    function moveNext(matchKey, keyToMatch) {
+                        if (!matchKey) {
+                            if (pendingGroupIndex === pendingGroups.length) {
+                                pendingGroups = [];
+                            } else if (pendingGroupIndex < pendingGroups.length) {
+                                current = pendingGroups[pendingGroupIndex++].enumerable;
+                                return true;
+                            }
+                        }
+
+                        while (iter.moveNext()) {
+                            var item = iter.current(),
+                                itemKey = keySelector ? keySelector(item) : item,
+                                itemLookup = getKey(itemKey);
+
+                            if (groups.hasOwnProperty(itemLookup)) {
+                                groups[itemLookup].items.push(item);
+                            } else {
+                                var items = [item];
+                                current = new Enumerable(
+                                    createGetEnumerator(items, itemLookup));
+                                current.key = itemKey;
+                                var group = groups[itemLookup] = {
+                                    items:items,
+                                    enumerable:current
+                                };
+
+                                if (matchKey) {
+                                    pendingGroups.push(group);
+                                }
+                            }
+
+                            if (!matchKey || keyToMatch === itemLookup) {
+                                return true;
+                            }
+
+                        }
+                        return iter.completed();
+                    }
+
+                    return exportEnumerator(
+                        function () {
+                            return moveNext(false, null);
+                        },
+                        function () {
+                            return !iter.isComplete() || pendingGroups.length ?
+                                current :
+                                iter.current();
+
+                        });
                 });
             },
             'first':function (predicate) {

@@ -1,4 +1,4 @@
-var suiteFilter;
+var suiteFilter = '.groupBy';
 
 describe('enumerable', function () {
     var ERROR_NOT_STARTED = 'Enumeration has not started.';
@@ -54,17 +54,17 @@ describe('enumerable', function () {
                 expect(results).toEqual(expectedResults);
             });
 
-            it ('should support repeatable enumerations', function() {
+            it('should support repeatable enumerations', function () {
                 var enumerable = enumerableFactory();
 
                 // get enumerator and enumerate
                 var enum1 = enumerable.getEnumerator();
-                var results1  = [];
+                var results1 = [];
                 enumerate(enum1, expectedCount + 1, results1);
 
                 // get another enumerator (should be reset)
                 var enum2 = enumerable.getEnumerator();
-                var results2  = [];
+                var results2 = [];
                 enumerate(enum2, expectedCount + 1, results2);
 
                 expect(results1).toEqual(expectedResults);
@@ -89,7 +89,7 @@ describe('enumerable', function () {
         })();
     }, []);
 
-    describe('.select', function() {
+    describe('.select', function () {
         defineSuite('selector', function () {
             return photon.enumerable([1, 5, 4]).select(function (item, index) {
                 return item + '@' + index;
@@ -103,7 +103,7 @@ describe('enumerable', function () {
         }, []);
     });
 
-    describe('.skip', function() {
+    describe('.skip', function () {
         defineSuite('by less than count', function () {
             return photon.enumerable([1, 2, 3]).skip(1);
         }, [2, 3]);
@@ -115,9 +115,14 @@ describe('enumerable', function () {
         defineSuite('by count', function () {
             return photon.enumerable([1, 2, 3]).skip(3);
         }, []);
+
+        defineSuite('by some then take', function () {
+            return photon.enumerable([1, 2, 3, 4]).skip(3).take(1)
+        }, [4]);
     });
 
-    describe('.take', function() {
+
+    describe('.take', function () {
         defineSuite('by less than count', function () {
             return photon.enumerable([1, 2, 3]).take(1);
         }, [1]);
@@ -131,7 +136,7 @@ describe('enumerable', function () {
         }, [1, 2, 3]);
     });
 
-    describe('.where', function() {
+    describe('.where', function () {
         var values = [1, 2, 3, 4, 5, 7];
         defineSuite('match some by value', function () {
             return photon.enumerable(values).where(function (item) {
@@ -164,62 +169,80 @@ describe('enumerable', function () {
         }, []);
     });
 
-    describe('.distinct', function() {
-        defineSuite('numbers', function() {
-            return photon.enumerable([1,2,1,2,2,3,4,5,4,6,3,2,1]).distinct();
-        }, [1,2,3,4,5,6]);
+    describe('.distinct', function () {
+        defineSuite('numbers', function () {
+            return photon.enumerable([1, 2, 1, 2, 2, 3, 4, 5, 4, 6, 3, 2, 1]).distinct();
+        }, [1, 2, 3, 4, 5, 6]);
 
-        defineSuite('strings', function() {
+        defineSuite('strings', function () {
             return photon.enumerable(['one', 'two', 'one', 'three', 'two']).distinct();
         }, ['one', 'two', 'three']);
 
-        defineSuite('dates', function() {
+        defineSuite('dates', function () {
             return photon.enumerable([new Date(0), new Date(1), new Date(0)]).distinct();
         }, [new Date(0), new Date(1)]);
 
 
-        var values = [{}, {}, {}, {}, {}];
-        defineSuite('objects', function() {
+        var values = [
+            {},
+            {},
+            {},
+            {},
+            {}
+        ];
+        defineSuite('objects', function () {
             return photon.enumerable([values[0], values[3], values[2], values[1], values[0], values[4], values[1], values[2]]).distinct();
         }, [values[0], values[3], values[2], values[1], values[4]]);
 
-        defineSuite('mixed types', function() {
+        defineSuite('mixed types', function () {
             return photon.enumerable(['1', 1, true, '2', 2, false, 1, '1', new Date(1)]).distinct();
         }, ['1', 1, true, '2', 2, false, new Date(1)]);
 
-        defineSuite('empty', function() {
+        defineSuite('empty', function () {
             return photon.enumerable([]).distinct();
         }, []);
 
         var keyedItems = [
-            {key :1,value:'One'},
-            {key :2,value:'Two'},
-            {key :1,value:'One'}
+            {key:1, value:'One'},
+            {key:2, value:'Two'},
+            {key:1, value:'One'}
         ];
-        defineSuite('selector', function() {
-            return photon.enumerable(keyedItems).distinct(function(item) {
+        defineSuite('selector', function () {
+            return photon.enumerable(keyedItems).distinct(function (item) {
                 return item.key;
             });
         }, [keyedItems[0], keyedItems[1]]);
 
-        defineSuite('nulls', function() {
+        defineSuite('nulls', function () {
             return photon.enumerable([1, null, 2, 1, null]).distinct();
         }, [1, null, 2]);
 
         var undef;
-        defineSuite('undefined', function() {
+        defineSuite('undefined', function () {
             return photon.enumerable([1, undef, 2, 1, undef]).distinct();
         }, [1, undef, 2]);
     });
 
-    describe('.any', function() {
-        it ('should return false when empty', function() {
+    describe('.groupBy', function() {
+        it ('should', function() {
+            var result = photon.enumerable([1, 2, 1, 2, 1, 2, 3]).groupBy();
+            var endResult = result.select(function(item) {
+                return item.toArray();
+            }).toArray();
+            expect(endResult).toEqual([[1,1,1],[2,2,2],[3]]);
+        });
+
+
+    });
+
+    describe('.any', function () {
+        it('should return false when empty', function () {
             expect(photon.enumerable([]).any()).toBe(false);
         });
 
-        it ('should return false when predicate finds no matches', function() {
+        it('should return false when predicate finds no matches', function () {
             var matched = false;
-            expect(photon.enumerable([1,2,3]).any(function(item) {
+            expect(photon.enumerable([1, 2, 3]).any(function (item) {
                 if (item > 3) {
                     matched = true;
                 }
@@ -228,77 +251,82 @@ describe('enumerable', function () {
             expect(matched).toBe(false);
         });
 
-        it ('should return true when predicate finds matches at start', function() {
+        it('should return true when predicate finds matches at start', function () {
             var matched = false;
-            expect(photon.enumerable([1,2,3, 4]).any(function(item) {
+            expect(photon.enumerable([1, 2, 3, 4]).any(function (item) {
                 return matched = (item === 1);
             })).toBe(true);
             expect(matched).toBe(true);
         });
 
-        it ('should return true when predicate finds matches at the end', function() {
+        it('should return true when predicate finds matches at the end', function () {
             var matched = false;
-            expect(photon.enumerable([1,2,3, 4]).any(function(item) {
+            expect(photon.enumerable([1, 2, 3, 4]).any(function (item) {
                 return matched = item === 4;
             })).toBe(true);
             expect(matched).toBe(true);
         });
     });
 
-    describe('.first', function() {
-        it ('should throw if empty', function() {
-            expect(function() {
+    describe('.first', function () {
+        it('should throw if empty', function () {
+            expect(function () {
                 photon.enumerable([]).first()
             }).toThrow(ERROR_NO_MATCH);
         });
 
-        it ('should return first item when not empty', function() {
-            expect(photon.enumerable([1,2,3]).first()).toBe(1);
+        it('should return first item when not empty', function () {
+            expect(photon.enumerable([1, 2, 3]).first()).toBe(1);
         });
 
-        it ('should throw when no items are matched by the predicate', function() {
-            expect(function() {
-                photon.enumerable([1,2,3]).first(function(item) {
+        it('should throw when no items are matched by the predicate', function () {
+            expect(function () {
+                photon.enumerable([1, 2, 3]).first(function (item) {
                     return item > 3;
                 })
             }).toThrow(ERROR_NO_MATCH);
         });
 
-        it ('should return first item matched by predicate', function() {
-            var data = [{v:3}, {v:1}, {v:2}, {v:1}];
-            expect(photon.enumerable(data).first(function(item) {
+        it('should return first item matched by predicate', function () {
+            var data = [
+                {v:3},
+                {v:1},
+                {v:2},
+                {v:1}
+            ];
+            expect(photon.enumerable(data).first(function (item) {
                 return item.v === 1;
             })).toBe(data[1]);
         });
     });
 
-    describe('.firstOrDefault', function() {
-        it ('should return first item when not empty', function() {
-            expect(photon.enumerable([1,2,3]).firstOrDefault()).toBe(1);
+    describe('.firstOrDefault', function () {
+        it('should return first item when not empty', function () {
+            expect(photon.enumerable([1, 2, 3]).firstOrDefault()).toBe(1);
         });
 
-        describe('- with no default value', function() {
-            it ('should return undefined when empty', function() {
+        describe('- with no default value', function () {
+            it('should return undefined when empty', function () {
                 expect(photon.enumerable([]).firstOrDefault()).toBeUndefined();
             });
 
-            it ('should return undefined when no items are matched by the predicate', function() {
+            it('should return undefined when no items are matched by the predicate', function () {
                 expect(
-                    photon.enumerable([1,2,3]).firstOrDefault(function(item) {
+                    photon.enumerable([1, 2, 3]).firstOrDefault(function (item) {
                         return item > 3;
                     })
                 ).toBeUndefined();
             });
         });
 
-        describe('- with default value', function() {
-            it ('should return default value when empty', function() {
+        describe('- with default value', function () {
+            it('should return default value when empty', function () {
                 expect(photon.enumerable([]).firstOrDefault(null, -1)).toBe(-1);
             });
 
-            it ('should return default value when no items are matched by the predicate', function() {
+            it('should return default value when no items are matched by the predicate', function () {
                 expect(
-                    photon.enumerable([1,2,3]).firstOrDefault(function(item) {
+                    photon.enumerable([1, 2, 3]).firstOrDefault(function (item) {
                         return item > 3;
                     }, -1)
                 ).toBe(-1);
