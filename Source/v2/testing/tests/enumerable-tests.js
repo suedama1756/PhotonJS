@@ -1,4 +1,4 @@
-var suiteFilter = '.groupBy';
+var suiteFilter;// = 'groupBy empty';
 
 describe('enumerable', function () {
     var ERROR_NOT_STARTED = 'Enumeration has not started.';
@@ -18,10 +18,24 @@ describe('enumerable', function () {
         return count;
     }
 
+    function getFullSuiteDescription() {
+        var result = [],
+            suite = jasmine.getEnv().currentSuite;
+        while (suite) {
+            result.unshift(suite.description);
+            suite = suite.parentSuite;
+        }
+        return result.join(' ');
+    }
+
     function defineSuite(suiteName, enumerableFactory, expectedResults) {
         var expectedCount = expectedResults.length;
         describe(suiteName, function () {
-            if (suiteFilter && suiteFilter.indexOf(suiteName) === -1) {
+            var suiteDescription = getFullSuiteDescription();
+
+            console.log('Suite: %s', suiteDescription);
+
+            if (suiteFilter && suiteDescription.indexOf(suiteFilter) === -1) {
                 return;
             }
 
@@ -223,16 +237,122 @@ describe('enumerable', function () {
         }, [1, undef, 2]);
     });
 
-    describe('.groupBy', function() {
-        it ('should', function() {
-            var result = photon.enumerable([1, 2, 1, 2, 1, 2, 3]).groupBy();
-            var endResult = result.select(function(item) {
-                return item.toArray();
-            }).toArray();
-            expect(endResult).toEqual([[1,1,1],[2,2,2],[3]]);
-        });
+    describe('.groupBy', function () {
+        defineSuite('numbers', function () {
+            return photon.enumerable([1, 2, 1, 2, 2, 3, 4, 5, 4, 6, 3, 2, 1]).groupBy()
+                .select(function (x) {
+                    return x.toArray();
+                });
+        }, [
+            [1, 1, 1],
+            [2, 2, 2, 2],
+            [3, 3],
+            [4, 4],
+            [5],
+            [6]
+        ]);
+
+        defineSuite('strings', function () {
+            return photon.enumerable(['one', 'two', 'one', 'three', 'two']).groupBy()
+                .select(function (x) {
+                    return x.toArray();
+                });
+        }, [
+            ['one', 'one'],
+            ['two', 'two'],
+            ['three']
+        ]);
+
+        defineSuite('dates', function () {
+            return photon.enumerable([new Date(0), new Date(1), new Date(0)]).groupBy()
+                .select(function (x) {
+                    return x.toArray();
+                });
+        }, [
+            [new Date(0), new Date(0)],
+            [new Date(1)]
+        ]);
 
 
+        var values = [
+            {},
+            {},
+            {},
+            {},
+            {}
+        ];
+        defineSuite('objects', function () {
+            return photon.enumerable([values[0], values[3], values[2], values[1], values[0], values[4], values[1], values[2]]).groupBy()
+                .select(function (x) {
+                    return x.toArray();
+                });
+        }, [
+            [values[0], values[0]],
+            [values[3]],
+            [values[2], values[2]],
+            [values[1], values[1]],
+            [values[4]]
+        ]);
+
+        defineSuite('mixed types', function () {
+            return photon.enumerable(['1', 1, true, '2', 2, false, 1, '1', new Date(1)]).groupBy()
+                .select(function (x) {
+                    return x.toArray();
+                });
+        }, [
+            ['1', '1'],
+            [1, 1],
+            [true],
+            ['2'],
+            [2],
+            [false],
+            [new Date(1)]
+        ]);
+
+        defineSuite('empty', function () {
+            return photon.enumerable([]).groupBy();
+        }, []);
+
+        var keyedItems = [
+            {key:1, value:'One'},
+            {key:2, value:'Two'},
+            {key:1, value:'One'}
+        ];
+        defineSuite('selector', function () {
+            return photon.enumerable(keyedItems).groupBy(
+                function (item) {
+                    return item.key;
+                }).select(
+                function (x) {
+                    return x.toArray();
+                });
+        }, [
+            [keyedItems[0], keyedItems[2]],
+            [keyedItems[1]]
+        ]);
+
+        defineSuite('nulls', function () {
+            return photon.enumerable([1, null, 2, 1, null]).groupBy()
+                .select(function (x) {
+                    return x.toArray();
+                });
+        }, [
+            [1, 1],
+            [null, null],
+            [2]
+        ]);
+
+        var undef;
+        defineSuite('undefined', function () {
+            return photon.enumerable([1, undef, 2, 1, undef]).groupBy()
+                .select(function (x) {
+                    return x.toArray();
+                })
+        }, [
+            [1, 1],
+            [undef, undef],
+            [2]
+        ]);
     });
 
     describe('.any', function () {

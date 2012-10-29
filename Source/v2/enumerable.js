@@ -68,15 +68,17 @@ var enumerable = (function () {
             return state === STATE_COMPLETE;
         }
 
+        function isStarted() {
+            return state !== STATE_NOT_STARTED;
+        }
+
         function current() {
-            if (state === STATE_NOT_STARTED) {
+            if (!isStarted()) {
                 throw new Error('Enumeration has not started.');
             }
-
-            if (state === STATE_COMPLETE) {
+            if (isComplete()) {
                 throw new Error('Enumeration has completed.');
             }
-
             return curr;
         }
 
@@ -91,8 +93,9 @@ var enumerable = (function () {
             current:current,
             completed:completed,
             isComplete:isComplete,
+            isStarted:isStarted,
             progress:progress
-        }
+        };
     }
 
     function fromArrayLike(array) {
@@ -122,7 +125,7 @@ var enumerable = (function () {
                 function () {
                     while (i.moveNext()) {
                         if (predicate(i.current(), ++index)) {
-                            return true
+                            return true;
                         }
                     }
 
@@ -191,6 +194,10 @@ var enumerable = (function () {
         return -2;
     }
 
+    function defaultKeySelector(item) {
+        return item;
+    }
+
     function getObjectKey(obj) {
         var type = Object.prototype.toString.call(obj);
         return type === '[object Object]' || obj.valueOf() === obj ?
@@ -233,12 +240,15 @@ var enumerable = (function () {
                 });
             },
             'distinct':function (keySelector) {
+                keySelector = keySelector || defaultKeySelector;
                 return new Enumerable(where(this,
                     function () {
                         var seen = {};
                         return function (item) {
-                            var key = getKey(keySelector ? keySelector(item) : item);
-                            return seen.hasOwnProperty(key) ? false : seen[key] = true;
+                            var key = getKey(keySelector(item));
+                            return seen.hasOwnProperty(key) ?
+                                false :
+                                seen[key] = true;
                         };
                     }, true));
 
@@ -263,6 +273,7 @@ var enumerable = (function () {
                 });
             },
             'groupBy':function (keySelector) {
+                keySelector = keySelector || defaultKeySelector;
                 var self = this;
                 return new Enumerable(function () {
                     var groups = {},
@@ -280,7 +291,7 @@ var enumerable = (function () {
                                         groupIter.completed();
                                 },
                                 groupIter.current);
-                        }
+                        };
                     }
 
                     function moveNext(matchKey, keyToMatch) {
@@ -295,7 +306,7 @@ var enumerable = (function () {
 
                         while (iter.moveNext()) {
                             var item = iter.current(),
-                                itemKey = keySelector ? keySelector(item) : item,
+                                itemKey = keySelector(item),
                                 itemLookup = getKey(itemKey);
 
                             if (groups.hasOwnProperty(itemLookup)) {
@@ -318,7 +329,6 @@ var enumerable = (function () {
                             if (!matchKey || keyToMatch === itemLookup) {
                                 return true;
                             }
-
                         }
                         return iter.completed();
                     }
@@ -328,7 +338,7 @@ var enumerable = (function () {
                             return moveNext(false, null);
                         },
                         function () {
-                            return !iter.isComplete() || pendingGroups.length ?
+                            return (!iter.isComplete() || pendingGroups.length) && iter.isStarted() ?
                                 current :
                                 iter.current();
 
