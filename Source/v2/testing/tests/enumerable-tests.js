@@ -1,5 +1,9 @@
 var suiteFilter;// = 'groupBy empty';
 
+function matchOddNumbers(x) {
+    return x % 2 === 1;
+}
+
 describe('enumerable', function () {
     var ERROR_NOT_STARTED = 'Enumeration has not started.';
     var ERROR_COMPLETED = 'Enumeration has completed.';
@@ -28,7 +32,7 @@ describe('enumerable', function () {
         return result.join(' ');
     }
 
-    function defineSuite(suiteName, enumerableFactory, expectedResults) {
+    function describeNonScalar(suiteName, enumerableFactory, expectedResults, additionalTests) {
         var expectedCount = expectedResults.length;
         describe(suiteName, function () {
             var suiteDescription = getFullSuiteDescription();
@@ -84,375 +88,717 @@ describe('enumerable', function () {
                 expect(results1).toEqual(expectedResults);
                 expect(results2).toEqual(expectedResults);
             });
+
+            if (additionalTests) {
+                additionalTests();
+            }
         })
     }
 
-    defineSuite('.fromArray', function () {
-        return photon.enumerable([1, 2, 3]);
-    }, [1, 2, 3]);
+    function describeScalar(suiteName, enumerableFactory, getter, expectedResult, additionalTests) {
+        describe(suiteName, function () {
+            var suiteDescription = getFullSuiteDescription();
 
-    defineSuite('.fromArguments', function () {
-        return (function () {
-            return photon.enumerable(arguments);
-        })(1, 2, 3);
-    }, [1, 2, 3]);
+            console.log('Suite: %s', suiteDescription);
 
-    defineSuite('.fromEmptyArguments', function () {
-        return (function () {
-            return photon.enumerable(arguments);
-        })();
-    }, []);
+            if (suiteFilter && suiteDescription.indexOf(suiteFilter) === -1) {
+                return;
+            }
 
-    describe('.select', function () {
-        defineSuite('selector', function () {
+            var enumerable = null;
+
+            function verifyResult(result) {
+                if (typeof expectedResult === 'number' && isNaN(expectedResult)) {
+                    expect(isNaN(result)).toBe(true);
+                } else {
+                    expect(result).toBe(expectedResult);
+                }
+            }
+
+            beforeEach(function () {
+                enumerable = enumerableFactory();
+            });
+
+            it('should return correct value', function () {
+                var result = getter(enumerable);
+                verifyResult(result);
+            });
+
+            it('should support repeatable enumerations', function () {
+                var result1 = getter(enumerable);
+                verifyResult(result1);
+                var result2 = getter(enumerable);
+                verifyResult(result2);
+            });
+
+            if (additionalTests) {
+                additionalTests();
+            }
+        })
+    }
+
+    describe('- creating,', function () {
+        describe('from enumerable', function() {
+            it('should return original enumerable object', function () {
+                var original = photon.enumerable([1, 2, 3]);
+                expect(photon.enumerable(original)).toBe(original);
+            })
+        });
+
+        describeNonScalar('from empty arguments', function () {
+            return (function () {
+                return photon.enumerable(arguments);
+            })();
+        }, []);
+
+        describeNonScalar('from arguments', function () {
+            return (function () {
+                return photon.enumerable(arguments);
+            })(1, 2, 3);
+        }, [1, 2, 3]);
+
+        describeNonScalar('from array', function () {
+            return photon.enumerable([1, 2, 3]);
+        }, [1, 2, 3]);
+    });
+
+    describe('- select,', function () {
+        describeNonScalar('using value and index', function () {
             return photon.enumerable([1, 5, 4]).select(function (item, index) {
                 return item + '@' + index;
             });
         }, ['1@0', '5@1', '4@2']);
 
-        defineSuite('empty', function () {
+        describeNonScalar('is empty', function () {
             return photon.enumerable([]).select(function (item, index) {
                 return item + '@' + index;
             });
         }, []);
     });
 
-    describe('.skip', function () {
-        defineSuite('by less than count', function () {
+    describe('- skip,', function () {
+        describeNonScalar('less than count', function () {
             return photon.enumerable([1, 2, 3]).skip(1);
         }, [2, 3]);
 
-        defineSuite('by more than count', function () {
+        describeNonScalar('more than count', function () {
             return photon.enumerable([1, 2, 3]).skip(4);
         }, []);
 
-        defineSuite('by count', function () {
+        describeNonScalar('count', function () {
             return photon.enumerable([1, 2, 3]).skip(3);
         }, []);
 
-        defineSuite('by some then take', function () {
+        describeNonScalar('some then take', function () {
             return photon.enumerable([1, 2, 3, 4]).skip(3).take(1)
         }, [4]);
     });
 
-
-    describe('.take', function () {
-        defineSuite('by less than count', function () {
+    describe('- take,', function () {
+        describeNonScalar('less than count', function () {
             return photon.enumerable([1, 2, 3]).take(1);
         }, [1]);
 
-        defineSuite('by more than count', function () {
+        describeNonScalar('more than count', function () {
             return photon.enumerable([1, 2, 3]).take(4);
         }, [1, 2, 3]);
 
-        defineSuite('by count', function () {
+        describeNonScalar('count', function () {
             return photon.enumerable([1, 2, 3]).take(3);
         }, [1, 2, 3]);
     });
 
-    describe('.where', function () {
+    describe('- where,', function () {
         var values = [1, 2, 3, 4, 5, 7];
-        defineSuite('match some by value', function () {
+        describeNonScalar('matching some by value', function () {
             return photon.enumerable(values).where(function (item) {
                 return (item % 2) === 1;
             });
         }, [1, 3, 5, 7]);
 
-        defineSuite('match none', function () {
-            return photon.enumerable(values).where(function () {
-                return false;
-            });
-        }, []);
-
-        defineSuite('match all', function () {
-            return photon.enumerable(values).where(function () {
-                return true;
-            });
-        }, values);
-
-        defineSuite('by some by index', function () {
+        describeNonScalar('matching some by index', function () {
             return photon.enumerable(values).where(function (item, index) {
                 return index > 2;
             });
         }, [4, 5, 7]);
 
-        defineSuite('over empty', function () {
+        describeNonScalar('matching none', function () {
+            return photon.enumerable(values).where(function () {
+                return false;
+            });
+        }, []);
+
+        describeNonScalar('matching all', function () {
+            return photon.enumerable(values).where(function () {
+                return true;
+            });
+        }, values);
+
+        describeNonScalar('is empty', function () {
             return photon.enumerable([]).where(function () {
                 throw new Error('Unexpected predicate call.');
             });
         }, []);
     });
 
-    describe('.distinct', function () {
-        defineSuite('numbers', function () {
-            return photon.enumerable([1, 2, 1, 2, 2, 3, 4, 5, 4, 6, 3, 2, 1]).distinct();
-        }, [1, 2, 3, 4, 5, 6]);
+    describe('- distinct,', function () {
+        describe('has no key selector,', function () {
+            describeNonScalar('contains only number types', function () {
+                return photon.enumerable([1, 2, 1, 2, 2, 3, 4, 5, 4, 6, 3, 2, 1]).distinct();
+            }, [1, 2, 3, 4, 5, 6]);
 
-        defineSuite('strings', function () {
-            return photon.enumerable(['one', 'two', 'one', 'three', 'two']).distinct();
-        }, ['one', 'two', 'three']);
+            describeNonScalar('contains only string types', function () {
+                return photon.enumerable(['one', 'two', 'one', 'three', 'two']).distinct();
+            }, ['one', 'two', 'three']);
 
-        defineSuite('dates', function () {
-            return photon.enumerable([new Date(0), new Date(1), new Date(0)]).distinct();
-        }, [new Date(0), new Date(1)]);
+            describeNonScalar('contains only date types', function () {
+                return photon.enumerable([new Date(0), new Date(1), new Date(0)]).distinct();
+            }, [new Date(0), new Date(1)]);
 
-
-        var values = [
-            {},
-            {},
-            {},
-            {},
-            {}
-        ];
-        defineSuite('objects', function () {
-            return photon.enumerable([values[0], values[3], values[2], values[1], values[0], values[4], values[1], values[2]]).distinct();
-        }, [values[0], values[3], values[2], values[1], values[4]]);
-
-        defineSuite('mixed types', function () {
-            return photon.enumerable(['1', 1, true, '2', 2, false, 1, '1', new Date(1)]).distinct();
-        }, ['1', 1, true, '2', 2, false, new Date(1)]);
-
-        defineSuite('empty', function () {
-            return photon.enumerable([]).distinct();
-        }, []);
-
-        var keyedItems = [
-            {key:1, value:'One'},
-            {key:2, value:'Two'},
-            {key:1, value:'One'}
-        ];
-        defineSuite('selector', function () {
-            return photon.enumerable(keyedItems).distinct(function (item) {
-                return item.key;
-            });
-        }, [keyedItems[0], keyedItems[1]]);
-
-        defineSuite('nulls', function () {
-            return photon.enumerable([1, null, 2, 1, null]).distinct();
-        }, [1, null, 2]);
-
-        var undef;
-        defineSuite('undefined', function () {
-            return photon.enumerable([1, undef, 2, 1, undef]).distinct();
-        }, [1, undef, 2]);
-    });
-
-    describe('.groupBy', function () {
-        defineSuite('numbers', function () {
-            return photon.enumerable([1, 2, 1, 2, 2, 3, 4, 5, 4, 6, 3, 2, 1]).groupBy()
-                .select(function (x) {
-                    return x.toArray();
-                });
-        }, [
-            [1, 1, 1],
-            [2, 2, 2, 2],
-            [3, 3],
-            [4, 4],
-            [5],
-            [6]
-        ]);
-
-        defineSuite('strings', function () {
-            return photon.enumerable(['one', 'two', 'one', 'three', 'two']).groupBy()
-                .select(function (x) {
-                    return x.toArray();
-                });
-        }, [
-            ['one', 'one'],
-            ['two', 'two'],
-            ['three']
-        ]);
-
-        defineSuite('dates', function () {
-            return photon.enumerable([new Date(0), new Date(1), new Date(0)]).groupBy()
-                .select(function (x) {
-                    return x.toArray();
-                });
-        }, [
-            [new Date(0), new Date(0)],
-            [new Date(1)]
-        ]);
-
-
-        var values = [
-            {},
-            {},
-            {},
-            {},
-            {}
-        ];
-        defineSuite('objects', function () {
-            return photon.enumerable([values[0], values[3], values[2], values[1], values[0], values[4], values[1], values[2]]).groupBy()
-                .select(function (x) {
-                    return x.toArray();
-                });
-        }, [
-            [values[0], values[0]],
-            [values[3]],
-            [values[2], values[2]],
-            [values[1], values[1]],
-            [values[4]]
-        ]);
-
-        defineSuite('mixed types', function () {
-            return photon.enumerable(['1', 1, true, '2', 2, false, 1, '1', new Date(1)]).groupBy()
-                .select(function (x) {
-                    return x.toArray();
-                });
-        }, [
-            ['1', '1'],
-            [1, 1],
-            [true],
-            ['2'],
-            [2],
-            [false],
-            [new Date(1)]
-        ]);
-
-        defineSuite('empty', function () {
-            return photon.enumerable([]).groupBy();
-        }, []);
-
-        var keyedItems = [
-            {key:1, value:'One'},
-            {key:2, value:'Two'},
-            {key:1, value:'One'}
-        ];
-        defineSuite('selector', function () {
-            return photon.enumerable(keyedItems).groupBy(
-                function (item) {
-                    return item.key;
-                }).select(
-                function (x) {
-                    return x.toArray();
-                });
-        }, [
-            [keyedItems[0], keyedItems[2]],
-            [keyedItems[1]]
-        ]);
-
-        defineSuite('nulls', function () {
-            return photon.enumerable([1, null, 2, 1, null]).groupBy()
-                .select(function (x) {
-                    return x.toArray();
-                });
-        }, [
-            [1, 1],
-            [null, null],
-            [2]
-        ]);
-
-        var undef;
-        defineSuite('undefined', function () {
-            return photon.enumerable([1, undef, 2, 1, undef]).groupBy()
-                .select(function (x) {
-                    return x.toArray();
-                })
-        }, [
-            [1, 1],
-            [undef, undef],
-            [2]
-        ]);
-    });
-
-    describe('.any', function () {
-        it('should return false when empty', function () {
-            expect(photon.enumerable([]).any()).toBe(false);
-        });
-
-        it('should return false when predicate finds no matches', function () {
-            var matched = false;
-            expect(photon.enumerable([1, 2, 3]).any(function (item) {
-                if (item > 3) {
-                    matched = true;
-                }
-                return matched;
-            })).toBe(false);
-            expect(matched).toBe(false);
-        });
-
-        it('should return true when predicate finds matches at start', function () {
-            var matched = false;
-            expect(photon.enumerable([1, 2, 3, 4]).any(function (item) {
-                return matched = (item === 1);
-            })).toBe(true);
-            expect(matched).toBe(true);
-        });
-
-        it('should return true when predicate finds matches at the end', function () {
-            var matched = false;
-            expect(photon.enumerable([1, 2, 3, 4]).any(function (item) {
-                return matched = item === 4;
-            })).toBe(true);
-            expect(matched).toBe(true);
-        });
-    });
-
-    describe('.first', function () {
-        it('should throw if empty', function () {
-            expect(function () {
-                photon.enumerable([]).first()
-            }).toThrow(ERROR_NO_MATCH);
-        });
-
-        it('should return first item when not empty', function () {
-            expect(photon.enumerable([1, 2, 3]).first()).toBe(1);
-        });
-
-        it('should throw when no items are matched by the predicate', function () {
-            expect(function () {
-                photon.enumerable([1, 2, 3]).first(function (item) {
-                    return item > 3;
-                })
-            }).toThrow(ERROR_NO_MATCH);
-        });
-
-        it('should return first item matched by predicate', function () {
-            var data = [
-                {v:3},
-                {v:1},
-                {v:2},
-                {v:1}
+            var values = [
+                {},
+                {},
+                {},
+                {},
+                {}
             ];
-            expect(photon.enumerable(data).first(function (item) {
-                return item.v === 1;
-            })).toBe(data[1]);
+            describeNonScalar('contains only object types', function () {
+                return photon.enumerable([values[0], values[3], values[2], values[1], values[0], values[4], values[1], values[2]]).distinct();
+            }, [values[0], values[3], values[2], values[1], values[4]]);
+
+            describeNonScalar('contains mixed types', function () {
+                return photon.enumerable(['1', 1, true, '2', 2, false, 1, '1', new Date(1)]).distinct();
+            }, ['1', 1, true, '2', 2, false, new Date(1)]);
+
+            describeNonScalar('is empty', function () {
+                return photon.enumerable([]).distinct();
+            }, []);
+
+            describeNonScalar('contains nulls', function () {
+                return photon.enumerable([1, null, 2, 1, null]).distinct();
+            }, [1, null, 2]);
+
+            var undef;
+            describeNonScalar('contains undefined', function () {
+                return photon.enumerable([1, undef, 2, 1, undef]).distinct();
+            }, [1, undef, 2]);
+        });
+
+        describe('has key selector,', function () {
+            var keyedItems = [
+                {key:1, value:'One'},
+                {key:2, value:'Two'},
+                {key:1, value:'One'}
+            ];
+            describeNonScalar('contains groups', function () {
+                return photon.enumerable(keyedItems).distinct(function (item) {
+                    return item.key;
+                });
+            }, [keyedItems[0], keyedItems[1]]);
         });
     });
 
-    describe('.firstOrDefault', function () {
-        it('should return first item when not empty', function () {
-            expect(photon.enumerable([1, 2, 3]).firstOrDefault()).toBe(1);
-        });
+    describe('- groupBy,', function () {
+        describe('has no key selector,', function () {
+            describeNonScalar('contains only numeric values', function () {
+                return photon.enumerable([1, 2, 1, 2, 2, 3, 4, 5, 4, 6, 3, 2, 1]).groupBy()
+                    .select(function (x) {
+                        return x.toArray();
+                    });
+            }, [
+                [1, 1, 1],
+                [2, 2, 2, 2],
+                [3, 3],
+                [4, 4],
+                [5],
+                [6]
+            ]);
 
-        describe('- with no default value', function () {
-            it('should return undefined when empty', function () {
-                expect(photon.enumerable([]).firstOrDefault()).toBeUndefined();
-            });
+            describeNonScalar('contains only string values', function () {
+                return photon.enumerable(['one', 'two', 'one', 'three', 'two']).groupBy()
+                    .select(function (x) {
+                        return x.toArray();
+                    });
+            }, [
+                ['one', 'one'],
+                ['two', 'two'],
+                ['three']
+            ]);
 
-            it('should return undefined when no items are matched by the predicate', function () {
-                expect(
-                    photon.enumerable([1, 2, 3]).firstOrDefault(function (item) {
-                        return item > 3;
+            describeNonScalar('contains only date values', function () {
+                return photon.enumerable([new Date(0), new Date(1), new Date(0)]).groupBy()
+                    .select(function (x) {
+                        return x.toArray();
+                    });
+            }, [
+                [new Date(0), new Date(0)],
+                [new Date(1)]
+            ]);
+
+            var values = [
+                {},
+                {},
+                {},
+                {},
+                {}
+            ];
+            describeNonScalar('contains only object values', function () {
+                return photon.enumerable([values[0], values[3], values[2], values[1], values[0], values[4], values[1], values[2]]).groupBy()
+                    .select(function (x) {
+                        return x.toArray();
+                    });
+            }, [
+                [values[0], values[0]],
+                [values[3]],
+                [values[2], values[2]],
+                [values[1], values[1]],
+                [values[4]]
+            ]);
+
+            describeNonScalar('contains mixed types', function () {
+                return photon.enumerable(['1', 1, true, '2', 2, false, 1, '1', new Date(1)]).groupBy()
+                    .select(function (x) {
+                        return x.toArray();
+                    });
+            }, [
+                ['1', '1'],
+                [1, 1],
+                [true],
+                ['2'],
+                [2],
+                [false],
+                [new Date(1)]
+            ]);
+
+            describeNonScalar('contains nulls', function () {
+                return photon.enumerable([1, null, 2, 1, null]).groupBy()
+                    .select(function (x) {
+                        return x.toArray();
+                    });
+            }, [
+                [1, 1],
+                [null, null],
+                [2]
+            ]);
+
+
+            var undef;
+            describeNonScalar('contains undefined', function () {
+                return photon.enumerable([1, undef, 2, 1, undef]).groupBy()
+                    .select(function (x) {
+                        return x.toArray();
                     })
-                ).toBeUndefined();
-            });
+            }, [
+                [1, 1],
+                [undef, undef],
+                [2]
+            ]);
+
+            describeNonScalar('is empty', function () {
+                return photon.enumerable([]).groupBy();
+            }, []);
         });
 
-        describe('- with default value', function () {
-            it('should return default value when empty', function () {
-                expect(photon.enumerable([]).firstOrDefault(null, -1)).toBe(-1);
-            });
-
-            it('should return default value when no items are matched by the predicate', function () {
-                expect(
-                    photon.enumerable([1, 2, 3]).firstOrDefault(function (item) {
-                        return item > 3;
-                    }, -1)
-                ).toBe(-1);
-            });
+        describe('has key selector,', function () {
+            var keyedItems = [
+                {key:1, value:'One'},
+                {key:2, value:'Two'},
+                {key:1, value:'One'}
+            ];
+            describeNonScalar('contains groups', function () {
+                return photon.enumerable(keyedItems).groupBy(
+                    function (item) {
+                        return item.key;
+                    }).select(
+                    function (x) {
+                        return x.toArray();
+                    });
+            }, [
+                [keyedItems[0], keyedItems[2]],
+                [keyedItems[1]]
+            ]);
         });
     });
 
+    describe('- any,', function () {
+        describe('has no predicate,', function () {
+            function getter(enumerable) {
+                return enumerable.any();
+            }
+
+            describeScalar('is empty', function () {
+                return photon.enumerable([]);
+            }, getter, false);
+
+            describeScalar('is not empty', function () {
+                return photon.enumerable([1]);
+            }, getter, true);
+        });
+
+        describe('has predicate,', function () {
+            var matched;
+
+            function getter(enumerable) {
+                return enumerable.any(matchOddNumbers);
+            }
+
+            describeScalar('is empty', function () {
+                return photon.enumerable([]);
+            }, getter, false);
+
+            describeScalar('has matches', function () {
+                return photon.enumerable([2, 3, 4, 5]);
+            }, getter, true, function () {
+                var matched;
+                beforeEach(function () {
+                    matched = {};
+                });
+
+                it('should stop iterating once matched', function () {
+                    photon.enumerable([2, 3, 4, 5]).any(function (x) {
+                        matched = x;
+                        return matchOddNumbers(x);
+                    });
+                    expect(matched).toBe(3);
+                });
+            });
+
+            describeScalar('has matches at start', function () {
+                return photon.enumerable([3, 4, 6]);
+            }, getter, true);
+
+            describeScalar('has matches at end', function () {
+                return photon.enumerable([4, 6, 7]);
+            }, getter, true);
+        });
+    });
+
+    describe('- last,', function () {
+        describe('has no predicate,', function () {
+            function getter(enumerable) {
+                return enumerable.last();
+            }
+
+            describe('is empty', function () {
+                it('should throw error', function () {
+                    expect(function () {
+                        photon.enumerable([]).last()
+                    }).toThrow(ERROR_NO_MATCH);
+                });
+            });
+
+            describeScalar('is not empty',
+                function () {
+                    return photon.enumerable([1, 2, 3]);
+                },
+                getter, 3);
+        });
+
+        describe('has predicate,', function () {
+            describe('is empty', function () {
+                it('should throw error', function () {
+                    expect(function () {
+                        photon.enumerable([]).last()
+                    }).toThrow(ERROR_NO_MATCH);
+                });
+            });
+
+            describe('has no matches', function () {
+                it('should throw error', function () {
+                    expect(function () {
+                        photon.enumerable([2, 4]).last(matchOddNumbers)
+                    }).toThrow(ERROR_NO_MATCH);
+                });
+            });
+
+            describeScalar('has matches', function () {
+                return photon.enumerable([2, 3, 4, 5, 6]);
+            }, function (enumerable) {
+                return enumerable.last(matchOddNumbers, -1);
+            }, 5);
+        });
+    });
+
+    describe('- lastOrDefault,', function () {
+        describe('has no predicate,', function () {
+            function getter(enumerable) {
+                return enumerable.lastOrDefault();
+            }
+
+            describeScalar('is empty with no default specified', function () {
+                return photon.enumerable([]);
+            }, getter, undefined);
+
+            describeScalar('is empty with default specified',
+                function () {
+                    return photon.enumerable([]);
+                },
+                function (enumerable) {
+                    return enumerable.lastOrDefault(null, -1);
+                }, -1);
+
+            describeScalar('is not empty',
+                function () {
+                    return photon.enumerable([1, 2, 3]);
+                },
+                getter, 3);
+        });
+
+        describe('has predicate,', function () {
+            function getter(enumerable) {
+                return enumerable.lastOrDefault(matchOddNumbers);
+            }
+
+            describeScalar('is empty with no default specified', function () {
+                return photon.enumerable([]);
+            }, getter, undefined);
+
+            describeScalar('is empty with default specified', function () {
+                return photon.enumerable([]);
+            }, function (enumerable) {
+                return enumerable.lastOrDefault(matchOddNumbers, -1);
+            }, -1);
+
+            describeScalar('has no matches with no default specified', function () {
+                return photon.enumerable([2, 4]);
+            }, getter, undefined);
+
+            describeScalar('has no matches with default specified', function () {
+                return photon.enumerable([2, 4]);
+            }, function (enumerable) {
+                return enumerable.lastOrDefault(matchOddNumbers, -1);
+            }, -1);
+
+            describeScalar('has matches', function () {
+                return photon.enumerable([2, 3, 4, 5, 6]);
+            }, function (enumerable) {
+                return enumerable.lastOrDefault(matchOddNumbers, -1);
+            }, 5);
+        });
+    });
+
+    describe('- first,', function () {
+        describe('has no predicate,', function () {
+            function getter(enumerable) {
+                return enumerable.first();
+            }
+
+            describe('is empty', function () {
+                it('should throw error', function () {
+                    expect(function () {
+                        photon.enumerable([]).first()
+                    }).toThrow(ERROR_NO_MATCH);
+                });
+            });
+
+            describeScalar('is not empty',
+                function () {
+                    return photon.enumerable([1, 2, 3]);
+                },
+                getter, 1);
+        });
+
+        describe('has predicate,', function () {
+            describe('is empty', function () {
+                it('should throw error', function () {
+                    expect(function () {
+                        photon.enumerable([]).first()
+                    }).toThrow(ERROR_NO_MATCH);
+                });
+            });
+
+            describe('has no matches', function () {
+                it('should throw error', function () {
+                    expect(function () {
+                        photon.enumerable([2, 4]).first(matchOddNumbers)
+                    }).toThrow(ERROR_NO_MATCH);
+                });
+            });
+
+            describeScalar('has matches', function () {
+                return photon.enumerable([2, 3, 4, 5]);
+            }, function (enumerable) {
+                return enumerable.first(matchOddNumbers, -1);
+            }, 3);
+        });
+    });
+
+    describe('- firstOrDefault,', function () {
+        describe('has no predicate,', function () {
+            function getter(enumerable) {
+                return enumerable.firstOrDefault();
+            }
+
+            describeScalar('is empty with no default specified', function () {
+                return photon.enumerable([]);
+            }, getter, undefined);
+
+            describeScalar('is empty with default specified',
+                function () {
+                    return photon.enumerable([]);
+                },
+                function (enumerable) {
+                    return enumerable.firstOrDefault(null, -1);
+                }, -1);
+
+            describeScalar('is not empty',
+                function () {
+                    return photon.enumerable([1, 2, 3]);
+                },
+                getter, 1);
+        });
+
+        describe('has predicate,', function () {
+            function getter(enumerable) {
+                return enumerable.firstOrDefault(matchOddNumbers);
+            }
+
+            describeScalar('is empty with no default specified', function () {
+                return photon.enumerable([]);
+            }, getter, undefined);
+
+            describeScalar('is empty with default specified', function () {
+                return photon.enumerable([]);
+            }, function (enumerable) {
+                return enumerable.firstOrDefault(matchOddNumbers, -1);
+            }, -1);
+
+            describeScalar('has no matches with no default specified', function () {
+                return photon.enumerable([2, 4]);
+            }, getter, undefined);
+
+            describeScalar('has no matches with default specified', function () {
+                return photon.enumerable([2, 4]);
+            }, function (enumerable) {
+                return enumerable.firstOrDefault(matchOddNumbers, -1);
+            }, -1);
+
+            describeScalar('has matches', function () {
+                return photon.enumerable([2, 3, 4, 5]);
+            }, function (enumerable) {
+                return enumerable.firstOrDefault(matchOddNumbers, -1);
+            }, 3);
+        });
+    });
+
+    describe('- min,', function () {
+        function getter(enumerable) {
+            return enumerable.min();
+        }
+
+        describeScalar('is empty', function () {
+            return photon.enumerable([])
+        }, getter, undefined);
+
+        describeScalar('contains only numeric values', function () {
+            return photon.enumerable([5, 2, 3, 7, 8, 4, 1, 56, 23]);
+        }, getter, 1);
+
+        describeScalar('contains only boolean values', function () {
+            return photon.enumerable([true, false]);
+        }, getter, false);
+
+        describeScalar('contains only string values', function () {
+            return photon.enumerable(['Peter', 'Larry', 'Paul', 'Larrs']);
+        }, getter, 'Larrs');
+
+        describeScalar('contains mixed types and first element is a number', function () {
+            return photon.enumerable([3, '2', '1', 0.5, 1.5, true]);
+        }, getter, 0.5);
+
+        describeScalar('contains mixed types and first element is a string', function () {
+            return photon.enumerable(['Peter', 1, false, 'Larry']);
+        }, getter, 'Larry');
+    });
+
+    describe('- max,', function () {
+        function getter(enumerable) {
+            return enumerable.max();
+        }
+
+        describeScalar('is empty', function () {
+            return photon.enumerable([])
+        }, getter, undefined);
+
+        describeScalar('contains only numeric values', function () {
+            return photon.enumerable([5, 2, 3, 7, 8, 4, 1, 56, 23]);
+        }, getter, 56);
+
+        describeScalar('contains only boolean values', function () {
+            return photon.enumerable([true, false]);
+        }, getter, true);
+
+        describeScalar('contains only string values', function () {
+            return photon.enumerable(['Peter', 'Larry', 'Paul', 'Larrs']);
+        }, getter, 'Peter');
+
+        describeScalar('contains mixed types and first element is a number', function () {
+            return photon.enumerable([3, '2', '1', 1.5, false]);
+        }, getter, 3);
+
+        describeScalar('contains mixed types and first element is a string', function () {
+            return photon.enumerable(['Peter', 1, false, 'Larry']);
+        }, getter, 'Peter');
+    });
+
+    describe('- average,', function () {
+        function getter(enumerable) {
+            return enumerable.average();
+        }
+
+        describeScalar('is empty', function () {
+            return photon.enumerable([])
+        }, getter, NaN);
+
+        describeScalar('contains only numeric values', function () {
+            return photon.enumerable([5, 2, 3, 7, 8, 4, 1, 56, 23]);
+        }, getter, 109 / 9);
+
+        describeScalar('contains only boolean values', function () {
+            return photon.enumerable([true, false]);
+        }, getter, 0.5);
+
+        describeScalar('contains only string values', function () {
+            return photon.enumerable(['Peter', 'Larry', 'Paul', 'Larrs']);
+        }, getter, NaN);
+
+        describeScalar('contains mixed types coercible to number', function () {
+            return photon.enumerable([3, '2', '1', 1.5, false]);
+        }, getter, 7.5 / 5);
+
+        describeScalar('contains mixed types not coercible to number', function () {
+            return photon.enumerable(['Peter', 1, false, 'Larry']);
+        }, getter, NaN);
+    });
+
+    describe('- sum,', function () {
+        function getter(enumerable) {
+            return enumerable.sum();
+        }
+
+        describeScalar('is empty', function () {
+            return photon.enumerable([])
+        }, getter, NaN);
+
+        describeScalar('contains only numeric values', function () {
+            return photon.enumerable([5, 2, 3, 7, 8, 4, 1, 56, 23]);
+        }, getter, 109);
+
+        describeScalar('contains only boolean values', function () {
+            return photon.enumerable([true, false]);
+        }, getter, 1);
+
+        describeScalar('contains only string values', function () {
+            return photon.enumerable(['Peter', 'Larry', 'Paul', 'Larrs']);
+        }, getter, NaN);
+
+        describeScalar('contains mixed types coercible to number', function () {
+            return photon.enumerable([3, '2', '1', 1.5, false]);
+        }, getter, 7.5);
+
+        describeScalar('contains mixed types not coercible to number', function () {
+            return photon.enumerable(['Peter', 1, false, 'Larry']);
+        }, getter, NaN);
+    });
 
 });

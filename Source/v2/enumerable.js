@@ -170,12 +170,12 @@ var enumerable = (function () {
         return value === NO_VALUE ? defaultValue : value;
     }
 
-    function aggregate(enumerable, accumulator, seed) {
-        var enumerator = enumerable['getEnumerator']();
+    function aggregate(enumerable, accumulator, seed, empty) {
+        var enumerator = enumerable['getEnumerator'](), index = 0;
         while (enumerator['moveNext']()) {
-            seed = accumulator(seed, enumerator['current']());
+            seed = accumulator(seed, enumerator['current'](), index++);
         }
-        return seed;
+        return index ? seed : empty;
     }
 
     function defaultComparer(x, y) {
@@ -371,14 +371,14 @@ var enumerable = (function () {
             'sum':function () {
                 return aggregate(this, function (accumulated, next) {
                     return accumulated + toNumber(next);
-                }, 0);
+                }, 0, NaN);
             },
             'average':function () {
                 var count = 0;
                 return aggregate(this, function (accumulated, next) {
                     count++;
                     return accumulated + toNumber(next);
-                }, 0) / count;
+                }, 0, NaN) / count;
             },
             'aggregate':function (accumulator, seed) {
                 return aggregate(this, accumulator, seed);
@@ -405,10 +405,8 @@ var enumerable = (function () {
             return EMPTY;
         }
 
-        if (isFunction(enumerable['getEnumerator'])) {
-            return new Enumerable(function () {
-                return enumerable['getEnumerator'];
-            });
+        if (enumerable['getEnumerator']) {
+            return enumerable;
         }
 
         return new Enumerable(isArrayLike(enumerable) ? fromArrayLike(enumerable) : [enumerable]);
