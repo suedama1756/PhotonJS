@@ -128,13 +128,15 @@ var enumerable = (function () {
         };
     }
 
-    function makeComparer(selectors, selectorIndex, direction) {
+
+    function makeComparer(selectors, selectorIndex) {
         var nextComparer = selectorIndex < selectors.length - 1 ?
-                makeComparer(selectors, selectorIndex + 1) :
+                makeComparer(selectors, selectorIndex + 1, direction) :
                 function () {
                     return 0;
                 },
-            selector = makeSelector(selectors[selectorIndex]);
+            selector = makeSelector(selectors[selectorIndex][0]),
+            direction = selectors[selectorIndex][1];
 
         return function (x, y) {
             var x1 = selector(x), y1 = selector(y);
@@ -142,40 +144,40 @@ var enumerable = (function () {
         };
     }
 
-    function orderByNext(enumerable, selectors, selector, direction) {
+    function orderByNext(e, selectors, selector, direction) {
         selectors = selectors.slice(0);
-        selectors.push(selector);
+        selectors.push([selector, direction]);
         return function () {
             return extend(
                 new Enumerable(function () {
-                    return enumerable(enumerable['toArray']().sort(
+                    return enumerable(e['toArray']().sort(
                         makeComparer(selectors, 0)))['getEnumerator']();
                 }),
                 {
                     'thenBy':function (nextSelector) {
-                        return orderByNext(selectors, nextSelector, direction)();
+                        return orderByNext(e, selectors, nextSelector, 1)();
                     },
-                    'thenByDescending' : function(nextSelector) {
-                        return orderByNext(selectors, nextSelector, direction)();
+                    'thenByDescending':function (nextSelector) {
+                        return orderByNext(e, selectors, nextSelector, -1)();
                     }
                 });
         }
     }
 
 
-    function orderBy(enumerable, selector) {
+    function orderBy(e, selector, direction) {
+        var selectors = [];
         if (isArray(selector)) {
-            return aggregate(enumerable(selector).skip(1), function (accumulator, next, index) {
-                return accumulator.thenBy(selector[index + 1]);
-            }, orderBy(enumerable, selector[0]));
+            selectors = selector.slice(0, selector.length);
+            return orderByNext(e, selectors, selector[selector.length - 1], direction)();
         }
 
-        return orderByNext(enumerable, [], selector, 1)();
+        return orderByNext(e, selectors, selector, direction)();
     }
 
-    function where(enumerable, predicateOrFactory, isFactory) {
+    function where(e, predicateOrFactory, isFactory) {
         return function () {
-            var i = iterator(enumerable), index = -1, predicate = isFactory ? predicateOrFactory() : predicateOrFactory;
+            var i = iterator(e), index = -1, predicate = isFactory ? predicateOrFactory() : predicateOrFactory;
             return exportEnumerator(
                 function () {
                     while (i.moveNext()) {
@@ -429,47 +431,7 @@ var enumerable = (function () {
                 }, 0, NaN);
             },
             'orderBy':function (selector) {
-                if (isArray(selector)) {
-                    return aggregate(enumerable(selector).skip(1), function (accumulator, next, index) {
-                        return accumulator.thenBy(selector[index + 1]);
-                    }, this.orderBy(selector[0]));
-                }
-
-                function makeComparer(selectors, selectorIndex) {
-                    var nextComparer = selectorIndex < selectors.length - 1 ?
-                            makeComparer(selectors, selectorIndex + 1) :
-                            function () {
-                                return 0;
-                            },
-                        selector = makeSelector(selectors[selectorIndex]);
-
-                    return function (x, y) {
-                        var x1 = selector(x), y1 = selector(y);
-                        return x1 < y1 ? -1 : (x1 > y1 ? 1 : nextComparer(x, y));
-                    };
-                }
-
-                var self = this;
-
-                function makeThenBy(selectors, selector) {
-                    selectors = selectors.slice(0);
-                    selectors.push(selector);
-                    return function () {
-                        var result = new Enumerable(function () {
-                            return enumerable(self.toArray().sort(
-                                makeComparer(selectors, 0)))['getEnumerator']();
-
-                        });
-                        result.thenBy = function (nextSelector) {
-                            return makeThenBy(selectors, nextSelector)();
-                        }
-
-                        return result;
-                    }
-                }
-
-                return makeThenBy([], selector)();
-
+                return orderBy(this, selector, 1);
             },
             'average':function () {
                 var count = 0;
