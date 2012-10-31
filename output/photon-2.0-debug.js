@@ -10,7 +10,7 @@
         "use strict";    photon.version = '0.7.0.1';
         /*jslint sub:true */
         
-        var toString = Object.prototype.toString;
+        var toString = Object.prototype.toString, arrayPrototype = Array.prototype;
         
         var undef;
         
@@ -107,6 +107,11 @@
             return obj && 'length' in obj;
         }
         
+        var isArray = modernize(Array, 'isArray', function () {
+            return function () {
+                return isType('[object Array');
+            }
+        });
         
         modernize(Object, 'getOwnPropertyNames', function () {
             var result = function (obj) {
@@ -255,6 +260,7 @@
         photon['type'] = type;
         
         // Even if we use the enumerator type we must wrap it before returning as an 'real' enumerator (to ensure privacy is maintained)
+        // 5692
         
         var enumerable = (function () {
             /**
@@ -354,6 +360,15 @@
                 };
             }
         
+            function makeSelector(selector) {
+                if (isString(selector)) {
+                    return function (x) {
+                        return x[selector];
+                    }
+                }
+                return selector || defaultSelector;
+            }
+        
             function fromArrayLike(array) {
                 return function () {
                     var i = -1, e = iterator();
@@ -372,6 +387,51 @@
                         },
                         e.current);
                 };
+            }
+        
+            function makeComparer(selectors, selectorIndex, direction) {
+                var nextComparer = selectorIndex < selectors.length - 1 ?
+                        makeComparer(selectors, selectorIndex + 1) :
+                        function () {
+                            return 0;
+                        },
+                    selector = makeSelector(selectors[selectorIndex]);
+        
+                return function (x, y) {
+                    var x1 = selector(x), y1 = selector(y);
+                    return (x1 < y1 ? -1 : (x1 > y1 ? 1 : nextComparer(x, y))) * direction;
+                };
+            }
+        
+            function orderByNext(enumerable, selectors, selector, direction) {
+                selectors = selectors.slice(0);
+                selectors.push(selector);
+                return function () {
+                    return extend(
+                        new Enumerable(function () {
+                            return enumerable(enumerable['toArray']().sort(
+                                makeComparer(selectors, 0)))['getEnumerator']();
+                        }),
+                        {
+                            'thenBy':function (nextSelector) {
+                                return orderByNext(selectors, nextSelector, direction)();
+                            },
+                            'thenByDescending' : function(nextSelector) {
+                                return orderByNext(selectors, nextSelector, direction)();
+                            }
+                        });
+                }
+            }
+        
+        
+            function orderBy(enumerable, selector) {
+                if (isArray(selector)) {
+                    return aggregate(enumerable(selector).skip(1), function (accumulator, next, index) {
+                        return accumulator.thenBy(selector[index + 1]);
+                    }, orderBy(enumerable, selector[0]));
+                }
+        
+                return orderByNext(enumerable, [], selector, 1)();
             }
         
             function where(enumerable, predicateOrFactory, isFactory) {
@@ -450,7 +510,7 @@
                 return -2;
             }
         
-            function defaultKeySelector(item) {
+            function defaultSelector(item) {
                 return item;
             }
         
@@ -496,7 +556,7 @@
                         });
                     },
                     'distinct':function (keySelector) {
-                        keySelector = keySelector || defaultKeySelector;
+                        keySelector = keySelector || defaultSelector;
                         return new Enumerable(where(this,
                             function () {
                                 var seen = {};
@@ -529,7 +589,7 @@
                         });
                     },
                     'groupBy':function (keySelector) {
-                        keySelector = keySelector || defaultKeySelector;
+                        keySelector = keySelector || defaultSelector;
                         var self = this;
                         return new Enumerable(function () {
                             var groups = {},
@@ -628,6 +688,49 @@
                         return aggregate(this, function (accumulated, next) {
                             return accumulated + toNumber(next);
                         }, 0, NaN);
+                    },
+                    'orderBy':function (selector) {
+                        if (isArray(selector)) {
+                            return aggregate(enumerable(selector).skip(1), function (accumulator, next, index) {
+                                return accumulator.thenBy(selector[index + 1]);
+                            }, this.orderBy(selector[0]));
+                        }
+        
+                        function makeComparer(selectors, selectorIndex) {
+                            var nextComparer = selectorIndex < selectors.length - 1 ?
+                                    makeComparer(selectors, selectorIndex + 1) :
+                                    function () {
+                                        return 0;
+                                    },
+                                selector = makeSelector(selectors[selectorIndex]);
+        
+                            return function (x, y) {
+                                var x1 = selector(x), y1 = selector(y);
+                                return x1 < y1 ? -1 : (x1 > y1 ? 1 : nextComparer(x, y));
+                            };
+                        }
+        
+                        var self = this;
+        
+                        function makeThenBy(selectors, selector) {
+                            selectors = selectors.slice(0);
+                            selectors.push(selector);
+                            return function () {
+                                var result = new Enumerable(function () {
+                                    return enumerable(self.toArray().sort(
+                                        makeComparer(selectors, 0)))['getEnumerator']();
+        
+                                });
+                                result.thenBy = function (nextSelector) {
+                                    return makeThenBy(selectors, nextSelector)();
+                                }
+        
+                                return result;
+                            }
+                        }
+        
+                        return makeThenBy([], selector)();
+        
                     },
                     'average':function () {
                         var count = 0;

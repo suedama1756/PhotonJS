@@ -1,4 +1,4 @@
-var suiteFilter;// = 'groupBy empty';
+var suiteFilter = 'orderBy';
 
 function matchOddNumbers(x) {
     return x % 2 === 1;
@@ -138,7 +138,7 @@ describe('enumerable', function () {
     }
 
     describe('- creating,', function () {
-        describe('from enumerable', function() {
+        describe('from enumerable', function () {
             it('should return original enumerable object', function () {
                 var original = photon.enumerable([1, 2, 3]);
                 expect(photon.enumerable(original)).toBe(original);
@@ -771,6 +771,87 @@ describe('enumerable', function () {
         }, getter, NaN);
     });
 
+
+    describe('- orderBy,', function () {
+        var n2Data = [
+            {
+                first:'a', second:'f'
+            },
+            {
+                first:'b', second:'g'
+            },
+            {
+                first:'a', second:'a'
+            }
+        ];
+
+        var n3Data = [
+            {
+                first:'a', second:'f', third:'b'
+            },
+            {
+                first:'b', second:'g', third:'a'
+            },
+            {
+                first:'a', second:'a', third:'a'
+            },
+            {
+                first:'a', second:'f', third:'a'
+            }
+        ];
+
+
+        var uniqueData = [
+            {a:5},
+            {a:2},
+            {a:9},
+            {a:4},
+            {a:1}
+        ];
+
+        describeNonScalar('isEmpty', function () {
+            return photon.enumerable([])
+                .orderBy();
+        }, []);
+
+        describeNonScalar('selector function', function () {
+            return photon.enumerable(uniqueData)
+                .orderBy(function (x) {
+                    return x.a;
+                });
+        }, [uniqueData[4], uniqueData[1], uniqueData[3], uniqueData[0], uniqueData[2]]);
+
+        describeNonScalar('selector property', function () {
+            return photon.enumerable(uniqueData).orderBy('a');
+        }, [uniqueData[4], uniqueData[1], uniqueData[3], uniqueData[0], uniqueData[2]]);
+
+        describeNonScalar('no selector', function () {
+            return photon.enumerable([3, 5, 2, 1, 6])
+                .orderBy();
+        }, [1, 2, 3, 5, 6]);
+
+        describeNonScalar('selector array', function () {
+            return photon.enumerable(n3Data).orderBy(['first', function(x) {
+                return x.second;
+            }, 'third']);
+        }, [n3Data[2], n3Data[3], n3Data[0], n3Data[1]]);
+
+        describeNonScalar('followed with thenBy', function () {
+            return photon.enumerable(n2Data)
+                .orderBy(function (x) {
+                    return x.first;
+                })
+                .thenBy(function (x) {
+                    return x.second;
+                });
+        }, [n2Data[2], n2Data[0], n2Data[1]]);
+
+        describeNonScalar('followed with thenBy, thenBy', function () {
+            return photon.enumerable(n3Data).orderBy('first').thenBy('second').thenBy('third')
+        }, [n3Data[2], n3Data[3], n3Data[0], n3Data[1]]);
+    });
+
+
     describe('- sum,', function () {
         function getter(enumerable) {
             return enumerable.sum();
@@ -800,5 +881,6 @@ describe('enumerable', function () {
             return photon.enumerable(['Peter', 1, false, 'Larry']);
         }, getter, NaN);
     });
+
 
 });

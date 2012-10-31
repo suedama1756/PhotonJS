@@ -1,6 +1,6 @@
 /*jslint sub:true */
 
-var toString = Object.prototype.toString;
+var toString = Object.prototype.toString, arrayPrototype = Array.prototype;
 
 var undef;
 
@@ -97,6 +97,11 @@ function isArrayLike(obj) {
     return obj && 'length' in obj;
 }
 
+var isArray = modernize(Array, 'isArray', function () {
+    return function () {
+        return isType('[object Array');
+    }
+});
 
 modernize(Object, 'getOwnPropertyNames', function () {
     var result = function (obj) {
