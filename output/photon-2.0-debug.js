@@ -48,8 +48,20 @@
             return typeof obj === 'object';
         }
         
+        function isPrimitive(obj) {
+            return !(isObject(obj) || isFunction(obj));
+        }
+        
         function isNullOrUndefined(obj) {
             return obj === null || obj === undef;
+        }
+        
+        function hasOwnProperty(obj, property) {
+            return !isPrimitive(obj) && obj.hasOwnProperty(property);
+        }
+        
+        function hasProperty(obj, property) {
+            return !isPrimitive(obj) && property in obj;
         }
         
         var toNumber = Number;
@@ -104,7 +116,9 @@
         }
         
         function isArrayLike(obj) {
-            return obj && 'length' in obj;
+            var l = 0;
+            return isArray(obj) ||
+                (isObject(obj) && isNumber(l = obj.length) && (l === 0 || (l > 0 && '0' in obj && l - 1 in obj)));
         }
         
         var isArray = modernize(Array, 'isArray', function () {
@@ -284,13 +298,6 @@
              */
             var NO_VALUE = {};
         
-            var EMPTY = new Enumerable(function () {
-                var e = iterator();
-                return exportEnumerator(
-                    e.completed,
-                    e.current);
-            });
-        
             /**
              * Creates an enumerator from the specified moveNext and current functions. This function ensures enumerator
              * functions are exported correctly in the minified code.
@@ -369,6 +376,12 @@
                 return selector || defaultSelector;
             }
         
+            function makeSelectors(selectors) {
+                return EMPTY['concat'](selectors.length ?
+                    enumerable(selectors).select(makeSelector) :
+                    defaultSelector);
+            }
+        
             function fromArrayLike(array) {
                 return function () {
                     var i = -1, e = iterator();
@@ -390,50 +403,42 @@
             }
         
         
-            function makeComparer(selectors, selectorIndex) {
-                var nextComparer = selectorIndex < selectors.length - 1 ?
-                        makeComparer(selectors, selectorIndex + 1, direction) :
-                        function () {
-                            return 0;
-                        },
-                    selector = makeSelector(selectors[selectorIndex][0]),
-                    direction = selectors[selectorIndex][1];
+            function makeComparer(selectors) {
+                if (selectors.moveNext()) {
+                    var curr =  selectors.current(), next = makeComparer(selectors),
+                        selector = makeSelector(curr.selector), direction = curr.direction;
         
-                return function (x, y) {
-                    var x1 = selector(x), y1 = selector(y);
-                    return (x1 < y1 ? -1 : (x1 > y1 ? 1 : nextComparer(x, y))) * direction;
-                };
+                    return function (x, y) {
+                        var x1 = selector(x), y1 = selector(y);
+                        return (x1 < y1 ? -1 : (x1 > y1 ? 1 : next(x, y))) * direction;
+                    };
+                }
+                return function() {
+                    return 0;
+                }
             }
         
-            function orderByNext(e, selectors, selector, direction) {
-                selectors = selectors.slice(0);
-                selectors.push([selector, direction]);
+            function orderByNext(e, selectors, direction) {
                 return function () {
                     return extend(
                         new Enumerable(function () {
                             return enumerable(e['toArray']().sort(
-                                makeComparer(selectors, 0)))['getEnumerator']();
+                                makeComparer(iterator(selectors, function (selector) {
+                                    return {
+                                        selector : selector,
+                                        direction : direction
+                                    };
+                                }))))['getEnumerator']();
                         }),
                         {
-                            'thenBy':function (nextSelector) {
-                                return orderByNext(e, selectors, nextSelector, 1)();
+                            'thenBy':function () {
+                                return orderByNext(e, selectors.concat(makeSelectors(arguments)), 1)();
                             },
-                            'thenByDescending':function (nextSelector) {
-                                return orderByNext(e, selectors, nextSelector, -1)();
+                            'thenByDescending':function (next) {
+                                return orderByNext(e, selectors.concat(makeSelectors(arguments)), -1)();
                             }
                         });
                 }
-            }
-        
-        
-            function orderBy(e, selector, direction) {
-                var selectors = [];
-                if (isArray(selector)) {
-                    selectors = selector.slice(0, selector.length);
-                    return orderByNext(e, selectors, selector[selector.length - 1], direction)();
-                }
-        
-                return orderByNext(e, selectors, selector, direction)();
             }
         
             function where(e, predicateOrFactory, isFactory) {
@@ -590,6 +595,29 @@
                             }, iter.current);
                         });
                     },
+                    'concat':function () {
+                        var self = this, args = arguments;
+                        return new Enumerable(function () {
+                            var iter = iterator(),
+                                currIter = iterator(self),
+                                nextIter = iterator(enumerable(args), function (x) {
+                                    return iterator(enumerable(x));
+                                });
+        
+                            return exportEnumerator(function () {
+                                    while (!currIter.moveNext()) {
+                                        if (nextIter.moveNext()) {
+                                            currIter = nextIter.current();
+                                        } else {
+                                            return iter.completed();
+                                        }
+                                    }
+                                    return iter.progress(currIter.current());
+                                },
+                                iter.current);
+        
+                        })
+                    },
                     'groupBy':function (keySelector) {
                         keySelector = keySelector || defaultSelector;
                         var self = this;
@@ -691,8 +719,13 @@
                             return accumulated + toNumber(next);
                         }, 0, NaN);
                     },
-                    'orderBy':function (selector) {
-                        return orderBy(this, selector, 1);
+                    'orderBy':function () {
+                        return orderByNext(this,
+                            makeSelectors(arguments), 1)();
+                    },
+                    'orderByDesc':function () {
+                        return orderByNext(this,
+                            makeSelectors(arguments), -1)();
                     },
                     'average':function () {
                         var count = 0;
@@ -721,16 +754,23 @@
                     }
                 })['build']();
         
+            var EMPTY = new Enumerable(function () {
+                var e = iterator();
+                return exportEnumerator(
+                    e.completed,
+                    e.current);
+            });
+        
             return function (enumerable) {
-                if (isNullOrUndefined(enumerable)) {
+                if (isUndefined(enumerable) && !arguments.length) {
                     return EMPTY;
                 }
         
-                if (enumerable['getEnumerator']) {
+                if (hasProperty(enumerable, 'getEnumerator')) {
                     return enumerable;
                 }
         
-                return new Enumerable(isArrayLike(enumerable) ? fromArrayLike(enumerable) : [enumerable]);
+                return new Enumerable(fromArrayLike(isArrayLike(enumerable) ? enumerable : [enumerable]));
             };
         })();
         

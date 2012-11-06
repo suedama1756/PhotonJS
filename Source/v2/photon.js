@@ -38,8 +38,20 @@ function isObject(obj) {
     return typeof obj === 'object';
 }
 
+function isPrimitive(obj) {
+    return !(isObject(obj) || isFunction(obj));
+}
+
 function isNullOrUndefined(obj) {
     return obj === null || obj === undef;
+}
+
+function hasOwnProperty(obj, property) {
+    return !isPrimitive(obj) && obj.hasOwnProperty(property);
+}
+
+function hasProperty(obj, property) {
+    return !isPrimitive(obj) && property in obj;
 }
 
 var toNumber = Number;
@@ -94,7 +106,9 @@ function noop() {
 }
 
 function isArrayLike(obj) {
-    return obj && 'length' in obj;
+    var l = 0;
+    return isArray(obj) ||
+        (isObject(obj) && isNumber(l = obj.length) && (l === 0 || (l > 0 && '0' in obj && l - 1 in obj)));
 }
 
 var isArray = modernize(Array, 'isArray', function () {

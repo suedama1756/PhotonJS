@@ -1,10 +1,27 @@
-var suiteFilter = 'orderBy';
+var suiteFilter = 'Perf'; // = 'orderBy, selector array';
+
+function getFullSuiteDescription(suite) {
+    var result = [];
+    while (suite) {
+        result.unshift(suite.description);
+        suite = suite.parentSuite;
+    }
+    return result.join(' ');
+}
+
 
 function matchOddNumbers(x) {
     return x % 2 === 1;
 }
 
 describe('enumerable', function () {
+    if (suiteFilter) {
+        jasmine.getEnv().specFilter = function (spec) {
+            var suiteDescription = getFullSuiteDescription(spec.suite) + ' ' + spec.description;
+            return suiteDescription.indexOf(suiteFilter) !== -1;
+        };
+    }
+
     var ERROR_NOT_STARTED = 'Enumeration has not started.';
     var ERROR_COMPLETED = 'Enumeration has completed.';
     var ERROR_NO_MATCH = 'No match found.';
@@ -22,27 +39,10 @@ describe('enumerable', function () {
         return count;
     }
 
-    function getFullSuiteDescription() {
-        var result = [],
-            suite = jasmine.getEnv().currentSuite;
-        while (suite) {
-            result.unshift(suite.description);
-            suite = suite.parentSuite;
-        }
-        return result.join(' ');
-    }
 
     function describeNonScalar(suiteName, enumerableFactory, expectedResults, additionalTests) {
         var expectedCount = expectedResults.length;
         describe(suiteName, function () {
-            var suiteDescription = getFullSuiteDescription();
-
-            console.log('Suite: %s', suiteDescription);
-
-            if (suiteFilter && suiteDescription.indexOf(suiteFilter) === -1) {
-                return;
-            }
-
             var enumerator = null;
 
             beforeEach(function () {
@@ -831,9 +831,9 @@ describe('enumerable', function () {
         }, [1, 2, 3, 5, 6]);
 
         describeNonScalar('selector array', function () {
-            return photon.enumerable(n3Data).orderBy(['first', function(x) {
+            return photon.enumerable(n3Data).orderBy('first', function (x) {
                 return x.second;
-            }, 'third']);
+            }, 'third');
         }, [n3Data[2], n3Data[3], n3Data[0], n3Data[1]]);
 
         describeNonScalar('followed with thenBy', function () {
@@ -880,6 +880,84 @@ describe('enumerable', function () {
         describeScalar('contains mixed types not coercible to number', function () {
             return photon.enumerable(['Peter', 1, false, 'Larry']);
         }, getter, NaN);
+    });
+
+    describe('- concat,', function () {
+        describeNonScalar('is empty, concat none', function () {
+            return photon.enumerable([]).concat();
+        }, []);
+
+        describeNonScalar('is empty, concat single', function () {
+            return photon.enumerable([]).concat([1]);
+        }, [1]);
+
+        describeNonScalar('is not empty, concat single', function () {
+            return photon.enumerable([1, 2, 3]).concat([4, 5]);
+        }, [1, 2, 3, 4, 5]);
+
+        describeNonScalar('is not empty, concat multiple', function () {
+            return photon.enumerable([1, 2, 3]).concat([4, 5], [6, 7], [8, 9]);
+        }, [1, 2, 3, 4, 5, 6, 7, 8, 9]);
+    });
+});
+
+function timeIt(callback, operation) {
+    var t = (new Date()).getTime();
+    callback();
+    console.log('Operation: %s took %dms.', operation, ((new Date()).getTime() - t));
+}
+
+describe('Perf', function () {
+    it('should', function () {
+//        var p = [];
+//        for (var i = 0; i < 1000000; i++) {
+//            p.push(Math.floor(Math.random() * 1000000));
+//        }
+//
+//        for (var i = 0; i < 10; i++) {
+//            timeIt(function () {
+//                p.slice(0).sort();
+//            }, 'Array.sort');
+//
+//
+//            timeIt(function () {
+//                photon.enumerable(p).orderBy().toArray();
+//            }, 'Enumerable.orderBy');
+//        }
+        function ExpensiveSortProperty(){
+            this.value_ = Math.floor(Math.random() * 1000000);
+        }
+        ExpensiveSortProperty.prototype.value = function() {
+            for (var i = 0; i<10000;i++) {
+            }
+            return this.value_;
+        }
+        var p = [];
+        for (var i=0; i<1000; i++) p.push(new ExpensiveSortProperty());
+
+        timeIt(function() {
+            p.sort(function(x, y) {
+                x = x.value();
+                y = y.value();
+                return x > y ? 1 : (x < y ? -1 : 0);
+            });
+
+        });
+
+
+        timeIt(function() {
+            photon.enumerable(p).select(function(x) {
+                return {
+                    x : x,
+                    v :x.value()
+                }
+            }).orderBy(function(x, y) {
+                return x.v > y.v ? 1 : (x.v < y.v ? -1 : 0);
+            }).select(function(x) {
+                    return x.x;
+                }).toArray();
+
+        });
     });
 
 
