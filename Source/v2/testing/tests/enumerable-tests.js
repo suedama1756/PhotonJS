@@ -1,4 +1,4 @@
-var suiteFilter = 'Perf'; // = 'orderBy, selector array';
+var suiteFilter; // = 'Perf';
 
 function getFullSuiteDescription(suite) {
     var result = [];
@@ -831,9 +831,9 @@ describe('enumerable', function () {
         }, [1, 2, 3, 5, 6]);
 
         describeNonScalar('selector array', function () {
-            return photon.enumerable(n3Data).orderBy('first', function (x) {
+            return photon.enumerable(n3Data).orderBy(['first', function (x) {
                 return x.second;
-            }, 'third');
+            }, 'third']);
         }, [n3Data[2], n3Data[3], n3Data[0], n3Data[1]]);
 
         describeNonScalar('followed with thenBy', function () {
@@ -849,6 +849,30 @@ describe('enumerable', function () {
         describeNonScalar('followed with thenBy, thenBy', function () {
             return photon.enumerable(n3Data).orderBy('first').thenBy('second').thenBy('third')
         }, [n3Data[2], n3Data[3], n3Data[0], n3Data[1]]);
+
+        describeNonScalar('followed with thenBy using selector array', function () {
+            return photon.enumerable(n3Data).orderBy('first').thenBy(['second', function (x) {
+                return x.third;
+            }]);
+        }, [n3Data[2], n3Data[3], n3Data[0], n3Data[1]]);
+
+        var comparerData = [
+            'bf',
+            'ba',
+            'ab',
+            'aa',
+            'ah'
+        ];
+
+        function comparer(x, y) {
+            x = x.charAt(0);
+            y = y.charAt(0);
+            return x < y ? -1 : (x > y ? 1 : 0);
+        }
+
+        describeNonScalar('comparer', function () {
+            return photon.enumerable(comparerData).orderBy(null, comparer);
+        }, comparerData.slice(0).sort(comparer));
     });
 
 
@@ -924,19 +948,20 @@ describe('Perf', function () {
 //                photon.enumerable(p).orderBy().toArray();
 //            }, 'Enumerable.orderBy');
 //        }
-        function ExpensiveSortProperty(){
+        function ExpensiveSortProperty() {
             this.value_ = Math.floor(Math.random() * 1000000);
         }
-        ExpensiveSortProperty.prototype.value = function() {
-            for (var i = 0; i<10000;i++) {
+
+        ExpensiveSortProperty.prototype.value = function () {
+            for (var i = 0; i < 10000; i++) {
             }
             return this.value_;
         }
         var p = [];
-        for (var i=0; i<1000; i++) p.push(new ExpensiveSortProperty());
+        for (var i = 0; i < 1000; i++) p.push(new ExpensiveSortProperty());
 
-        timeIt(function() {
-            p.sort(function(x, y) {
+        timeIt(function () {
+            p.sort(function (x, y) {
                 x = x.value();
                 y = y.value();
                 return x > y ? 1 : (x < y ? -1 : 0);
@@ -945,15 +970,15 @@ describe('Perf', function () {
         });
 
 
-        timeIt(function() {
-            photon.enumerable(p).select(function(x) {
+        timeIt(function () {
+            photon.enumerable(p).select(function (x) {
                 return {
-                    x : x,
-                    v :x.value()
+                    x:x,
+                    v:x.value()
                 }
-            }).orderBy(function(x, y) {
-                return x.v > y.v ? 1 : (x.v < y.v ? -1 : 0);
-            }).select(function(x) {
+            }).orderBy(function (x) {
+                    return x.v;
+                }).select(function (x) {
                     return x.x;
                 }).toArray();
 

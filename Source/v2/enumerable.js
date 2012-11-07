@@ -102,9 +102,7 @@ var enumerable = (function () {
     }
 
     function makeSelectors(selectors) {
-        return EMPTY['concat'](selectors.length ?
-            enumerable(selectors).select(makeSelector) :
-            defaultSelector);
+        return selectors ? enumerable(selectors).select(makeSelector) : enumerable(defaultSelector);
     }
 
     function fromArrayLike(array) {
@@ -127,43 +125,47 @@ var enumerable = (function () {
         };
     }
 
-
     function makeComparer(selectors) {
         if (selectors.moveNext()) {
-            var curr =  selectors.current(), next = makeComparer(selectors),
-                selector = makeSelector(curr.selector), direction = curr.direction;
+            var curr = selectors.current(), next = makeComparer(selectors),
+                selector = makeSelector(curr.selector), direction = curr.direction, comparer =
+                    curr.comparer;
 
-            return function (x, y) {
-                var x1 = selector(x), y1 = selector(y);
-                return (x1 < y1 ? -1 : (x1 > y1 ? 1 : next(x, y))) * direction;
-            };
+            return comparer ?
+                (direction == 1 ? comparer : function (x, y) {
+                    return comparer(x, y) * -1;
+                }) :
+                function (x, y) {
+                    var x1 = selector(x), y1 = selector(y);
+                    return (x1 < y1 ? -1 : (x1 > y1 ? 1 : next(x, y))) * direction;
+                };
         }
-        return function() {
+        return function () {
             return 0;
         }
     }
 
-    function orderByNext(e, selectors, direction) {
-        return function () {
-            return extend(
-                new Enumerable(function () {
-                    return enumerable(e['toArray']().sort(
-                        makeComparer(iterator(selectors, function (selector) {
-                            return {
-                                selector : selector,
-                                direction : direction
-                            };
-                        }))))['getEnumerator']();
-                }),
-                {
-                    'thenBy':function () {
-                        return orderByNext(e, selectors.concat(makeSelectors(arguments)), 1)();
-                    },
-                    'thenByDescending':function (next) {
-                        return orderByNext(e, selectors.concat(makeSelectors(arguments)), -1)();
-                    }
-                });
-        }
+    function orderByNext(e, keySelectors, comparer, direction) {
+        return extend(
+            new Enumerable(function () {
+                return enumerable(e['toArray']().sort(
+                    makeComparer(iterator(keySelectors, function (selector) {
+                        return {
+                            selector:selector,
+                            direction:direction,
+                            comparer:comparer
+                        };
+                    }))))['getEnumerator']();
+            }),
+            {
+                'thenBy':function (keySelector, comparer) {
+                    return orderByNext(e, keySelectors.concat(makeSelectors(keySelector)), comparer, 1);
+                },
+                'thenByDesc':function (keySelector, comparer) {
+                    return orderByNext(e, keySelectors.concat(makeSelectors(keySelector)), comparer, -1);
+                }
+            });
+
     }
 
     function where(e, predicateOrFactory, isFactory) {
@@ -444,13 +446,13 @@ var enumerable = (function () {
                     return accumulated + toNumber(next);
                 }, 0, NaN);
             },
-            'orderBy':function () {
+            'orderBy':function (keySelector, comparer) {
                 return orderByNext(this,
-                    makeSelectors(arguments), 1)();
+                    makeSelectors(keySelector), comparer, 1);
             },
-            'orderByDesc':function () {
+            'orderByDesc':function (keySelector, comparer) {
                 return orderByNext(this,
-                    makeSelectors(arguments), -1)();
+                    makeSelectors(keySelector), comparer, -1);
             },
             'average':function () {
                 var count = 0;

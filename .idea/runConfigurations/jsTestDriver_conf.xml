@@ -1,0 +1,13 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="jsTestDriver.conf" type="JSTestDriver:ConfigurationType" factoryName="JsTestDriver">
+    <setting name="configLocationType" value="CONFIG_FILE" />
+    <setting name="settingsFile" value="$PROJECT_DIR$/Source/v2/testing/jsTestDriver.conf" />
+    <setting name="serverType" value="INTERNAL" />
+    <setting name="preferredDebugBrowser" value="CHROME" />
+    <RunnerSettings RunnerId="JsTestDriverClientRunner" />
+    <RunnerSettings RunnerId="JstdDebugProgramRunner" />
+    <ConfigurationWrapper RunnerId="JsTestDriverClientRunner" />
+    <ConfigurationWrapper RunnerId="JstdDebugProgramRunner" />
+    <method />
+  </configuration>
+</component>
