@@ -114,7 +114,7 @@ function isArrayLike(obj) {
 var isArray = modernize(Array, 'isArray', function () {
     return function () {
         return isType('[object Array');
-    }
+    };
 });
 
 modernize(Object, 'getOwnPropertyNames', function () {

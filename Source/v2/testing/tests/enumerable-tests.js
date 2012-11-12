@@ -1,4 +1,4 @@
-var suiteFilter; // = 'Perf';
+var suiteFilter; // = 'orderByDesc, selector array';
 
 function getFullSuiteDescription(suite) {
     var result = [];
@@ -7,11 +7,6 @@ function getFullSuiteDescription(suite) {
         suite = suite.parentSuite;
     }
     return result.join(' ');
-}
-
-
-function matchOddNumbers(x) {
-    return x % 2 === 1;
 }
 
 describe('enumerable', function () {
@@ -26,6 +21,10 @@ describe('enumerable', function () {
     var ERROR_COMPLETED = 'Enumeration has completed.';
     var ERROR_NO_MATCH = 'No match found.';
 
+    function matchOddNumbers(x) {
+        return x % 2 === 1;
+    }
+
     function enumerate(enumerator, count, results) {
         for (var i = 0; i < count; i++) {
             if (!enumerator.moveNext()) {
@@ -38,7 +37,6 @@ describe('enumerable', function () {
         }
         return count;
     }
-
 
     function describeNonScalar(suiteName, enumerableFactory, expectedResults, additionalTests) {
         var expectedCount = expectedResults.length;
@@ -160,6 +158,10 @@ describe('enumerable', function () {
         describeNonScalar('from array', function () {
             return photon.enumerable([1, 2, 3]);
         }, [1, 2, 3]);
+
+        describeNonScalar('from string', function () {
+            return photon.enumerable('Test');
+        }, ['T', 'e', 's', 't']);
     });
 
     describe('- select,', function () {
@@ -875,6 +877,117 @@ describe('enumerable', function () {
         }, comparerData.slice(0).sort(comparer));
     });
 
+    describe('- orderByDesc,', function () {
+        var uniqueData = [
+            {a:5},
+            {a:2},
+            {a:9},
+            {a:4},
+            {a:1}
+        ];
+        var uniqueDataDesc = [uniqueData[2], uniqueData[0], uniqueData[3], uniqueData[1], uniqueData[4]];
+
+
+        var n2Data = [
+            {
+                first:'a', second:'f'
+            },
+            {
+                first:'b', second:'g'
+            },
+            {
+                first:'a', second:'a'
+            }
+        ];
+        var n2DataDescDesc = [n2Data[1], n2Data[0], n2Data[2]];
+
+        var n3Data = [
+            {
+                first:'a', second:'f', third:'b'
+            },
+            {
+                first:'b', second:'g', third:'a'
+            },
+            {
+                first:'a', second:'a', third:'a'
+            },
+            {
+                first:'a', second:'f', third:'a'
+            }
+        ];
+        var n3DataDescDescDesc = [n3Data[1], n3Data[0], n3Data[3], n3Data[2]];
+
+        describeNonScalar('isEmpty', function () {
+            return photon.enumerable([])
+                .orderByDesc();
+        }, []);
+
+        describeNonScalar('selector function', function () {
+            return photon.enumerable(uniqueData)
+                .orderByDesc(function (x) {
+                    return x.a;
+                });
+        }, uniqueDataDesc);
+
+        describeNonScalar('selector property', function () {
+            return photon.enumerable(uniqueData).orderByDesc('a');
+        }, uniqueDataDesc);
+
+        describeNonScalar('no selector', function () {
+            return photon.enumerable([3, 5, 2, 1, 6])
+                .orderByDesc();
+        }, [6, 5, 3, 2, 1]);
+
+        describeNonScalar('selector array', function () {
+            return photon.enumerable(n3Data).orderByDesc(['first', function (x) {
+                return x.second;
+            }, 'third']);
+        }, n3DataDescDescDesc);
+
+        describeNonScalar('followed with thenByDesc', function () {
+            return photon.enumerable(n2Data)
+                .orderByDesc(function (x) {
+                    return x.first;
+                })
+                .thenByDesc(function (x) {
+                    return x.second;
+                });
+        }, n2DataDescDesc);
+
+        describeNonScalar('followed with thenByDesc, thenByDesc', function () {
+            return photon.enumerable(n3Data).orderByDesc('first').thenByDesc('second').thenByDesc('third')
+        }, n3DataDescDescDesc);
+
+        describeNonScalar('followed with thenBy using selector array', function () {
+            return photon.enumerable(n3Data).orderByDesc('first').thenByDesc(['second', function (x) {
+                return x.third;
+            }]);
+        }, n3DataDescDescDesc);
+
+        var comparerData = [
+            'bf',
+            'ba',
+            'ab',
+            'aa',
+            'ah'
+        ];
+
+        function comparer(x, y) {
+            x = x.charAt(0);
+            y = y.charAt(0);
+            return x < y ? -1 : (x > y ? 1 : 0);
+        }
+
+        var comparerDataDesc = comparerData.slice();
+        comparerDataDesc.sort(function(x, y) {
+            return comparer(x, y) * -1; }
+        );
+
+        describeNonScalar('comparer', function () {
+            return photon.enumerable(comparerData).orderByDesc(null, comparer);
+        }, comparerDataDesc);
+    });
+
 
     describe('- sum,', function () {
         function getter(enumerable) {
@@ -925,65 +1038,4 @@ describe('enumerable', function () {
     });
 });
 
-function timeIt(callback, operation) {
-    var t = (new Date()).getTime();
-    callback();
-    console.log('Operation: %s took %dms.', operation, ((new Date()).getTime() - t));
-}
-
-describe('Perf', function () {
-    it('should', function () {
-//        var p = [];
-//        for (var i = 0; i < 1000000; i++) {
-//            p.push(Math.floor(Math.random() * 1000000));
-//        }
-//
-//        for (var i = 0; i < 10; i++) {
-//            timeIt(function () {
-//                p.slice(0).sort();
-//            }, 'Array.sort');
-//
-//
-//            timeIt(function () {
-//                photon.enumerable(p).orderBy().toArray();
-//            }, 'Enumerable.orderBy');
-//        }
-        function ExpensiveSortProperty() {
-            this.value_ = Math.floor(Math.random() * 1000000);
-        }
-
-        ExpensiveSortProperty.prototype.value = function () {
-            for (var i = 0; i < 10000; i++) {
-            }
-            return this.value_;
-        }
-        var p = [];
-        for (var i = 0; i < 1000; i++) p.push(new ExpensiveSortProperty());
-
-        timeIt(function () {
-            p.sort(function (x, y) {
-                x = x.value();
-                y = y.value();
-                return x > y ? 1 : (x < y ? -1 : 0);
-            });
-
-        });
-
-
-        timeIt(function () {
-            photon.enumerable(p).select(function (x) {
-                return {
-                    x:x,
-                    v:x.value()
-                }
-            }).orderBy(function (x) {
-                    return x.v;
-                }).select(function (x) {
-                    return x.x;
-                }).toArray();
-
-        });
-    });
-
-
-});
+// TODO: Must test combination of selector and comparer in order by clause.

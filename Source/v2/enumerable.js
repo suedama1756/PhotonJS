@@ -16,7 +16,7 @@ var enumerable = (function () {
      * @const
      * @type {Number}
      */
-    var STATE_COMPLETE = 3;
+    var STATE_COMPLETED = 3;
     /**
      * @const
      * @type {object}
@@ -55,11 +55,11 @@ var enumerable = (function () {
         }
 
         function completed() {
-            return !(state = STATE_COMPLETE);
+            return !(state = STATE_COMPLETED);
         }
 
-        function isComplete() {
-            return state === STATE_COMPLETE;
+        function isCompleted() {
+            return state === STATE_COMPLETED;
         }
 
         function isStarted() {
@@ -70,14 +70,14 @@ var enumerable = (function () {
             if (!isStarted()) {
                 throw new Error('Enumeration has not started.');
             }
-            if (isComplete()) {
+            if (isCompleted()) {
                 throw new Error('Enumeration has completed.');
             }
             return curr;
         }
 
         function moveNext() {
-            return state !== STATE_COMPLETE && enumerator['moveNext']() ?
+            return state !== STATE_COMPLETED && enumerator['moveNext']() ?
                 progress(enumerator['current']()) :
                 completed();
         }
@@ -86,74 +86,94 @@ var enumerable = (function () {
             moveNext:moveNext,
             current:current,
             completed:completed,
-            isComplete:isComplete,
+            isComplete:isCompleted,
             isStarted:isStarted,
             progress:progress
         };
     }
 
     function makeSelector(selector) {
-        if (isString(selector)) {
-            return function (x) {
-                return x[selector];
-            }
-        }
-        return selector || defaultSelector;
+        return isString(selector) ? function (x) {
+            return x[selector];
+        } : selector || defaultSelector;
+
     }
 
     function makeSelectors(selectors) {
-        return selectors ? enumerable(selectors).select(makeSelector) : enumerable(defaultSelector);
+        if (isString(selectors)) {
+            selectors = [selectors];
+        }
+        return selectors ?
+            enumerable(selectors).select(makeSelector) :
+            enumerable(defaultSelector);
     }
 
-    function fromArrayLike(array) {
+    function fromArrayLike(arrayLike) {
         return function () {
-            var i = -1, e = iterator();
+            var i = -1, iter = iterator();
             return exportEnumerator(
                 function () {
-                    if (!e.isComplete()) {
-                        var l = array.length;
+                    if (!iter.isComplete()) {
+                        var l = arrayLike.length;
                         while (++i < l) {
-                            if (i in array) {
-                                return e.progress(array[i]);
+                            if (i in arrayLike) {
+                                return iter.progress(arrayLike[i]);
                             }
                         }
                     }
 
-                    return e.completed();
+                    return iter.completed();
                 },
-                e.current);
+                iter.current);
         };
     }
 
-    function makeComparer(selectors) {
-        if (selectors.moveNext()) {
-            var curr = selectors.current(), next = makeComparer(selectors),
-                selector = makeSelector(curr.selector), direction = curr.direction, comparer =
-                    curr.comparer;
+    function fromString(text) {
+        return function () {
+            var i = -1, l = text.length, iter = iterator();
+            return exportEnumerator(
+                function () {
+                    return !iter.isComplete() && ++i < l ?
+                        iter.progress(text.charAt(i)) :
+                        iter.completed();
+                },
+                iter.current);
+        };
+    }
 
-            return comparer ?
-                (direction == 1 ? comparer : function (x, y) {
-                    return comparer(x, y) * -1;
-                }) :
-                function (x, y) {
-                    var x1 = selector(x), y1 = selector(y);
-                    return (x1 < y1 ? -1 : (x1 > y1 ? 1 : next(x, y))) * direction;
-                };
+    function makeComparer(orderByDescriptors, isTail) {
+        if (orderByDescriptors.moveNext()) {
+            var curr = orderByDescriptors.current(),
+                next = makeComparer(orderByDescriptors, true),
+                keySelector = makeSelector(curr.keySelector),
+                direction = curr.direction,
+                comparer = curr.comparer;
+
+
+            var result = function (x, y) {
+                return comparer(keySelector(x), keySelector(y)) || next(x, y);
+            };
+
+            return !isTail && direction === -1 ? function (x, y) {
+                return result(x, y) * -1;
+            } : result;
+
         }
         return function () {
             return 0;
-        }
+        };
     }
 
     function orderByNext(e, keySelectors, comparer, direction) {
         return extend(
             new Enumerable(function () {
+                // double wrap for consistent lazy evaluation
                 return enumerable(e['toArray']().sort(
-                    makeComparer(iterator(keySelectors, function (selector) {
+                    makeComparer(iterator(keySelectors, function (keySelector) {
                         return {
-                            selector:selector,
+                            keySelector:keySelector,
                             direction:direction,
-                            comparer:comparer
+                            comparer:comparer || defaultComparer
                         };
                     }))))['getEnumerator']();
             }),
@@ -165,32 +185,31 @@ var enumerable = (function () {
                     return orderByNext(e, keySelectors.concat(makeSelectors(keySelector)), comparer, -1);
                 }
             });
-
     }
 
     function where(e, predicateOrFactory, isFactory) {
         return function () {
-            var i = iterator(e), index = -1, predicate = isFactory ? predicateOrFactory() : predicateOrFactory;
+            var iter = iterator(e), index = -1, predicate = isFactory ? predicateOrFactory() : predicateOrFactory;
             return exportEnumerator(
                 function () {
-                    while (i.moveNext()) {
-                        if (predicate(i.current(), ++index)) {
+                    while (iter.moveNext()) {
+                        if (predicate(iter.current(), ++index)) {
                             return true;
                         }
                     }
 
-                    return i.completed();
+                    return iter.completed();
                 },
-                i.current);
+                iter.current);
         };
     }
 
-    function any() {
+    function predicateTrue() {
         return true;
     }
 
     function findNext(iter, predicate) {
-        predicate = predicate || any;
+        predicate = predicate || predicateTrue;
         while (iter.moveNext()) {
             var current = iter.current();
             if (predicate(current)) {
@@ -272,6 +291,10 @@ var enumerable = (function () {
     }
 
     function Enumerable(getEnumerator) {
+        if (!(this instanceof Enumerable)) {
+            return new Enumerable(getEnumerator);
+        }
+
         this['getEnumerator'] = getEnumerator;
     }
 
@@ -343,7 +366,7 @@ var enumerable = (function () {
                         },
                         iter.current);
 
-                })
+                });
             },
             'groupBy':function (keySelector) {
                 keySelector = keySelector || defaultSelector;
@@ -473,22 +496,21 @@ var enumerable = (function () {
                 return enumerable(this['toArray']().reverse());
             },
             'toArray':function () {
-                var result = [], i = 0, e = iterator(this);
-                while (e.moveNext()) {
-                    result[i++] = e.current();
+                var result = [], index = 0, iter = iterator(this);
+                while (iter.moveNext()) {
+                    result[index++] = iter.current();
                 }
                 return result;
             }
         })['build']();
 
     var EMPTY = new Enumerable(function () {
-        var e = iterator();
+        var iter = iterator();
         return exportEnumerator(
-            e.completed,
-            e.current);
+            iter.completed, iter.current);
     });
 
-    return function (enumerable) {
+    var enumerable = function (enumerable) {
         if (isUndefined(enumerable) && !arguments.length) {
             return EMPTY;
         }
@@ -497,8 +519,13 @@ var enumerable = (function () {
             return enumerable;
         }
 
+        if (isString(enumerable)) {
+            return new Enumerable(fromString(enumerable));
+        }
+
         return new Enumerable(fromArrayLike(isArrayLike(enumerable) ? enumerable : [enumerable]));
     };
-})();
 
-photon['enumerable'] = enumerable;
+    photon['enumerable'] = enumerable;
+    photon['Enumerable'] = Enumerable;
+})();
