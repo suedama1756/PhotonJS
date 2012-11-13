@@ -1,4 +1,4 @@
-var suiteFilter; // = 'orderByDesc, selector array';
+var suiteFilter;// = 'orderBy, isEmpty';
 
 function getFullSuiteDescription(suite) {
     var result = [];
@@ -878,16 +878,15 @@ describe('enumerable', function () {
     });
 
     describe('- orderByDesc,', function () {
-        var uniqueData = [
-            {a:5},
-            {a:2},
-            {a:9},
-            {a:4},
-            {a:1}
+        var n1Data = [
+            {first:5},
+            {first:2},
+            {first:9},
+            {first:4},
+            {first:1}
         ];
-        var uniqueDataDesc = [uniqueData[2], uniqueData[0], uniqueData[3], uniqueData[1], uniqueData[4]];
-
-
+        var n1DataDesc = [n1Data[2], n1Data[0], n1Data[3], n1Data[1], n1Data[4]];
+        var n1DataAsc = [n1Data[4], n1Data[1], n1Data[3], n1Data[0], n1Data[2]];
         var n2Data = [
             {
                 first:'a', second:'f'
@@ -900,6 +899,7 @@ describe('enumerable', function () {
             }
         ];
         var n2DataDescDesc = [n2Data[1], n2Data[0], n2Data[2]];
+        var n2DataDescAsc = [n2Data[1], n2Data[2], n2Data[0]];
 
         var n3Data = [
             {
@@ -923,15 +923,15 @@ describe('enumerable', function () {
         }, []);
 
         describeNonScalar('selector function', function () {
-            return photon.enumerable(uniqueData)
+            return photon.enumerable(n1Data)
                 .orderByDesc(function (x) {
-                    return x.a;
+                    return x.first;
                 });
-        }, uniqueDataDesc);
+        }, n1DataDesc);
 
         describeNonScalar('selector property', function () {
-            return photon.enumerable(uniqueData).orderByDesc('a');
-        }, uniqueDataDesc);
+            return photon.enumerable(n1Data).orderByDesc('first');
+        }, n1DataDesc);
 
         describeNonScalar('no selector', function () {
             return photon.enumerable([3, 5, 2, 1, 6])
@@ -964,28 +964,24 @@ describe('enumerable', function () {
             }]);
         }, n3DataDescDescDesc);
 
-        var comparerData = [
-            'bf',
-            'ba',
-            'ab',
-            'aa',
-            'ah'
-        ];
-
-        function comparer(x, y) {
-            x = x.charAt(0);
-            y = y.charAt(0);
-            return x < y ? -1 : (x > y ? 1 : 0);
-        }
-
-        var comparerDataDesc = comparerData.slice();
-        comparerDataDesc.sort(function(x, y) {
-            return comparer(x, y) * -1; }
-        );
-
         describeNonScalar('comparer', function () {
-            return photon.enumerable(comparerData).orderByDesc(null, comparer);
-        }, comparerDataDesc);
+            return photon.enumerable(n1Data)
+                .orderByDesc(null, function (x, y) {
+                    return x.first < y.first ? -1 : (x.first > y.first ? 1 : 0);
+                });
+        }, n1DataDesc);
+
+        describeNonScalar('comparer and selector', function () {
+            return photon.enumerable(n1Data).orderByDesc(function (x) {
+                return x.first;
+            }, function(x, y) {
+                return (x < y ? -1 : (x > y ? 1 : 0)) * -1;
+            });
+        }, n1DataAsc);
+
+        describeNonScalar('then by asc', function () {
+            return photon.enumerable(n2Data).orderByDesc('first').thenBy('second');
+        }, n2DataDescAsc);
     });
 
 

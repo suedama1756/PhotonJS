@@ -375,12 +375,11 @@
             }
         
             function makeSelectors(selectors) {
-                if (isString(selectors)) {
-                    selectors = [selectors];
+                if (!isArray(selectors)) {
+                    selectors = [selectors || defaultSelector];
                 }
-                return selectors ?
-                    enumerable(selectors).select(makeSelector) :
-                    enumerable(defaultSelector);
+                return enumerable(selectors).select(makeSelector);
+        
             }
         
             function fromArrayLike(arrayLike) {
@@ -416,48 +415,47 @@
                 };
             }
         
-            function makeComparer(orderByDescriptors, isTail) {
+            function makeComparer(orderByDescriptors) {
                 if (orderByDescriptors.moveNext()) {
                     var curr = orderByDescriptors.current(),
-                        next = makeComparer(orderByDescriptors, true),
-                        keySelector = makeSelector(curr.keySelector),
+                        next = makeComparer(orderByDescriptors),
+                        selector = makeSelector(curr.selector),
                         direction = curr.direction,
                         comparer = curr.comparer;
         
         
-                    var result = function (x, y) {
-                        return comparer(keySelector(x), keySelector(y)) || next(x, y);
+                    return function (x, y) {
+                        return (comparer(selector(x), selector(y)) * direction) || next(x, y);
                     };
-        
-                    return !isTail && direction === -1 ? function (x, y) {
-                        return result(x, y) * -1;
-                    } : result;
-        
                 }
                 return function () {
                     return 0;
                 };
             }
         
-            function orderByNext(e, keySelectors, comparer, direction) {
+            function makeOrderByDescriptors(selectors, comparer, direction) {
+                return enumerable(select(makeSelectors(selectors), function (selector) {
+                    return {
+                        selector:selector,
+                        direction:direction,
+                        comparer:comparer || defaultComparer
+                    };
+                }));
+            }
+        
+            function orderByNext(e, orderByDescriptors) {
                 return extend(
                     new Enumerable(function () {
                         // double wrap for consistent lazy evaluation
-                        return enumerable(e['toArray']().sort(
-                            makeComparer(iterator(keySelectors, function (keySelector) {
-                                return {
-                                    keySelector:keySelector,
-                                    direction:direction,
-                                    comparer:comparer || defaultComparer
-                                };
-                            }))))['getEnumerator']();
+                        return iterator(enumerable(e['toArray']().sort(
+                            makeComparer(iterator(orderByDescriptors)))));
                     }),
                     {
-                        'thenBy':function (keySelector, comparer) {
-                            return orderByNext(e, keySelectors.concat(makeSelectors(keySelector)), comparer, 1);
+                        'thenBy':function (keySelectors, comparer) {
+                            return orderByNext(e, orderByDescriptors.concat(makeOrderByDescriptors(keySelectors, comparer, 1)));
                         },
                         'thenByDesc':function (keySelector, comparer) {
-                            return orderByNext(e, keySelectors.concat(makeSelectors(keySelector)), comparer, -1);
+                            return orderByNext(e, orderByDescriptors.concat(makeOrderByDescriptors(keySelector, comparer, -1)));
                         }
                     });
             }
@@ -476,6 +474,37 @@
                             return iter.completed();
                         },
                         iter.current);
+                };
+            }
+        
+            function select(e, selector) {
+                return function () {
+                    var iter = iterator(e, selector);
+                    return exportEnumerator(
+                        iter.moveNext,
+                        iter.current);
+                }
+            }
+        
+            function concat(e, args) {
+                return function () {
+                    var iter = iterator(),
+                        currIter = iterator(e),
+                        nextIter = iterator(enumerable(args), function (x) {
+                            return iterator(enumerable(x));
+                        });
+        
+                    return exportEnumerator(function () {
+                            while (!currIter.moveNext()) {
+                                if (!nextIter.moveNext()) {
+                                    return iter.completed();
+                                }
+                                currIter = nextIter.current();
+                            }
+                            return iter.progress(currIter.current());
+                        },
+                        iter.current);
+        
                 };
             }
         
@@ -514,10 +543,10 @@
                 return value === NO_VALUE ? defaultValue : value;
             }
         
-            function aggregate(enumerable, accumulator, seed, empty) {
-                var enumerator = enumerable['getEnumerator'](), index = 0;
-                while (enumerator['moveNext']()) {
-                    seed = accumulator(seed, enumerator['current'](), index++);
+            function aggregate(e, accumulator, seed, empty) {
+                var iter = iterator(e), index = 0;
+                while (iter.moveNext()) {
+                    seed = accumulator(seed, iter.current(), index++);
                 }
                 return index ? seed : empty;
             }
@@ -567,7 +596,7 @@
         
             function Enumerable(getEnumerator) {
                 if (!(this instanceof Enumerable)) {
-                    return new Enumerable(getEnumerator);
+                    return enumerable(getEnumerator);
                 }
         
                 this['getEnumerator'] = getEnumerator;
@@ -576,39 +605,31 @@
             type(Enumerable)['defines'](
                 {
                     'where':function (predicate) {
-                        return new Enumerable(where(this, predicate));
+                        return enumerable(where(this, predicate));
                     },
                     'select':function (selector) {
-                        var self = this;
-                        return new Enumerable(function () {
-                            var iter = iterator(self, selector);
-                            return exportEnumerator(
-                                iter.moveNext,
-                                iter.current);
-                        });
+                        return enumerable(select(this, selector));
                     },
                     'distinct':function (keySelector) {
                         keySelector = keySelector || defaultSelector;
-                        return new Enumerable(where(this,
+                        return enumerable(where(this,
                             function () {
                                 var seen = {};
                                 return function (item) {
                                     var key = getKey(keySelector(item));
-                                    return seen.hasOwnProperty(key) ?
-                                        false :
-                                        seen[key] = true;
+                                    return !seen.hasOwnProperty(key) && (seen[key] = true);
                                 };
                             }, true));
         
                     },
                     'skip':function (count) {
-                        return count > 0 ? new Enumerable(where(this, function (x, i) {
+                        return count > 0 ? enumerable(where(this, function (x, i) {
                             return i >= count;
                         })) : this;
                     },
                     'take':function (count) {
                         var self = this;
-                        return new Enumerable(function () {
+                        return enumerable(function () {
                             var iter = iterator(self), taken = 0;
                             return exportEnumerator(function () {
                                 if (taken < count && iter.moveNext()) {
@@ -621,32 +642,12 @@
                         });
                     },
                     'concat':function () {
-                        var self = this, args = arguments;
-                        return new Enumerable(function () {
-                            var iter = iterator(),
-                                currIter = iterator(self),
-                                nextIter = iterator(enumerable(args), function (x) {
-                                    return iterator(enumerable(x));
-                                });
-        
-                            return exportEnumerator(function () {
-                                    while (!currIter.moveNext()) {
-                                        if (nextIter.moveNext()) {
-                                            currIter = nextIter.current();
-                                        } else {
-                                            return iter.completed();
-                                        }
-                                    }
-                                    return iter.progress(currIter.current());
-                                },
-                                iter.current);
-        
-                        });
+                        return enumerable(concat(this, arguments));
                     },
                     'groupBy':function (keySelector) {
                         keySelector = keySelector || defaultSelector;
                         var self = this;
-                        return new Enumerable(function () {
+                        return enumerable(function () {
                             var groups = {},
                                 iter = iterator(self),
                                 current,
@@ -684,7 +685,7 @@
                                         groups[itemLookup].items.push(item);
                                     } else {
                                         var items = [item];
-                                        current = new Enumerable(
+                                        current = enumerable(
                                             createGetEnumerator(items, itemLookup));
                                         current.key = itemKey;
                                         var group = groups[itemLookup] = {
@@ -746,11 +747,11 @@
                     },
                     'orderBy':function (keySelector, comparer) {
                         return orderByNext(this,
-                            makeSelectors(keySelector), comparer, 1);
+                            makeOrderByDescriptors(keySelector, comparer, 1));
                     },
                     'orderByDesc':function (keySelector, comparer) {
                         return orderByNext(this,
-                            makeSelectors(keySelector), comparer, -1);
+                            makeOrderByDescriptors(keySelector, comparer, -1));
                     },
                     'average':function () {
                         var count = 0;
@@ -785,20 +786,24 @@
                     iter.completed, iter.current);
             });
         
-            var enumerable = function (enumerable) {
-                if (isUndefined(enumerable) && !arguments.length) {
+            var enumerable = function (source) {
+                if (isUndefined(source) && !arguments.length) {
                     return EMPTY;
                 }
         
-                if (hasProperty(enumerable, 'getEnumerator')) {
-                    return enumerable;
+                if (hasProperty(source, 'getEnumerator')) {
+                    return source;
                 }
         
-                if (isString(enumerable)) {
-                    return new Enumerable(fromString(enumerable));
+                if (isString(source)) {
+                    return new Enumerable(fromString(source));
                 }
         
-                return new Enumerable(fromArrayLike(isArrayLike(enumerable) ? enumerable : [enumerable]));
+                if (isFunction(source)) {
+                    return new Enumerable(source);
+                }
+        
+                return new Enumerable(fromArrayLike(isArrayLike(source) ? source : [source]));
             };
         
             photon['enumerable'] = enumerable;
