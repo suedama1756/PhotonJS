@@ -447,8 +447,8 @@
                 return extend(
                     new Enumerable(function () {
                         // double wrap for consistent lazy evaluation
-                        return iterator(enumerable(e['toArray']().sort(
-                            makeComparer(iterator(orderByDescriptors)))));
+                        return enumerable(e['toArray']().sort(
+                            makeComparer(iterator(orderByDescriptors))))['getEnumerator']();
                     }),
                     {
                         'thenBy':function (keySelectors, comparer) {
