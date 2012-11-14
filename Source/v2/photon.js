@@ -155,6 +155,7 @@ extend(photon, {
     "isUndefined":isUndefined,
     "isNullOrUndefined":isNullOrUndefined,
     "extend":extend,
-    "getUID":getUID
+    "getUID":getUID,
+    "noop":noop
 });
 

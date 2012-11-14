@@ -1,4 +1,4 @@
-var suiteFilter;// = 'orderBy, isEmpty';
+var suiteFilter; // = 'forEach';
 
 function getFullSuiteDescription(suite) {
     var result = [];
@@ -974,7 +974,7 @@ describe('enumerable', function () {
         describeNonScalar('comparer and selector', function () {
             return photon.enumerable(n1Data).orderByDesc(function (x) {
                 return x.first;
-            }, function(x, y) {
+            }, function (x, y) {
                 return (x < y ? -1 : (x > y ? 1 : 0)) * -1;
             });
         }, n1DataAsc);
@@ -1031,6 +1031,40 @@ describe('enumerable', function () {
         describeNonScalar('is not empty, concat multiple', function () {
             return photon.enumerable([1, 2, 3]).concat([4, 5], [6, 7], [8, 9]);
         }, [1, 2, 3, 4, 5, 6, 7, 8, 9]);
+    });
+
+    describe('- forEach,', function () {
+        describe('isEmpty', function () {
+            it('should not invoke callback', function () {
+                var wasCalled = false;
+                photon.enumerable([]).forEach(function () {
+                    wasCalled = true;
+                });
+                expect(wasCalled).toBe(false);
+            });
+        });
+
+        describe('not isEmpty', function () {
+            it('should invoke for each item', function () {
+                var results = [];
+                photon.enumerable([3, 2, 1]).forEach(function (x, i) {
+                    results.push({x:x, i:i});
+                });
+                expect(results).toEqual([{x:3,i:0},{x:2,i:1},{x:1,i:2}]);
+            });
+        });
+
+        describe('sparse', function () {
+            it('should invoke for each item', function () {
+                var results = [];
+                var data = [3, 2, 1];
+                delete data[1];
+                photon.enumerable(data).forEach(function (x, i) {
+                    results.push({x:x, i:i});
+                });
+                expect(results).toEqual([{x:3,i:0},{x:1,i:1}]);
+            });
+        });
     });
 });
 

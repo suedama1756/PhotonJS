@@ -5,7 +5,8 @@
         files:[
             'photon.js',
             'type.js',
-            'enumerable.js'
+            'enumerable.js',
+            'bind.js'
 
         ],
         dependencies:{

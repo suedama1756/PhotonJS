@@ -40,6 +40,10 @@ function type(constructor) {
             extend(members_, members);
             return this;
         },
+        'exports' : function(callback) {
+            extend(members_, callback(members_));
+            return this;
+        },
         'build':function () {
             if (isNullOrUndefined(constructor)) {
                 constructor = function () {

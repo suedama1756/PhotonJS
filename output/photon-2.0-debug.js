@@ -165,7 +165,8 @@
             "isUndefined":isUndefined,
             "isNullOrUndefined":isNullOrUndefined,
             "extend":extend,
-            "getUID":getUID
+            "getUID":getUID,
+            "noop":noop
         });
         
         
@@ -209,6 +210,10 @@
                         });
                     }
                     extend(members_, members);
+                    return this;
+                },
+                'exports' : function(callback) {
+                    extend(members_, callback(members_));
                     return this;
                 },
                 'build':function () {
@@ -434,20 +439,20 @@
             }
         
             function makeOrderByDescriptors(selectors, comparer, direction) {
-                return enumerable(select(makeSelectors(selectors), function (selector) {
+                return makeSelectors(selectors).select(function (selector) {
                     return {
                         selector:selector,
                         direction:direction,
                         comparer:comparer || defaultComparer
                     };
-                }));
+                });
             }
         
             function orderByNext(e, orderByDescriptors) {
                 return extend(
                     new Enumerable(function () {
                         // double wrap for consistent lazy evaluation
-                        return enumerable(e['toArray']().sort(
+                        return enumerable(e.toArray().sort(
                             makeComparer(iterator(orderByDescriptors))))['getEnumerator']();
                     }),
                     {
@@ -604,13 +609,13 @@
         
             type(Enumerable)['defines'](
                 {
-                    'where':function (predicate) {
+                    where:function (predicate) {
                         return enumerable(where(this, predicate));
                     },
-                    'select':function (selector) {
+                    select:function (selector) {
                         return enumerable(select(this, selector));
                     },
-                    'distinct':function (keySelector) {
+                    distinct:function (keySelector) {
                         keySelector = keySelector || defaultSelector;
                         return enumerable(where(this,
                             function () {
@@ -622,12 +627,12 @@
                             }, true));
         
                     },
-                    'skip':function (count) {
+                    skip:function (count) {
                         return count > 0 ? enumerable(where(this, function (x, i) {
                             return i >= count;
                         })) : this;
                     },
-                    'take':function (count) {
+                    take:function (count) {
                         var self = this;
                         return enumerable(function () {
                             var iter = iterator(self), taken = 0;
@@ -641,10 +646,10 @@
                             }, iter.current);
                         });
                     },
-                    'concat':function () {
+                    concat:function () {
                         return enumerable(concat(this, arguments));
                     },
-                    'groupBy':function (keySelector) {
+                    groupBy:function (keySelector) {
                         keySelector = keySelector || defaultSelector;
                         var self = this;
                         return enumerable(function () {
@@ -717,68 +722,100 @@
                                 });
                         });
                     },
-                    'first':function (predicate) {
+                    first:function (predicate) {
                         return valueOrThrow(
                             findNext(iterator(this), predicate));
                     },
-                    'firstOrDefault':function (predicate, defaultValue) {
+                    firstOrDefault:function (predicate, defaultValue) {
                         return valueOrDefault(
                             findNext(iterator(this), predicate), defaultValue);
                     },
-                    'last':function (predicate) {
+                    last:function (predicate) {
                         return valueOrThrow(findLast(iterator(this), predicate));
                     },
-                    'lastOrDefault':function (predicate, defaultValue) {
+                    lastOrDefault:function (predicate, defaultValue) {
                         return valueOrDefault(findLast(iterator(this), predicate), defaultValue);
                     },
-                    'any':function (predicate) {
+                    any:function (predicate) {
                         return findNext(iterator(this), predicate) !== NO_VALUE;
                     },
-                    'min':function (comparer) {
+                    min:function (comparer) {
                         return extremum(this, comparer, -1);
                     },
-                    'max':function (comparer) {
+                    max:function (comparer) {
                         return extremum(this, comparer, 1);
                     },
-                    'sum':function () {
+                    sum:function () {
                         return aggregate(this, function (accumulated, next) {
                             return accumulated + toNumber(next);
                         }, 0, NaN);
                     },
-                    'orderBy':function (keySelector, comparer) {
+                    orderBy:function (keySelector, comparer) {
                         return orderByNext(this,
                             makeOrderByDescriptors(keySelector, comparer, 1));
                     },
-                    'orderByDesc':function (keySelector, comparer) {
+                    orderByDesc:function (keySelector, comparer) {
                         return orderByNext(this,
                             makeOrderByDescriptors(keySelector, comparer, -1));
                     },
-                    'average':function () {
+                    average:function () {
                         var count = 0;
                         return aggregate(this, function (accumulated, next) {
                             count++;
                             return accumulated + toNumber(next);
                         }, 0, NaN) / count;
                     },
-                    'aggregate':function (accumulator, seed) {
+                    aggregate:function (accumulator, seed) {
                         return aggregate(this, accumulator, seed);
                     },
-                    'count':function () {
+                    count:function () {
                         return aggregate(this, function (accumulated) {
                             return accumulated + 1;
                         }, 0);
                     },
-                    'reverse':function () {
-                        return enumerable(this['toArray']().reverse());
+                    reverse:function () {
+                        return enumerable(this.toArray().reverse());
                     },
-                    'toArray':function () {
+                    forEach:function (callback, thisObj) {
+                        var iter = iterator(this), i = 0;
+                        while (iter.moveNext()) {
+                            callback.call(thisObj, iter.current(), i++);
+                        }
+                    },
+                    toArray:function () {
                         var result = [], index = 0, iter = iterator(this);
                         while (iter.moveNext()) {
                             result[index++] = iter.current();
                         }
                         return result;
                     }
-                })['build']();
+                })['exports'](function (o) {
+                return {
+                    'toArray':o.toArray,
+                    'forEach':o.forEach,
+                    'reverse':o.reverse,
+                    'count':o.count,
+                    'aggregate':o.aggregate,
+                    'average':o.average,
+                    'orderByDesc':o.orderByDesc,
+                    'orderBy':o.orderBy,
+                    'sum':o.sum,
+                    'min':o.min,
+                    'max':o.max,
+                    'where':o.where,
+                    'select':o.select,
+                    'distinct':o.distinct,
+                    'skip':o.skip,
+                    'take':o.take,
+                    'concat':o.concat,
+                    'groupBy':o.groupBy,
+                    'first':o.first,
+                    'firstOrDefault':o.firstOrDefault,
+                    'last':o.last,
+                    'lastOrDefault':o.lastOrDefault,
+                    'any':o.any
+                }
+            })['build']();
         
             var EMPTY = new Enumerable(function () {
                 var iter = iterator();
@@ -809,6 +846,31 @@
             photon['enumerable'] = enumerable;
             photon['Enumerable'] = Enumerable;
         })();
+        
+        
+        function scope(parent) {
+            function ctor() {
+            }
+            ctor.prototype = parent || new (function() {});
+            return new ctor();
+        }
+        
+        
+        photon['scope'] = scope;
+        
+        
+        function rootScope() {
+        }
+        
+        type(rootScope)['defines'](
+        
+        ).defines(
+        
+        ).exports(function(members) {
+                return {
+                    ''
+                }
+            });
     });
 })(window, document);
 //@ sourceMappingURL=photon-2.0-debug.js.map
