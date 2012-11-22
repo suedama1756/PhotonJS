@@ -408,7 +408,7 @@
         }
         
         function makeGetEnumerator(source) {
-            if (isArray(source)) {
+            if (isArray(source) || isArrayLike(source)) {
                 return fromArrayLike(source);
             }
             if (isString(source)) {
@@ -422,11 +422,10 @@
         function select(getEnumerator, selector) {
             selector = toSelector(selector);
             return function () {
-                var controller = enumerator(), source = getEnumerator();
+                var controller = enumerator(), source = getEnumerator(), index = 0;
                 return exportEnumerator(function () {
-                        return (source.moveNext() && controller.progress(selector(source.current()))) || controller.end();
-                    },
-                    controller.current);
+                        return (source.moveNext() && controller.progress(selector(source.current(), index++))) || controller.end();
+                    }, controller.current);
             }
         }
         
@@ -451,7 +450,8 @@
                 var controller = enumerator(),
                     current = getEnumerator(),
                     next = select(makeGetEnumerator(values), function (x) {
-                        return makeGetEnumerator([x])();
+                        return (x.getEnumerator ||
+                            makeGetEnumerator(Array.isArray(x) ? x : [x]))();
                     })();
         
                 return exportEnumerator(function () {
@@ -566,11 +566,11 @@
         }
         
         function min(getEnumerator, comparer) {
-            return valueOrThrow(extremum(getEnumerator, comparer, -1));
+            return valueOrDefault(extremum(getEnumerator, comparer, -1));
         }
         
         function max(getEnumerator, comparer) {
-            return valueOrThrow(extremum(getEnumerator, comparer, 1));
+            return valueOrDefault(extremum(getEnumerator, comparer, 1));
         }
         
         function skip(getEnumerator, count) {
@@ -656,6 +656,9 @@
         }
         
         function enumerable(source) {
+            if (source instanceof Enumerable) {
+                return source;
+            }
             return new Enumerable(makeGetEnumerator(source));
         }
         
@@ -780,6 +783,9 @@
                         return accumulated + toNumber(next);
                     }, 0, NaN);
                 },
+                any : function(predicate) {
+                    return findNext(this.getEnumerator_(), predicate) !== NO_VALUE;
+                },
                 skip:function (count) {
                     return enumerable(skip(this.getEnumerator_, count));
                 },
@@ -799,9 +805,6 @@
                         return accumulated + toNumber(next);
                     }, 0, NaN) / count;
                 },
-                any:function (predicate) {
-                    return findNext(this.getEnumerator_, predicate) !== NO_VALUE;
-                },
                 forEach:function (callback, thisObj) {
                     forEach(this.getEnumerator_, callback, thisObj);
                 },
@@ -811,8 +814,8 @@
                 orderBy:function (selectors, comparer) {
                     return orderByNext(this.getEnumerator_, makeOrderByDescriptors(selectors, comparer, 1));
                 },
-                concat : function(values) {
-                    return enumerable(concat(this.getEnumerator_, values));
+                concat:function () {
+                    return enumerable(concat(this.getEnumerator_, arrayPrototype.slice.call(arguments)));
                 },
                 orderByDesc:function (selectors, comparer) {
                     return orderByNext(this.getEnumerator_, makeOrderByDescriptors(selectors, comparer, -1));
