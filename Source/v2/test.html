@@ -3,6 +3,14 @@
 <head>
     <title></title>
     <script src="../../output/photon-2.0-debug.js"></script>
+    <script src="angular.js"></script>
+    <script>
+        function timeIt(fn) {
+            var time = (new Date()).getTime();
+            fn();
+            console.log('Took %dms', (new Date()).getTime() - time);
+        }
+    </script>
 </head>
 <body>
 
