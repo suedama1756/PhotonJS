@@ -20,8 +20,9 @@
             'bind.js',
             beginEnclosure,
             'parsing/tokenize.js',
-            'parsing/tokenize.testing.js',
             'parsing/parser.js',
+            'parsing/exec.js',
+            'parsing/testing.js',
             endEnclosure
         ],
         dependencies:{

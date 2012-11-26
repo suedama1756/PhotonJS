@@ -1020,17 +1020,21 @@ describe('enumerable', function () {
             return photon.enumerable([]).concat();
         }, []);
 
-        describeNonScalar('is empty, concat single', function () {
+        describeNonScalar('is empty, concat single array', function () {
             return photon.enumerable([]).concat([1]);
         }, [1]);
 
-        describeNonScalar('is not empty, concat single', function () {
+        describeNonScalar('is not empty, concat single array', function () {
             return photon.enumerable([1, 2, 3]).concat([4, 5]);
         }, [1, 2, 3, 4, 5]);
 
-        describeNonScalar('is not empty, concat multiple', function () {
+        describeNonScalar('is not empty, concat multiple arrays', function () {
             return photon.enumerable([1, 2, 3]).concat([4, 5], [6, 7], [8, 9]);
         }, [1, 2, 3, 4, 5, 6, 7, 8, 9]);
+
+        describeNonScalar('is empty, concat single non object', function() {
+            return photon.enumerable([]).concat(null);
+        }, [null]);
     });
 
     describe('- forEach,', function () {

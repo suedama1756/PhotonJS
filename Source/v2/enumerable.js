@@ -144,8 +144,8 @@ function select(getEnumerator, selector) {
     return function () {
         var controller = enumerator(), source = getEnumerator(), index = 0;
         return exportEnumerator(function () {
-                return (source.moveNext() && controller.progress(selector(source.current(), index++))) || controller.end();
-            }, controller.current);
+            return (source.moveNext() && controller.progress(selector(source.current(), index++))) || controller.end();
+        }, controller.current);
     }
 }
 
@@ -170,7 +170,7 @@ function concat(getEnumerator, values) {
         var controller = enumerator(),
             current = getEnumerator(),
             next = select(makeGetEnumerator(values), function (x) {
-                return (x.getEnumerator ||
+                return ((x && isObject(x) && x.getEnumerator) ||
                     makeGetEnumerator(Array.isArray(x) ? x : [x]))();
             })();
 
@@ -503,7 +503,7 @@ extend(
                 return accumulated + toNumber(next);
             }, 0, NaN);
         },
-        any : function(predicate) {
+        any:function (predicate) {
             return findNext(this.getEnumerator_(), predicate) !== NO_VALUE;
         },
         skip:function (count) {
@@ -542,22 +542,85 @@ extend(
         }
     });
 
-enumerable.regexExec = function (regEx, text, startIndex) {
-    return enumerable(function () {
-        var source = enumerator(), index = startIndex, restoreLastIndex;
+
+//enumerable.regexExec = function (regex, text, startIndex, includeTerminal) {
+//    return enumerable(function () {
+//        var controller = enumerator(), index = startIndex, restoreLastIndex;
+//        return exportEnumerator(function () {
+//                var match, result;
+//                if (index === text.length) {
+//                    result = includeTerminal ? controller.progress(null) : controller.end(), index = -1;
+//                } else if (index === -1) {
+//                    result = controller.end();
+//                } else {
+//                    restoreLastIndex = regex.lastIndex, regex.lastIndex = index;
+//                    result = (match = regex.exec(text)) ?
+//                        controller.progress(match) :
+//                        controller.end();
+//                    index = regex.lastIndex, regex.lastIndex = restoreLastIndex;
+//                }
+//                return result;
+//
+//            },
+//            controller.current
+//        )
+//    });
+//}
+
+function regexExec(regex, text, startIndex, terminal) {
+    return function () {
+        var controller = enumerator(), index = startIndex, restoreLastIndex;
         return exportEnumerator(function () {
                 var match, result;
-                restoreLastIndex = regEx.lastIndex, regEx.lastIndex = index;
-
-                // next
-                result = (match = regEx.exec(text)) ? source.progress(match) : source.end();
-
-                // save current position, then restore previous regex position
-                index = regEx.lastIndex, regEx.lastIndex = restoreLastIndex;
+                if (index === text.length) {
+                    result = !isUndefined(terminal) ? controller.progress(terminal) : controller.end(), index = -1;
+                } else if (index === -1) {
+                    result = controller.end();
+                } else {
+                    restoreLastIndex = regex.lastIndex, regex.lastIndex = index;
+                    result = (match = regex.exec(text)) ?
+                        controller.progress(match) :
+                        controller.end();
+                    index = regex.lastIndex, regex.lastIndex = restoreLastIndex;
+                }
                 return result;
 
             },
-            source.current
+            controller.current
+        )
+    };
+}
+
+enumerable.regexExec = function (regex, text, startIndex) {
+    return enumerable(regexExec(regex, text, startIndex));
+}
+
+
+enumerable.value = function (value) {
+    var isComplete = false;
+    return enumerable(exportEnumerator(function () {
+        if (!isComplete) {
+            return isComplete = true;
+        }
+        return false;
+    }, function () {
+        if (isComplete) {
+            throw new Error();
+        }
+        return value;
+    }))
+}
+
+enumerable.sequence = function (fromInclusive, toExclusive, selector) {
+    return enumerable(function () {
+        var controller = enumerator();
+        return exportEnumerator(function () {
+                return fromInclusive < toExclusive ?
+                    controller.progress(selector ? selector(fromInclusive++) : fromInclusive++) :
+                    controller.end();
+
+            },
+            controller.current
         )
     });
 }

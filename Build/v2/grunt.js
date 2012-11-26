@@ -31,7 +31,7 @@ module.exports = function (grunt) {
                 jsOutputFile:'../../output/photon-2.0-min.js',
                 closurePath:'../tools/Closure',
                 options:{
-                    'compilation_level':'ADVANCED_OPTIMIZATIONS'
+                    'compilation_level':'SIMPLE_OPTIMIZATIONS'
                 }
             }
         }

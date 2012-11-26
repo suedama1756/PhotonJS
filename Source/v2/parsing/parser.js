@@ -1,4 +1,3 @@
-
 function memberEvaluator(path) {
     var code = generateMemberAccessCode(path), fn = Function('$scope', '$ctx', code);
     return function (scope) {
@@ -28,7 +27,6 @@ function generateMemberAccessCode(path) {
 
 
 var ctx = evaluationContext();
-
 
 
 function parser() {
@@ -122,7 +120,19 @@ function parser() {
         }
 
 
-        function read(e1, e2, e3, e4) {
+        function readType(type) {
+            var token;
+            if (index < length - 1) {
+                token = tokens[index];
+                if (token.type === type) {
+                    index++;
+                    return token;
+                }
+            }
+            return null;
+        }
+
+        function readText(e1, e2, e3, e4) {
             var token = peek(e1, e2, e3, e4);
             if (token) {
                 index++;
@@ -132,7 +142,7 @@ function parser() {
         }
 
         function consume(e1) {
-            if (!read(e1)) {
+            if (!readText(e1)) {
                 throw new Error("is unexpected, expecting [" + e1 + "]");
             }
         }
@@ -142,90 +152,83 @@ function parser() {
         }
 
         function assignment() {
-            var left = logicalOR();
-            var right;
-            var token;
-            if ((token = read('='))) {
-                if (!left.assign) {
+            var lhs = logicalOR(), rhs, token;
+            if (token = readText('=')) {
+                if (!lhs.assign) {
                     throw new Error("implies assignment but [" +
                         text.substring(0, token.index) + "] can not be assigned to", token);
                 }
-                right = logicalOR();
+                rhs = logicalOR();
                 return function (self, locals) {
-                    return left.assign(self, right(self, locals), locals);
+                    return lhs.assign(self, rhs(self, locals), locals);
                 };
-            } else {
-                return left;
             }
+            return lhs;
         }
 
         function logicalOR() {
-            var left = logicalAND();
-            var token;
+            var lhs = logicalAND(), token;
             while (true) {
-                if ((token = read('||'))) {
-                    left = binaryFn(left, token.fn, logicalAND());
+                if (token = readText('||')) {
+                    lhs = binaryFn(lhs, token.fn, logicalAND());
                 } else {
-                    return left;
+                    return lhs;
                 }
             }
         }
 
         function logicalAND() {
-            var left = equality();
-            var token;
-            if ((token = read('&&'))) {
-                left = binaryFn(left, token.fn, logicalAND());
+            var lhs = equality(), token;
+            if (token = readText('&&')) {
+                lhs = binaryFn(lhs, token.fn, logicalAND());
             }
-            return left;
+            return lhs;
         }
 
         function equality() {
-            var left = relational();
-            var token;
-            if ((token = read('==', '!='))) {
-                left = binaryFn(left, token.fn, equality());
+            var lhs = relational(), token;
+            if (token = readType(TOKEN_EQUALITY)) {
+                lhs = binaryFn(lhs, token.fn, equality());
             }
-            return left;
+            return lhs;
         }
 
         function relational() {
             var lhs = additive(), token;
-            if ((token = read('<', '>', '<=', '>='))) {
+            if (token = readType(TOKEN_RELATIONAL)) {
                 lhs = binaryFn(lhs, token.fn, relational());
             }
             return lhs;
         }
 
         function additive() {
-            var left = multiplicative();
-            var token;
-            while ((token = read('+', '-'))) {
-                left = binaryFn(left, token.fn, multiplicative());
+            var lhs = multiplicative(), token;
+            while (token = readType(TOKEN_ADDITIVE)) {
+                lhs = binaryFn(lhs, token.fn, multiplicative());
             }
-            return left;
+            return lhs;
         }
 
         function multiplicative() {
-            var left = unary();
-            var token;
-            while ((token = read('*', '/', '%'))) {
-                left = binaryFn(left, token.fn, unary());
+            var lhs = unary(), token;
+            while (token = readType(TOKEN_MULTIPLICATIVE)) {
+                lhs = binaryFn(lhs, token.fn, unary());
             }
-            return left;
+            return lhs;
         }
 
         function unary() {
             var token;
-            if (read('+')) {
-                return primary();
-            } else if ((token = read('-'))) {
-                return binaryFn(ZERO, token.fn, unary());
-            } else if ((token = read('!'))) {
-                return unaryFn(token.fn, unary());
-            } else {
+            if (readText('+')) {
                 return primary();
             }
+            if (token = readText('-')) {
+                return binaryFn(ZERO, token.fn, unary());
+            }
+            if (token = readText('!')) {
+                return unaryFn(token.fn, unary());
+            }
+            return primary();
         }
 
         function unaryFn(fn, right) {
@@ -246,7 +249,7 @@ function parser() {
             if (memberPath) {
                 primary = memberEvaluator(memberPath);
             } else {
-                token = read();
+                token = readText();
                 primary = token.fn;
                 if (!primary) {
                     if ((token.type & 32) === 32) {
@@ -277,4 +280,3 @@ function parser() {
 }
 
 photon.parser = parser;
-

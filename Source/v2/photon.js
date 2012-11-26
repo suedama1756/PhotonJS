@@ -51,7 +51,7 @@ function hasOwnProperty(obj, property) {
 }
 
 function hasProperty(obj, property) {
-    return !isPrimitive(obj) && property in obj;
+    return obj && !isPrimitive(obj) && property in obj;
 }
 
 var toNumber = Number;
@@ -144,6 +144,29 @@ modernize(Object, 'getOwnPropertyNames', function () {
             }
         }
         return keys;
+    };
+});
+
+modernize(arrayPrototype, 'forEach', function () {
+    return function (fn, obj) {
+        var array = this;
+        for (var i = 0, n = array.length; i < n; i++) {
+            if (i in array) {
+                fn.call(obj, array[i], i, array);
+            }
+        }
+    };
+});
+
+modernize(arrayPrototype, 'map', function () {
+    return function (mapper, obj) {
+        var length = this.length, result = new Array(length), actualArray = this;
+        for (var i = 0; i < length; i++) {
+            if (i in actualArray) {
+                result[i] = mapper.call(obj, actualArray[i], i, actualArray);
+            }
+        }
+        return result;
     };
 });
 

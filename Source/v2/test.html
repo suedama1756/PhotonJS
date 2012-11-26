@@ -8,11 +8,18 @@
         function timeIt(fn) {
             var time = (new Date()).getTime();
             fn();
+            //document.getElementById('output').innerText += 'Took %dms' + ((new Date()).getTime() - time);
             console.log('Took %dms', (new Date()).getTime() - time);
+        }
+
+        function run() {
+            timeIt(function() { for (var i=0; i<10000; i++) { photon.tokenize('one.two+three.four+five.six.onehundredandone').toArray(); } });
+            timeIt(function() { for (var i=0; i<10000; i++) { angular.lex('one.two+three.four+five.six.onehundredandone'); } });
         }
     </script>
 </head>
 <body>
-
+  <button onclick="run()">Click</button>
+<span id="output" ></span>
 </body>
 </html>

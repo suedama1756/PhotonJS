@@ -61,7 +61,7 @@
         }
         
         function hasProperty(obj, property) {
-            return !isPrimitive(obj) && property in obj;
+            return obj && !isPrimitive(obj) && property in obj;
         }
         
         var toNumber = Number;
@@ -154,6 +154,29 @@
                     }
                 }
                 return keys;
+            };
+        });
+        
+        modernize(arrayPrototype, 'forEach', function () {
+            return function (fn, obj) {
+                var array = this;
+                for (var i = 0, n = array.length; i < n; i++) {
+                    if (i in array) {
+                        fn.call(obj, array[i], i, array);
+                    }
+                }
+            };
+        });
+        
+        modernize(arrayPrototype, 'map', function () {
+            return function (mapper, obj) {
+                var length = this.length, result = new Array(length), actualArray = this;
+                for (var i = 0; i < length; i++) {
+                    if (i in actualArray) {
+                        result[i] = mapper.call(obj, actualArray[i], i, actualArray);
+                    }
+                }
+                return result;
             };
         });
         
@@ -424,8 +447,8 @@
             return function () {
                 var controller = enumerator(), source = getEnumerator(), index = 0;
                 return exportEnumerator(function () {
-                        return (source.moveNext() && controller.progress(selector(source.current(), index++))) || controller.end();
-                    }, controller.current);
+                    return (source.moveNext() && controller.progress(selector(source.current(), index++))) || controller.end();
+                }, controller.current);
             }
         }
         
@@ -450,7 +473,7 @@
                 var controller = enumerator(),
                     current = getEnumerator(),
                     next = select(makeGetEnumerator(values), function (x) {
-                        return (x.getEnumerator ||
+                        return ((x && isObject(x) && x.getEnumerator) ||
                             makeGetEnumerator(Array.isArray(x) ? x : [x]))();
                     })();
         
@@ -783,7 +806,7 @@
                         return accumulated + toNumber(next);
                     }, 0, NaN);
                 },
-                any : function(predicate) {
+                any:function (predicate) {
                     return findNext(this.getEnumerator_(), predicate) !== NO_VALUE;
                 },
                 skip:function (count) {
@@ -822,597 +845,90 @@
                 }
             });
         
-        enumerable.regexExec = function (regEx, text, startIndex) {
-            return enumerable(function () {
-                var source = enumerator(), index = startIndex, restoreLastIndex;
+        
+        //enumerable.regexExec = function (regex, text, startIndex, includeTerminal) {
+        //    return enumerable(function () {
+        //        var controller = enumerator(), index = startIndex, restoreLastIndex;
+        //        return exportEnumerator(function () {
+        //                var match, result;
+        //                if (index === text.length) {
+        //                    result = includeTerminal ? controller.progress(null) : controller.end(), index = -1;
+        //                } else if (index === -1) {
+        //                    result = controller.end();
+        //                } else {
+        //                    restoreLastIndex = regex.lastIndex, regex.lastIndex = index;
+        //                    result = (match = regex.exec(text)) ?
+        //                        controller.progress(match) :
+        //                        controller.end();
+        //                    index = regex.lastIndex, regex.lastIndex = restoreLastIndex;
+        //                }
+        //                return result;
+        //
+        //            },
+        //            controller.current
+        //        )
+        //    });
+        //}
+        
+        function regexExec(regex, text, startIndex, terminal) {
+            return function () {
+                var controller = enumerator(), index = startIndex, restoreLastIndex;
                 return exportEnumerator(function () {
                         var match, result;
-                        restoreLastIndex = regEx.lastIndex, regEx.lastIndex = index;
-        
-                        // next
-                        result = (match = regEx.exec(text)) ? source.progress(match) : source.end();
-        
-                        // save current position, then restore previous regex position
-                        index = regEx.lastIndex, regEx.lastIndex = restoreLastIndex;
+                        if (index === text.length) {
+                            result = !isUndefined(terminal) ? controller.progress(terminal) : controller.end(), index = -1;
+                        } else if (index === -1) {
+                            result = controller.end();
+                        } else {
+                            restoreLastIndex = regex.lastIndex, regex.lastIndex = index;
+                            result = (match = regex.exec(text)) ?
+                                controller.progress(match) :
+                                controller.end();
+                            index = regex.lastIndex, regex.lastIndex = restoreLastIndex;
+                        }
                         return result;
         
                     },
-                    source.current
+                    controller.current
+                )
+            };
+        }
+        
+        enumerable.regexExec = function (regex, text, startIndex) {
+            return enumerable(regexExec(regex, text, startIndex));
+        }
+        
+        
+        enumerable.value = function (value) {
+            var isComplete = false;
+            return enumerable(exportEnumerator(function () {
+                if (!isComplete) {
+                    return isComplete = true;
+                }
+                return false;
+            }, function () {
+                if (isComplete) {
+                    throw new Error();
+                }
+                return value;
+            }))
+        }
+        
+        enumerable.sequence = function (fromInclusive, toExclusive, selector) {
+            return enumerable(function () {
+                var controller = enumerator();
+                return exportEnumerator(function () {
+                        return fromInclusive < toExclusive ?
+                            controller.progress(selector ? selector(fromInclusive++) : fromInclusive++) :
+                            controller.end();
+        
+                    },
+                    controller.current
                 )
             });
         }
         
         photon.enumerable = enumerable;
-        //// Even if we use the enumerator type we must wrap it before returning as an 'real' enumerator (to ensure privacy is maintained)
-        //// 5692
-        //
-        //var enumerable = (function () {
-        //    /**
-        //     * @const
-        //     * @type {Number}
-        //     */
-        //    var STATE_NOT_STARTED = 0;
-        //    /**
-        //     * @const
-        //     * @type {Number}
-        //     */
-        //    var STATE_IN_PROGRESS = 1;
-        //    /**
-        //     * @const
-        //     * @type {Number}
-        //     */
-        //    var STATE_COMPLETED = 3;
-        //    /**
-        //     * @const
-        //     * @type {object}
-        //     */
-        //    var NO_VALUE = {};
-        //
-        //    /**
-        //     * Creates an enumerator from the specified moveNext and current functions. This function ensures enumerator
-        //     * functions are exported correctly in the minified code.
-        //     *
-        //     * @param {function} moveNext The 'moveNext' function for the enumerator.
-        //     * @param {function} current The 'current' function for the enumerator.
-        //     */
-        //    function exportEnumerator(moveNext, current) {
-        //        return {
-        //            'moveNext':moveNext,
-        //            'current':current
-        //        };
-        //    }
-        //
-        //    /**
-        //     *
-        //     * @param {Enumerable} [enumerable]
-        //     * @param {function} [selector]
-        //     * @return {Object}
-        //     */
-        //    function iterator(enumerable, selector) {
-        //        var enumerator = enumerable ? enumerable['getEnumerator']() : null,
-        //            state = STATE_NOT_STARTED,
-        //            curr,
-        //            index = -1;
-        //
-        //        function progress(value) {
-        //            curr = selector ? selector(value, ++index) : value;
-        //            return !!(state = STATE_IN_PROGRESS);
-        //        }
-        //
-        //        function completed() {
-        //            return !(state = STATE_COMPLETED);
-        //        }
-        //
-        //        function isCompleted() {
-        //            return state === STATE_COMPLETED;
-        //        }
-        //
-        //        function isStarted() {
-        //            return state !== STATE_NOT_STARTED;
-        //        }
-        //
-        //        function current() {
-        //            if (!isStarted()) {
-        //                throw new Error('Enumeration has not started.');
-        //            }
-        //            if (isCompleted()) {
-        //                throw new Error('Enumeration has completed.');
-        //            }
-        //            return curr;
-        //        }
-        //
-        //        function moveNext() {
-        //            return state !== STATE_COMPLETED && enumerator['moveNext']() ?
-        //                progress(enumerator['current']()) :
-        //                completed();
-        //        }
-        //
-        //        return {
-        //            moveNext:moveNext,
-        //            current:current,
-        //            completed:completed,
-        //            isComplete:isCompleted,
-        //            isStarted:isStarted,
-        //            progress:progress
-        //        };
-        //    }
-        //
-        //    function makeSelector(selector) {
-        //        return isString(selector) ? function (x) {
-        //            return x[selector];
-        //        } : selector || defaultSelector;
-        //
-        //    }
-        //
-        //    function makeSelectors(selectors) {
-        //        if (!isArray(selectors)) {
-        //            selectors = [selectors || defaultSelector];
-        //        }
-        //        return enumerable(selectors).select(makeSelector);
-        //
-        //    }
-        //
-        //    function fromArrayLike(arrayLike) {
-        //        return function () {
-        //            var i = -1, iter = iterator();
-        //            return exportEnumerator(
-        //                function () {
-        //                    if (!iter.isComplete()) {
-        //                        var l = arrayLike.length;
-        //                        while (++i < l) {
-        //                            if (i in arrayLike) {
-        //                                return iter.progress(arrayLike[i]);
-        //                            }
-        //                        }
-        //                    }
-        //
-        //                    return iter.completed();
-        //                },
-        //                iter.current);
-        //        };
-        //    }
-        //
-        //    function fromString(text) {
-        //        return function () {
-        //            var i = -1, l = text.length, iter = iterator();
-        //            return exportEnumerator(
-        //                function () {
-        //                    return !iter.isComplete() && ++i < l ?
-        //                        iter.progress(text.charAt(i)) :
-        //                        iter.completed();
-        //                },
-        //                iter.current);
-        //        };
-        //    }
-        //
-        //    function makeComparer(orderByDescriptors) {
-        //        if (orderByDescriptors.moveNext()) {
-        //            var curr = orderByDescriptors.current(),
-        //                next = makeComparer(orderByDescriptors),
-        //                selector = makeSelector(curr.selector),
-        //                direction = curr.direction,
-        //                comparer = curr.comparer;
-        //
-        //
-        //            return function (x, y) {
-        //                return (comparer(selector(x), selector(y)) * direction) || next(x, y);
-        //            };
-        //        }
-        //        return function () {
-        //            return 0;
-        //        };
-        //    }
-        //
-        //    function makeOrderByDescriptors(selectors, comparer, direction) {
-        //        return makeSelectors(selectors).select(function (selector) {
-        //            return {
-        //                selector:selector,
-        //                direction:direction,
-        //                comparer:comparer || defaultComparer
-        //            };
-        //        });
-        //    }
-        //
-        //    function orderByNext(e, orderByDescriptors) {
-        //        return extend(
-        //            new Enumerable(function () {
-        //                // double wrap for consistent lazy evaluation
-        //                return enumerable(e.toArray().sort(
-        //                    makeComparer(iterator(orderByDescriptors))))['getEnumerator']();
-        //            }),
-        //            {
-        //                'thenBy':function (keySelectors, comparer) {
-        //                    return orderByNext(e, orderByDescriptors.concat(makeOrderByDescriptors(keySelectors, comparer, 1)));
-        //                },
-        //                'thenByDesc':function (keySelector, comparer) {
-        //                    return orderByNext(e, orderByDescriptors.concat(makeOrderByDescriptors(keySelector, comparer, -1)));
-        //                }
-        //            });
-        //    }
-        //
-        //    function where(e, predicateOrFactory, isFactory) {
-        //        return function () {
-        //            var iter = iterator(e), index = -1, predicate = isFactory ? predicateOrFactory() : predicateOrFactory;
-        //            return exportEnumerator(
-        //                function () {
-        //                    while (iter.moveNext()) {
-        //                        if (predicate(iter.current(), ++index)) {
-        //                            return true;
-        //                        }
-        //                    }
-        //
-        //                    return iter.completed();
-        //                },
-        //                iter.current);
-        //        };
-        //    }
-        //
-        //    function select(e, selector) {
-        //        return function () {
-        //            var iter = iterator(e, selector);
-        //            return exportEnumerator(
-        //                iter.moveNext,
-        //                iter.current);
-        //        }
-        //    }
-        //
-        //    function concat(e, args) {
-        //        return function () {
-        //            var iter = iterator(),
-        //                currIter = iterator(e),
-        //                nextIter = iterator(enumerable(args), function (x) {
-        //                    return iterator(enumerable(x));
-        //                });
-        //
-        //            return exportEnumerator(function () {
-        //                    while (!currIter.moveNext()) {
-        //                        if (!nextIter.moveNext()) {
-        //                            return iter.completed();
-        //                        }
-        //                        currIter = nextIter.current();
-        //                    }
-        //                    return iter.progress(currIter.current());
-        //                },
-        //                iter.current);
-        //
-        //        };
-        //    }
-        //
-        //    function predicateTrue() {
-        //        return true;
-        //    }
-        //
-        //    function findNext(iter, predicate) {
-        //        predicate = predicate || predicateTrue;
-        //        while (iter.moveNext()) {
-        //            var current = iter.current();
-        //            if (predicate(current)) {
-        //                return current;
-        //            }
-        //        }
-        //
-        //        return NO_VALUE;
-        //    }
-        //
-        //    function findLast(iter, predicate) {
-        //        var lastFound = NO_VALUE, current;
-        //        while ((current = findNext(iter, predicate)) !== NO_VALUE) {
-        //            lastFound = current;
-        //        }
-        //        return lastFound;
-        //    }
-        //
-        //    function valueOrThrow(value) {
-        //        if (value === NO_VALUE) {
-        //            throw new Error('No match found.');
-        //        }
-        //        return value;
-        //    }
-        //
-        //    function valueOrDefault(value, defaultValue) {
-        //        return value === NO_VALUE ? defaultValue : value;
-        //    }
-        //
-        //    function aggregate(e, accumulator, seed, empty) {
-        //        var iter = iterator(e), index = 0;
-        //        while (iter.moveNext()) {
-        //            seed = accumulator(seed, iter.current(), index++);
-        //        }
-        //        return index ? seed : empty;
-        //    }
-        //
-        //    function defaultComparer(x, y) {
-        //        if (x === y) {
-        //            return 0;
-        //        }
-        //
-        //        if (x < y) {
-        //            return -1;
-        //        }
-        //
-        //        if (x > y) {
-        //            return 1;
-        //        }
-        //
-        //        return -2;
-        //    }
-        //
-        //    function defaultSelector(item) {
-        //        return item;
-        //    }
-        //
-        //    function getObjectKey(obj) {
-        //        var type = Object.prototype.toString.call(obj);
-        //        return type === '[object Object]' || obj.valueOf() === obj ?
-        //            'o' + getUID(obj) :
-        //            type + obj.valueOf();
-        //    }
-        //
-        //    function getKey(obj) {
-        //        var type = typeof obj;
-        //        return type === 'object' && obj !== null ?
-        //            getObjectKey(obj) :
-        //            type.charAt(0) + obj;
-        //    }
-        //
-        //    function extremum(enumerable, comparer, direction) {
-        //        comparer = comparer || defaultComparer;
-        //        return aggregate(enumerable, function (accumulated, next) {
-        //            return isUndefined(accumulated) || comparer(next, accumulated) === direction ?
-        //                next :
-        //                accumulated;
-        //        });
-        //    }
-        //
-        //    function Enumerable(getEnumerator) {
-        //        if (!(this instanceof Enumerable)) {
-        //            return enumerable(getEnumerator);
-        //        }
-        //
-        //        this['getEnumerator'] = getEnumerator;
-        //    }
-        //
-        //    type(Enumerable)['defines'](
-        //        {
-        //            where:function (predicate) {
-        //                return enumerable(where(this, predicate));
-        //            },
-        //            select:function (selector) {
-        //                return enumerable(select(this, selector));
-        //            },
-        //            distinct:function (keySelector) {
-        //                keySelector = keySelector || defaultSelector;
-        //                return enumerable(where(this,
-        //                    function () {
-        //                        var seen = {};
-        //                        return function (item) {
-        //                            var key = getKey(keySelector(item));
-        //                            return !seen.hasOwnProperty(key) && (seen[key] = true);
-        //                        };
-        //                    }, true));
-        //
-        //            },
-        //            skip:function (count) {
-        //                return count > 0 ? enumerable(where(this, function (x, i) {
-        //                    return i >= count;
-        //                })) : this;
-        //            },
-        //            take:function (count) {
-        //                var self = this;
-        //                return enumerable(function () {
-        //                    var iter = iterator(self), taken = 0;
-        //                    return exportEnumerator(function () {
-        //                        if (taken < count && iter.moveNext()) {
-        //                            taken++;
-        //                            return true;
-        //                        }
-        //                        return iter.completed();
-        //
-        //                    }, iter.current);
-        //                });
-        //            },
-        //            concat:function () {
-        //                return enumerable(concat(this, arguments));
-        //            },
-        //            groupBy:function (keySelector) {
-        //                keySelector = keySelector || defaultSelector;
-        //                var self = this;
-        //                return enumerable(function () {
-        //                    var groups = {},
-        //                        iter = iterator(self),
-        //                        current,
-        //                        pendingGroups = [],
-        //                        pendingGroupIndex = 0;
-        //
-        //                    function createGetEnumerator(items, itemLookup) {
-        //                        return function () {
-        //                            var groupIter = iterator(), itemIndex = 0;
-        //                            return exportEnumerator(function () {
-        //                                    return (itemIndex < items.length || moveNext(true, itemLookup)) ?
-        //                                        groupIter.progress(items[itemIndex++]) :
-        //                                        groupIter.completed();
-        //                                },
-        //                                groupIter.current);
-        //                        };
-        //                    }
-        //
-        //                    function moveNext(matchKey, keyToMatch) {
-        //                        if (!matchKey) {
-        //                            if (pendingGroupIndex === pendingGroups.length) {
-        //                                pendingGroups = [];
-        //                            } else if (pendingGroupIndex < pendingGroups.length) {
-        //                                current = pendingGroups[pendingGroupIndex++].enumerable;
-        //                                return true;
-        //                            }
-        //                        }
-        //
-        //                        while (iter.moveNext()) {
-        //                            var item = iter.current(),
-        //                                itemKey = keySelector(item),
-        //                                itemLookup = getKey(itemKey);
-        //
-        //                            if (groups.hasOwnProperty(itemLookup)) {
-        //                                groups[itemLookup].items.push(item);
-        //                            } else {
-        //                                var items = [item];
-        //                                current = enumerable(
-        //                                    createGetEnumerator(items, itemLookup));
-        //                                current.key = itemKey;
-        //                                var group = groups[itemLookup] = {
-        //                                    items:items,
-        //                                    enumerable:current
-        //                                };
-        //
-        //                                if (matchKey) {
-        //                                    pendingGroups.push(group);
-        //                                }
-        //                            }
-        //
-        //                            if (!matchKey || keyToMatch === itemLookup) {
-        //                                return true;
-        //                            }
-        //                        }
-        //                        return iter.completed();
-        //                    }
-        //
-        //                    return exportEnumerator(
-        //                        function () {
-        //                            return moveNext(false, null);
-        //                        },
-        //                        function () {
-        //                            return (!iter.isComplete() || pendingGroups.length) && iter.isStarted() ?
-        //                                current :
-        //                                iter.current();
-        //
-        //                        });
-        //                });
-        //            },
-        //            first:function (predicate) {
-        //                return valueOrThrow(
-        //                    findNext(iterator(this), predicate));
-        //            },
-        //            firstOrDefault:function (predicate, defaultValue) {
-        //                return valueOrDefault(
-        //                    findNext(iterator(this), predicate), defaultValue);
-        //            },
-        //            last:function (predicate) {
-        //                return valueOrThrow(findLast(iterator(this), predicate));
-        //            },
-        //            lastOrDefault:function (predicate, defaultValue) {
-        //                return valueOrDefault(findLast(iterator(this), predicate), defaultValue);
-        //            },
-        //            any:function (predicate) {
-        //                return findNext(iterator(this), predicate) !== NO_VALUE;
-        //            },
-        //            min:function (comparer) {
-        //                return extremum(this, comparer, -1);
-        //            },
-        //            max:function (comparer) {
-        //                return extremum(this, comparer, 1);
-        //            },
-        //            sum:function () {
-        //                return aggregate(this, function (accumulated, next) {
-        //                    return accumulated + toNumber(next);
-        //                }, 0, NaN);
-        //            },
-        //            orderBy:function (keySelector, comparer) {
-        //                return orderByNext(this,
-        //                    makeOrderByDescriptors(keySelector, comparer, 1));
-        //            },
-        //            orderByDesc:function (keySelector, comparer) {
-        //                return orderByNext(this,
-        //                    makeOrderByDescriptors(keySelector, comparer, -1));
-        //            },
-        //            average:function () {
-        //                var count = 0;
-        //                return aggregate(this, function (accumulated, next) {
-        //                    count++;
-        //                    return accumulated + toNumber(next);
-        //                }, 0, NaN) / count;
-        //            },
-        //            aggregate:function (accumulator, seed) {
-        //                return aggregate(this, accumulator, seed);
-        //            },
-        //            count:function () {
-        //                return aggregate(this, function (accumulated) {
-        //                    return accumulated + 1;
-        //                }, 0);
-        //            },
-        //            reverse:function () {
-        //                return enumerable(this.toArray().reverse());
-        //            },
-        //            forEach:function (callback, thisObj) {
-        //                var iter = iterator(this), i = 0;
-        //                while (iter.moveNext()) {
-        //                    callback.call(thisObj, iter.current(), i++);
-        //                }
-        //            },
-        //            toArray:function () {
-        //                var result = [], index = 0, iter = iterator(this);
-        //                while (iter.moveNext()) {
-        //                    result[index++] = iter.current();
-        //                }
-        //                return result;
-        //            }
-        //        })['exports'](function (o) {
-        //        return {
-        //            'toArray':o.toArray,
-        //            'forEach':o.forEach,
-        //            'reverse':o.reverse,
-        //            'count':o.count,
-        //            'aggregate':o.aggregate,
-        //            'average':o.average,
-        //            'orderByDesc':o.orderByDesc,
-        //            'orderBy':o.orderBy,
-        //            'sum':o.sum,
-        //            'min':o.min,
-        //            'max':o.max,
-        //            'where':o.where,
-        //            'select':o.select,
-        //            'distinct':o.distinct,
-        //            'skip':o.skip,
-        //            'take':o.take,
-        //            'concat':o.concat,
-        //            'groupBy':o.groupBy,
-        //            'first':o.first,
-        //            'firstOrDefault':o.firstOrDefault,
-        //            'last':o.last,
-        //            'lastOrDefault':o.lastOrDefault,
-        //            'any':o.any
-        //        }
-        //    })['build']();
-        //
-        //    var EMPTY = new Enumerable(function () {
-        //        var iter = iterator();
-        //        return exportEnumerator(
-        //            iter.completed, iter.current);
-        //    });
-        //
-        //    var enumerable = function (source) {
-        //        if (isUndefined(source) && !arguments.length) {
-        //            return EMPTY;
-        //        }
-        //
-        //        if (hasProperty(source, 'getEnumerator')) {
-        //            return source;
-        //        }
-        //
-        //        if (isString(source)) {
-        //            return new Enumerable(fromString(source));
-        //        }
-        //
-        //        if (isFunction(source)) {
-        //            return new Enumerable(source);
-        //        }
-        //
-        //        return new Enumerable(fromArrayLike(isArrayLike(source) ? source : [source]));
-        //    };
-        //
-        //    photon['enumerable'] = enumerable;
-        //    photon['Enumerable'] = Enumerable;
-        //})();
-        //
-        
         function scope(parent) {
             function ctor() {
             }
@@ -1438,20 +954,24 @@
         );
         (function() {
             var TOKEN_EOF = -1,
-                TOKEN_OPERATOR = 1,
-                TOKEN_KEYWORD = 4,
-                TOKEN_IDENTIFIER = 8,
-                TOKEN_GROUP = 16,
+                TOKEN_KEYWORD = 2,
+                TOKEN_IDENTIFIER = 3,
+                TOKEN_GROUP = 4,
+                TOKEN_OPERATOR = 16,
+                TOKEN_EQUALITY = 17,
+                TOKEN_RELATIONAL = 18,
+                TOKEN_MULTIPLICATIVE = 19,
+                TOKEN_ADDITIVE = 20,
                 TOKEN_STRING = 32,
                 TOKEN_NUMBER = 33,
                 TOKEN_BOOLEAN = 34,
                 TOKEN_NULL = 35,
+                TOKEN_UNDEFINED = 36,
                 TOKEN_DELIMITER = 64,
                 TOKEN_WHITESPACE = 128,
                 ZERO;
             
-            var tokenTextToTypeMap_ = {},
-                tokenTextToFnMap_ = {},
+            var tokenInfoMap_ = {},
                 tokenizeRegex;
             
             function compileBinary(tokenText) {
@@ -1464,22 +984,24 @@
                 }
             }
             
-            (function() {
+            (function () {
+                ZERO = compileConstant(0);
+            
                 var expressionSets = [];
             
                 function regexEscape(token) {
                     return enumerable(token).select(function (c) {
-                        return '\\[]{}().+*^'.indexOf(c) !== -1 ? '\\' + c : c;
+                        return '\\[]{}().+*^|'.indexOf(c) !== -1 ? '\\' + c : c;
                     }).toArray().join('');
                 }
             
                 function defineTokens(expressions, type, isPattern, compiler) {
                     if (!isPattern) {
                         expressions.forEach(function (expression, index) {
-                            tokenTextToTypeMap_[expression] = type;
-                            if (compiler) {
-                                tokenTextToFnMap_[expression] = isFunction(compiler) ? compiler(expression) : compiler[index];
-                            }
+                            tokenInfoMap_[expression] = {
+                                type:type,
+                                fn:compiler && (isFunction(compiler) ? compiler(expression) : compiler[index])
+                            };
                         });
             
                         expressions = expressions.map(regexEscape);
@@ -1492,82 +1014,101 @@
                     var text = enumerable(expressionSets).select(function (tokenSet) {
                         return tokenSet.join('|');
                     }).aggregate(function (accumulator, next) {
-                            if (accumulator) {
-                                accumulator += '|';
-                            }
-                            return accumulator + '(' + next + '){1}';
-                        }, '');
+                        return (accumulator ? accumulator + '|(' : '(') + next + ')';
+                    }, '');
                     return new RegExp(text, 'gi');
             
                 }
             
-                ZERO = compileConstant(0);
-            
                 defineTokens('\\s,\\r,\\t,\\n, '.split(','), TOKEN_WHITESPACE, false);
-                defineTokens('+ - * % / === == = !== != <<= << <= < >>= >= > &' .split(' '), TOKEN_OPERATOR, false, compileBinary);
-                defineTokens(['()[]{}'.split('')], TOKEN_GROUP, false);
+                defineTokens('=== == !== !='.split(' '), TOKEN_EQUALITY, false, compileBinary);
+            
+                defineTokens('<= < >= >'.split(' '), TOKEN_RELATIONAL, false, compileBinary);
+                defineTokens('* % /'.split(' '), TOKEN_MULTIPLICATIVE, false, compileBinary);
+                defineTokens('+ -'.split(' '), TOKEN_ADDITIVE, false, compileBinary);
+                defineTokens('&& || = <<= << >>= & | ^'.split(' '), TOKEN_OPERATOR, false, compileBinary);
+                defineTokens('()[]{}'.split(''), TOKEN_GROUP, false);
                 defineTokens(['"([^\\\\"]*(\\\\[rtn"])?)*"', "'([^\\\\']*(\\\\[rtn'])?)*'"], TOKEN_STRING, true);
-                defineTokens(['([-+]?[0-9]*[.]?[0-9]+([eE][-+]?[0-9]+)?)'], TOKEN_NUMBER, true);
+                defineTokens(['[-+]?[0-9]*[.]?[0-9]+([eE][-+]?[0-9]+)?'], TOKEN_NUMBER, true);
+                defineTokens(['NaN'], TOKEN_NUMBER, false, [compileConstant(NaN)]);
                 defineTokens(['true', 'false'], TOKEN_BOOLEAN, false, [compileConstant(true), compileConstant(false)]);
                 defineTokens(['null'], TOKEN_NULL, false, [compileConstant(null)]);
+                defineTokens(['undefined'], TOKEN_UNDEFINED, false, [noop]);
                 defineTokens('typeof in'.split(' '), TOKEN_KEYWORD, false);
                 defineTokens(['[a-z_$]{1}[\\da-z_]*'], TOKEN_IDENTIFIER, true);
-                defineTokens(['.', ':', ','], TOKEN_DELIMITER, true);
+                defineTokens('.:,;'.split(''), TOKEN_DELIMITER, false);
             
                 tokenizeRegex = compileTokens();
             })();
             
             function tokenize(text) {
-                function isWhiteSpace(value) {
-                    return !/[^\t\n\r ]/.test(value);
-                }
+                var nextTokenIndex = 0;
             
-                function getTokenType(text) {
-                    var tokenType = tokenTextToTypeMap_[text];
-                    if (tokenType) {
-                        return tokenType;
-                    }
-                    if (isWhiteSpace(text)) {
-                        return TOKEN_WHITESPACE;
-                    }
-                    if ('"\''.indexOf(text.charAt(0)) !== -1) {
-                        return TOKEN_STRING;
-                    }
-                    if (!isNaN(Number(text))) {
-                        return TOKEN_NUMBER;
-                    }
-                    return TOKEN_IDENTIFIER;
-                }
-            
-                function makeToken(text, index) {
-                    var type = text ? getTokenType(text) : TOKEN_EOF;
+                function createToken(type, text, index, fn) {
                     return {
+                        type:type,
                         text:text,
                         index:index,
-                        fn:tokenTextToFnMap_[text],
-                        type:type
+                        fn:fn
                     };
                 }
             
-                return enumerable.regexExec(tokenizeRegex, text, 0).select(function (x) {
-                    return makeToken(x[0], x.index);
-                }).concat([makeToken(null, text.length)]);
+                function checkIndex(index) {
+                    if (nextTokenIndex !== index) {
+                        var err = 'at (', c = text.charAt(nextTokenIndex);
+                        if (c === '"' || c === "'") {
+                            err = 'Unterminated string detected ' + err;
+                        }
+                        throw new Error('INVALID TOKEN: ' + err + nextTokenIndex + ').');
+                    }
+                }
+            
+                function nextToken(match) {
+                    var tokenType, tokenText, entry, index;
+            
+                    if (match) {
+                        tokenText = match[0];
+                        tokenType = (match[8] && TOKEN_STRING) || (match[1] && TOKEN_WHITESPACE) ||
+                            (match[20] && TOKEN_IDENTIFIER) || (match[13] && TOKEN_NUMBER);
+                        checkIndex(index = match.index);
+                        nextTokenIndex += tokenText.length;
+                    } else {
+                        checkIndex(index = text.length);
+                        tokenType = TOKEN_EOF;
+                    }
+            
+                    // match based on group
+                    if (tokenType) {
+                        return createToken(tokenType, tokenText, index, null);
+                    }
+            
+                    // lookup entry
+                    entry = tokenInfoMap_[tokenText];
+                    return createToken(entry.type, tokenText, index, entry.fn);
+                }
+            
+                return new Enumerable(function() {
+                    var controller = enumerator(), index = 0, restoreLastIndex;
+                    return exportEnumerator(function () {
+                            var match, result;
+                            if (index === text.length) {
+                                return index = -1, controller.progress(nextToken(null));
+                            }
+                            if (index === -1) {
+                                return false;
+                            }
+                            restoreLastIndex = tokenizeRegex.lastIndex, tokenizeRegex.lastIndex = index;
+                            result = (match = tokenizeRegex.exec(text)) ?
+                                controller.progress(nextToken(match)) :
+                                controller.end();
+                            index = tokenizeRegex.lastIndex, tokenizeRegex.lastIndex = restoreLastIndex;
+                            return result;
+            
+                        },
+                        controller.current
+                    )
+                });
             }
-            extend(photon.tokenize = tokenize, {
-                TOKEN_EOF:TOKEN_EOF,
-                TOKEN_OPERATOR:TOKEN_OPERATOR,
-                TOKEN_KEYWORD:TOKEN_KEYWORD,
-                TOKEN_IDENTIFIER:TOKEN_IDENTIFIER,
-                TOKEN_GROUP:TOKEN_GROUP,
-                TOKEN_STRING:TOKEN_STRING,
-                TOKEN_NUMBER:TOKEN_NUMBER,
-                TOKEN_BOOLEAN:TOKEN_BOOLEAN,
-                TOKEN_NULL:TOKEN_NULL,
-                TOKEN_DELIMITER:TOKEN_DELIMITER,
-                TOKEN_WHITESPACE:TOKEN_WHITESPACE
-            });
-            
-            
             function memberEvaluator(path) {
                 var code = generateMemberAccessCode(path), fn = Function('$scope', '$ctx', code);
                 return function (scope) {
@@ -1597,7 +1138,6 @@
             
             
             var ctx = evaluationContext();
-            
             
             
             function parser() {
@@ -1691,7 +1231,19 @@
                     }
             
             
-                    function read(e1, e2, e3, e4) {
+                    function readType(type) {
+                        var token;
+                        if (index < length - 1) {
+                            token = tokens[index];
+                            if (token.type === type) {
+                                index++;
+                                return token;
+                            }
+                        }
+                        return null;
+                    }
+            
+                    function readText(e1, e2, e3, e4) {
                         var token = peek(e1, e2, e3, e4);
                         if (token) {
                             index++;
@@ -1701,7 +1253,7 @@
                     }
             
                     function consume(e1) {
-                        if (!read(e1)) {
+                        if (!readText(e1)) {
                             throw new Error("is unexpected, expecting [" + e1 + "]");
                         }
                     }
@@ -1711,90 +1263,83 @@
                     }
             
                     function assignment() {
-                        var left = logicalOR();
-                        var right;
-                        var token;
-                        if ((token = read('='))) {
-                            if (!left.assign) {
+                        var lhs = logicalOR(), rhs, token;
+                        if (token = readText('=')) {
+                            if (!lhs.assign) {
                                 throw new Error("implies assignment but [" +
                                     text.substring(0, token.index) + "] can not be assigned to", token);
                             }
-                            right = logicalOR();
+                            rhs = logicalOR();
                             return function (self, locals) {
-                                return left.assign(self, right(self, locals), locals);
+                                return lhs.assign(self, rhs(self, locals), locals);
                             };
-                        } else {
-                            return left;
                         }
+                        return lhs;
                     }
             
                     function logicalOR() {
-                        var left = logicalAND();
-                        var token;
+                        var lhs = logicalAND(), token;
                         while (true) {
-                            if ((token = read('||'))) {
-                                left = binaryFn(left, token.fn, logicalAND());
+                            if (token = readText('||')) {
+                                lhs = binaryFn(lhs, token.fn, logicalAND());
                             } else {
-                                return left;
+                                return lhs;
                             }
                         }
                     }
             
                     function logicalAND() {
-                        var left = equality();
-                        var token;
-                        if ((token = read('&&'))) {
-                            left = binaryFn(left, token.fn, logicalAND());
+                        var lhs = equality(), token;
+                        if (token = readText('&&')) {
+                            lhs = binaryFn(lhs, token.fn, logicalAND());
                         }
-                        return left;
+                        return lhs;
                     }
             
                     function equality() {
-                        var left = relational();
-                        var token;
-                        if ((token = read('==', '!='))) {
-                            left = binaryFn(left, token.fn, equality());
+                        var lhs = relational(), token;
+                        if (token = readType(TOKEN_EQUALITY)) {
+                            lhs = binaryFn(lhs, token.fn, equality());
                         }
-                        return left;
+                        return lhs;
                     }
             
                     function relational() {
                         var lhs = additive(), token;
-                        if ((token = read('<', '>', '<=', '>='))) {
+                        if (token = readType(TOKEN_RELATIONAL)) {
                             lhs = binaryFn(lhs, token.fn, relational());
                         }
                         return lhs;
                     }
             
                     function additive() {
-                        var left = multiplicative();
-                        var token;
-                        while ((token = read('+', '-'))) {
-                            left = binaryFn(left, token.fn, multiplicative());
+                        var lhs = multiplicative(), token;
+                        while (token = readType(TOKEN_ADDITIVE)) {
+                            lhs = binaryFn(lhs, token.fn, multiplicative());
                         }
-                        return left;
+                        return lhs;
                     }
             
                     function multiplicative() {
-                        var left = unary();
-                        var token;
-                        while ((token = read('*', '/', '%'))) {
-                            left = binaryFn(left, token.fn, unary());
+                        var lhs = unary(), token;
+                        while (token = readType(TOKEN_MULTIPLICATIVE)) {
+                            lhs = binaryFn(lhs, token.fn, unary());
                         }
-                        return left;
+                        return lhs;
                     }
             
                     function unary() {
                         var token;
-                        if (read('+')) {
-                            return primary();
-                        } else if ((token = read('-'))) {
-                            return binaryFn(ZERO, token.fn, unary());
-                        } else if ((token = read('!'))) {
-                            return unaryFn(token.fn, unary());
-                        } else {
+                        if (readText('+')) {
                             return primary();
                         }
+                        if (token = readText('-')) {
+                            return binaryFn(ZERO, token.fn, unary());
+                        }
+                        if (token = readText('!')) {
+                            return unaryFn(token.fn, unary());
+                        }
+                        return primary();
                     }
             
                     function unaryFn(fn, right) {
@@ -1815,7 +1360,7 @@
                         if (memberPath) {
                             primary = memberEvaluator(memberPath);
                         } else {
-                            token = read();
+                            token = readText();
                             primary = token.fn;
                             if (!primary) {
                                 if ((token.type & 32) === 32) {
@@ -1846,8 +1391,38 @@
             }
             
             photon.parser = parser;
+            function execFactory(parser) {
+                var cache = {};
+                var result = function(expression, target) {
+                    return (cache[expression] || (cache[expression] = parser.parse(expression)))(target);
+                }
+                result.clearCache = function() {
+                    cache = {};
+                }
+                return result;
+            }
             
+            extend(photon.tokenize = tokenize, {
+                TOKEN_EOF:TOKEN_EOF,
+                TOKEN_OPERATOR:TOKEN_OPERATOR,
+                TOKEN_EQUALITY:TOKEN_EQUALITY,
+                TOKEN_RELATIONAL:TOKEN_RELATIONAL,
+                TOKEN_MULTIPLICATIVE:TOKEN_MULTIPLICATIVE,
+                TOKEN_ADDITIVE:TOKEN_ADDITIVE,
+                TOKEN_KEYWORD:TOKEN_KEYWORD,
+                TOKEN_IDENTIFIER:TOKEN_IDENTIFIER,
+                TOKEN_GROUP:TOKEN_GROUP,
+                TOKEN_STRING:TOKEN_STRING,
+                TOKEN_NUMBER:TOKEN_NUMBER,
+                TOKEN_BOOLEAN:TOKEN_BOOLEAN,
+                TOKEN_NULL:TOKEN_NULL,
+                TOKEN_UNDEFINED:TOKEN_UNDEFINED,
+                TOKEN_DELIMITER:TOKEN_DELIMITER,
+                TOKEN_WHITESPACE:TOKEN_WHITESPACE
+            });
             
+            photon.execFactory = execFactory;
+            photon.exec = execFactory(parser());
         })();
     });
 })(window, document);
