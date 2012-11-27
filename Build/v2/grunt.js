@@ -21,10 +21,10 @@ module.exports = function (grunt) {
                 tasks:'module closureCompiler lint'
             }
         },
-        lint:{
-            files:['grunt.js', '../../output/photon-2.0-debug.js']
-
-        },
+//        lint:{
+//            files:['grunt.js', '../../output/photon-2.0-debug.js']
+//
+//        },
         closureCompiler:{
             photon:{
                 js:['../../output/photon-2.0-debug.js'],
@@ -38,7 +38,7 @@ module.exports = function (grunt) {
     });
 
     // default task.
-    grunt.registerTask('default', 'module closureCompiler lint');
+    grunt.registerTask('default', 'module closureCompiler');
 
     // load module-grunt tasks
     grunt.loadTasks('../../../Build/node_modules/module-grunt');
