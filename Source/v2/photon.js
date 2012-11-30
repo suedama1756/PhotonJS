@@ -1,6 +1,7 @@
 /*jslint sub:true */
 
-var toString = Object.prototype.toString, arrayPrototype = Array.prototype;
+var toString = Object.prototype.toString, arrayPrototype = Array.prototype,
+    functionPrototype = Function.prototype;
 
 var undef;
 
