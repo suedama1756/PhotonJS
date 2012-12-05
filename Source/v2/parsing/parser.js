@@ -1,11 +1,8 @@
 function generateMemberAccessCode(path) {
-    var code = 'var c = $scope, u; return ';
+    var code = 'var c = $scope, u;';
     code += enumerable(path).aggregate(function (accumulated, next) {
-        if (accumulated !== '') {
-            accumulated += ' && ';
-        }
-        return accumulated + "c && (c=$ctx.has(c, '" + next + "')?c['" + next + "']:u)";
-    }, '');
+        return accumulated + " if ($ctx.isNullOrUndefined(c)) return u; c=c['" + next + "'];";
+    }, '') + ' return c';
     return code;
 }
 
@@ -25,6 +22,9 @@ function evaluationContext() {
     return {
         has:function (obj, property) {
             return hasProperty(obj, property);
+        },
+        isNullOrUndefined:function (obj) {
+            return isNullOrUndefined(obj);
         }
     }
 }
@@ -76,13 +76,9 @@ function chainBinary(lhsEvaluator, readToken, tokenMatch) {
     return result;
 }
 
-var isDot = isText('.'),
-    isIdent = isType(TOKEN_IDENTIFIER),
-    isString = isType(TOKEN_STRING),
-    isNotOpenBrace = not(isText('(')),
+var isString = isType(TOKEN_STRING),
     isOpenSquareBracket = isText('['),
     isCloseSquareBracket = isText(']'),
-    matchMemberPathDotIdent = [isDot, isIdent],
     matchMemberPathIndexer = [isOpenSquareBracket, isString, isCloseSquareBracket];
 
 function parser() {
@@ -113,10 +109,17 @@ function parser() {
             return null;
         }
 
+        function makeError(message) {
+            return extend(new Error(strFormat("Parser error: {0} at position ({1}).", message, index)), {
+                line:0, column:index
+            });
+        }
+
         function expectText(text) {
-            var token;
+            var token, found;
             if (!(token = readText(text))) {
-                throw new Error('Unexpected token');
+                token = tokens[index];
+                throw makeError(strFormat("expected token '{0}', but found '{1}'", text, (token && token.text) || 'EOF'));
             }
             return token;
         }
@@ -166,39 +169,42 @@ function parser() {
             return result;
         }
 
-        function readMemberName() {
-            var match;
-            if (match = (readType(TOKEN_IDENTIFIER) || readPattern(matchMemberPathIndexer, 1, 3))) {
-                return match.type === TOKEN_STRING ?
-                    unquote(match.text) :
-                    match.text;
-            }
-            return null;
-        }
-
-        function readMemberChain() {
-            var name, token, path, thisObj, result = null;
-            if (name = readMemberName()) {
-                path = [name];
+        function readMemberChain(getContext) {
+            var token, path, result = getContext;
+            if (token = readType(TOKEN_IDENTIFIER) || (getContext && readPattern(matchMemberPathIndexer, 1, 3))) {
+                path = [token.text];
                 while (true) {
                     if (readText('.') || peekText('[')) {
                         token = readType(TOKEN_IDENTIFIER) || readPattern(matchMemberPathIndexer, 1, 3);
                         if (!token) {
                             throw new Error();
                         }
-                        path.push(token.type === TOKEN_STRING ? unquote(match.text) : token.text);
+                        path.push(token.type === TOKEN_STRING ?
+                            unquote(token.text) :
+                            token.text);
                     } else if (readText('(')) {
-                        thisObj = path.length > 1 ?
-                            member(path.slice(0, path.length - 1), result) :
-                            result;
-                        result = functionCall(member(path.slice(path.length - 1)), thisObj);
+                        var getFn = result;
+                        if (path.length) {
+                            getContext = result;
+                            if (path.length > 1) {
+                                result = member(path.slice(0, path.length - 1), result);
+                                getContext = result;
+                            }
+                            getFn = member(path.slice(path.length - 1), result);
+                        }
+                        result = functionCall(getFn, getContext);
+                        getContext = function () {
+                            return window;
+                        };
                         path = [];
                     } else {
+                        // member path has ended
                         break;
                     }
                 }
             }
 
+            // consume anything left in the path
             if (path && path.length) {
                 result = member(path, result);
             }
@@ -257,7 +263,7 @@ function parser() {
             return primary();
         }
 
-        function functionCall(getMember, target) {
+        function functionCall(getFn, getContextFn) {
             var argEvaluators = [];
             if (!peekText(')')) {
                 do {
@@ -267,12 +273,12 @@ function parser() {
             expectText(')');
             return function (self, locals) {
                 var args = [],
-                    context = target ? target(self, locals) : self;
+                    context = getContextFn ? getContextFn(self, locals) : self;
 
                 for (var i = 0; i < argEvaluators.length; i++) {
                     args.push(argEvaluators[i](self, locals));
                 }
-                var fn = getMember(context, locals) || noop;
+                var fn = getFn(self, locals) || noop;
                 if (fn.apply) {
                     return fn.apply(context, args);
                 }
@@ -282,11 +288,33 @@ function parser() {
             };
         }
 
+        function array() {
+            var elements = [];
+            if (!peekText(']')) {
+                do {
+                    elements.push(expression());
+                } while (readText(','));
+            }
+
+            return function (self, locals) {
+                return elements.map(function (e) {
+                    return e(self, locals);
+                });
+            }
+        }
 
         function primary() {
             var primary, token;
-            if (peekType(TOKEN_IDENTIFIER)) {
-                primary = readMemberChain();
+
+            primary = readMemberChain();
+            if (!primary) {
+                if (readText('(')) {
+                    primary = expression();
+                    expectText(')');
+                } else if (readText('[')) {
+                    primary = array();
+                    expectText(']');
+                }
             }
 
             if (!primary) {
@@ -307,39 +335,12 @@ function parser() {
                         }
                     }
                 }
-            }
 
-            var thisObj, next;
-            while (index < tokens.length) {
-                if (readText('.') || peekText('[')) {
-                    if (next = member(readMemberChain(), primary)) {
-                        primary = next;
-                        thisObj = primary;
-                    } else {
-                        thisObj = primary;
-                        primary = member([readMemberName(true)]);
-                    }
-                } else if (readText('(')) {
-                    primary = functionCall(primary, thisObj);
-                    thisObj = null;
-                } else {
-                    break;
+                if (peekText('.') || peekText('[')) {
+                    readText('.');
+                    primary = readMemberChain(primary);
                 }
             }
-//            var fnName;
-//            if (matches = readPattern([isIdent, isText('(')], 2)) {
-//                fnName = matches[0].text;
-//            } else if (matches = readPattern([isOpenSquareBracket, isString, isCloseSquareBracket, isText('(')], 4)) {
-//                fnName = unquote(matches[1].text);
-//            }
-//            if (fnName) {
-//                primary = functionCall(memberEvaluator([fnName]), primary);
-//            }
-//
-//            while (token = readText('(')) {
-//                primary = functionCall(primary, undef);
-//            }
-
 
             if (!primary) {
                 throw new Error("Invalid expression.")

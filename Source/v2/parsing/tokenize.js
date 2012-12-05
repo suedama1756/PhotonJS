@@ -24,9 +24,11 @@ function compileBinary(tokenText) {
 }
 
 function compileConstant(value) {
-    return function () {
+    var result = function () {
         return value;
     }
+    result.isPrimitive = isPrimitive(value);
+    return result;
 }
 
 (function () {

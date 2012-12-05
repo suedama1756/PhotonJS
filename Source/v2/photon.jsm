@@ -18,6 +18,7 @@
             'type.js',
             'enumerable.js',
             'bind.js',
+            'string.js',
             beginEnclosure,
             'parsing/tokenize.js',
             'parsing/parser.js',

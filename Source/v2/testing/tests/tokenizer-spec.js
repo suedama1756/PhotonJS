@@ -33,7 +33,6 @@ describe('tokenize -', function () {
             {
                 expect(result).toBe(value);
             }
-
         });
     }
 
