@@ -137,6 +137,9 @@ function makeGetEnumerator(source) {
     if (isFunction(source)) {
         return source;
     }
+    if (isFunction(source.getEnumerator)) {
+        return source.getEnumerator;
+    }
 }
 
 function select(getEnumerator, selector) {

@@ -4,22 +4,86 @@
     <title></title>
     <script src="../../output/photon-2.0-debug.js"></script>
     <script src="angular.js"></script>
-    <script>
-        function timeIt(fn) {
-            var time = (new Date()).getTime();
-            fn();
-            //document.getElementById('output').innerText += 'Took %dms' + ((new Date()).getTime() - time);
-            console.log('Took %dms', (new Date()).getTime() - time);
-        }
-
-        function run() {
-            timeIt(function() { for (var i=0; i<10000; i++) { photon.tokenize('one.two+three.four+five.six.onehundredandone').toArray(); } });
-            timeIt(function() { for (var i=0; i<10000; i++) { angular.lex('one.two+three.four+five.six.onehundredandone'); } });
-        }
-    </script>
 </head>
 <body>
-  <button onclick="run()">Click</button>
-<span id="output" ></span>
+<span mdx-attr-style="'color:red;'" mdx-inner_text="model.value"></span>
+<input mdx-model="model.value">
+<button mdx-action="model.invoke(),on='click'">Click</button>
+<span mdx-on-mouseover="model.enter(model.value)">Some Text</span>
+<button mdx-on-click="model.invoke()"></button>
+<div mdx-each="child in model.items">
+    <!--{{model.category}} - {{item.orderNo}} - {{item.description}}-->
+    <span mdx-inner_text="model.category" style="font-weight: bold"></span> -
+    <span mdx-inner_text="child.orderNo"></span> -
+    <span mdx-inner_text="child.description"></span>
+    <div>
+        <br>
+        <span style="text-decoration: underline;"><span >
+            Comments
+        </span></span>
+        <div mdx-each="comment in child.comments" >
+            <span mdx-inner_text="comment"></span>
+        </div>
+
+    </div>
+    <p></p>
+</div>
+
+<script>
+    testModule = photon.module(function (x) {
+        x.factory('A', ['B', function (b) {
+            return {
+                b: b
+            }
+        }]).trans();
+
+        x.factory('B', function () {
+            return {
+                message : 'B'
+            };
+        }).scope();
+
+        x.factory('C', function () {
+            return {
+                value : 0
+            };
+        }).singleton();
+
+        x.directive('A').factory(function () {
+            return 'Directive A';
+        });
+
+        x.directive('B').factory(function () {
+            return 'Directive B';
+        });
+
+
+    });
+
+
+    var model = {
+        invoke: function () {
+            alert('invoked');
+        },
+        enter: function (value) {
+            alert('enter with value ' + value);
+        },
+        value: 'This should be red',
+        category : 'Special Interests',
+        items: [
+            {
+                orderNo: 1,
+                description: 'Black ribbed nobler',
+                comments: ['Got this baby today, can\'t wait to get home and try it!!!']
+            },
+            {
+                orderNo: 2,
+                description: 'Blue vein piccolo'
+            }
+        ]
+    };
+
+    photon.bootstrap(document.body, {model: model});
+</script>
 </body>
 </html>

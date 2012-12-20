@@ -16,15 +16,24 @@
         files:[
             'photon.js',
             'type.js',
-            'enumerable.js',
-            'bind.js',
+            'collections/enumerable.js',
+            'collections/List.js',
             'string.js',
+            'ioc/module.js',
             beginEnclosure,
             'parsing/tokenize.js',
             'parsing/parser.js',
             'parsing/exec.js',
             'parsing/testing.js',
-            endEnclosure
+            endEnclosure,
+            'directives/action.js',
+            'directives/attr.js',
+            'directives/each.js',
+            'directives/model.js',
+            'directives/on.js',
+            'directives/property.js',
+            'binding/DataContext.js',
+            'binding/bind.js'
         ],
         dependencies:{
             '$':{

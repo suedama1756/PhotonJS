@@ -3,18 +3,24 @@ describe('parser - ', function () {
         return photon.parser().parse(expression)(target);
     }
 
-    function itShouldEvaluate(expression, target, result) {
+    function shouldEvaluateToBe(expression, target, result) {
         it("should evaluate '" + expression + "'", function () {
             expect(evaluate(expression, target)).toBe(result);
         });
     }
 
-    function itShouldThrowUnexpected(expression, target, expected, actual, line, column) {
-        var message = photon.string.format("expected token '{0}', but found '{1}'", expected, actual);
-        itShouldThrow(expression, target, message, line, column);
+    function shouldEvaluateToEqual(expression, target, result) {
+        it("should evaluate '" + expression + "'", function () {
+            expect(evaluate(expression, target)).toEqual(result);
+        });
     }
 
-    function itShouldThrow(expression, target, message, line, column) {
+    function shouldEvaluateAndThrowUnexpected(expression, target, expected, actual, line, column) {
+        var message = photon.string.format("expected token '{0}', but found '{1}'", expected, actual);
+        shouldEvaluateAndThrow(expression, target, message, line, column);
+    }
+
+    function shouldEvaluateAndThrow(expression, target, message, line, column) {
         message = photon.string.format("Parser error: {0} at position ({1}).", message, column);
 
         it("should throw when evaluating '" + expression + "'", function () {
@@ -35,130 +41,136 @@ describe('parser - ', function () {
 
     describe('constants', function () {
         describe('strings', function () {
-            itShouldEvaluate('"test"', null, 'test');
-            itShouldEvaluate("'test'", null, 'test');
+            shouldEvaluateToBe('"test"', null, 'test');
+            shouldEvaluateToBe("'test'", null, 'test');
         });
 
         describe('numbers', function () {
-            itShouldEvaluate('1', null, 1);
-            itShouldEvaluate('1.1', null, 1.1);
+            shouldEvaluateToBe('1', null, 1);
+            shouldEvaluateToBe('1.1', null, 1.1);
         });
 
         describe('booleans', function () {
-            itShouldEvaluate('true', null, true);
-            itShouldEvaluate('false', null, false);
+            shouldEvaluateToBe('true', null, true);
+            shouldEvaluateToBe('false', null, false);
         });
 
         describe('null', function () {
-            itShouldEvaluate('null', null, null);
+            shouldEvaluateToBe('null', null, null);
         });
 
         describe('undefined', function () {
-            itShouldEvaluate('undefined', null, undefined);
+            shouldEvaluateToBe('undefined', null, undefined);
         });
     });
 
     describe('single member paths', function () {
         describe('that exist', function () {
-            itShouldEvaluate('a', {a:1}, 1);
+            shouldEvaluateToBe('a', {a:1}, 1);
         });
 
         describe('that do not exists', function () {
-            itShouldEvaluate('a', {b:1}, undefined);
+            shouldEvaluateToBe('a', {b:1}, undefined);
         });
     });
 
     describe('multi member paths', function () {
         describe('using dot notation', function () {
             describe('that exist', function () {
-                itShouldEvaluate('a.b.c', {a:{b:{c:1}}}, 1);
+                shouldEvaluateToBe('a.b.c', {a:{b:{c:1}}}, 1);
             });
 
             describe('that do not exist', function () {
-                itShouldEvaluate('a.b.c', {a:{e:{c:1}}}, undefined);
-                itShouldEvaluate('a.b.c', {a:{b:{d:1}}}, undefined);
+                shouldEvaluateToBe('a.b.c', {a:{e:{c:1}}}, undefined);
+                shouldEvaluateToBe('a.b.c', {a:{b:{d:1}}}, undefined);
             });
         });
 
         describe('using indexer notation', function () {
             describe('that exist', function () {
-                itShouldEvaluate('a["b"][\'c\']', {a:{b:{c:1}}}, 1);
+                shouldEvaluateToBe('a["b"][\'c\']', {a:{b:{c:1}}}, 1);
             });
 
             describe('that do not exist', function () {
-                itShouldEvaluate('a["b"]["c"]', {a:{e:{c:1}}}, undefined);
-                itShouldEvaluate('a["b"]["c"]', {a:{b:{d:1}}}, undefined);
+                shouldEvaluateToBe('a["b"]["c"]', {a:{e:{c:1}}}, undefined);
+                shouldEvaluateToBe('a["b"]["c"]', {a:{b:{d:1}}}, undefined);
             });
         });
 
         describe('using mixed dot/indexer notation', function () {
             describe('that exist', function () {
-                itShouldEvaluate('a["b"].c', {a:{b:{c:1}}}, 1);
+                shouldEvaluateToBe('a["b"].c', {a:{b:{c:1}}}, 1);
             });
 
             describe('that do not exist', function () {
-                itShouldEvaluate('a["b"]c', {a:{e:{c:1}}}, undefined);
-                itShouldEvaluate('a.b["c"]', {a:{b:{d:1}}}, undefined);
+                shouldEvaluateToBe('a["b"]c', {a:{e:{c:1}}}, undefined);
+                shouldEvaluateToBe('a.b["c"]', {a:{b:{d:1}}}, undefined);
             });
         });
     });
 
     describe('operators', function () {
         describe('additive', function () {
-            itShouldEvaluate('1 + 1', null, 2);
-            itShouldEvaluate('1 - 1', null, 0);
+            shouldEvaluateToBe('1 + 1', null, 2);
+            shouldEvaluateToBe('1 - 1', null, 0);
         });
 
         describe('multiplicative', function () {
-            itShouldEvaluate('4 / 2', null, 2);
-            itShouldEvaluate('4 * 2', null, 8);
-            itShouldEvaluate('3 % 2', null, 1);
+            shouldEvaluateToBe('4 / 2', null, 2);
+            shouldEvaluateToBe('4 * 2', null, 8);
+            shouldEvaluateToBe('3 % 2', null, 1);
         });
 
         describe('unary', function () {
-            itShouldEvaluate('+1', null, 1);
-            itShouldEvaluate('-1', null, -1);
+            shouldEvaluateToBe('+1', null, 1);
+            shouldEvaluateToBe('-1', null, -1);
         });
 
         describe('relational', function () {
-            itShouldEvaluate('4 === 4', null, true);
-            itShouldEvaluate('4 === 2', null, false);
-            itShouldEvaluate('4 !== 2', null, true);
-            itShouldEvaluate('4 !== 4', null, false);
+            shouldEvaluateToBe('4 === 4', null, true);
+            shouldEvaluateToBe('4 === 2', null, false);
+            shouldEvaluateToBe('4 !== 2', null, true);
+            shouldEvaluateToBe('4 !== 4', null, false);
 
-            itShouldEvaluate('4 == 4', null, true);
-            itShouldEvaluate('4 == "4"', null, true);
-            itShouldEvaluate('4 == 2', null, false);
-            itShouldEvaluate('4 == "2"', null, false);
+            shouldEvaluateToBe('4 == 4', null, true);
+            shouldEvaluateToBe('4 == "4"', null, true);
+            shouldEvaluateToBe('4 == 2', null, false);
+            shouldEvaluateToBe('4 == "2"', null, false);
 
-            itShouldEvaluate('4 != 4', null, false);
-            itShouldEvaluate('4 != "4"', null, false);
-            itShouldEvaluate('4 != 2', null, true);
-            itShouldEvaluate('4 != "2"', null, true);
+            shouldEvaluateToBe('4 != 4', null, false);
+            shouldEvaluateToBe('4 != "4"', null, false);
+            shouldEvaluateToBe('4 != 2', null, true);
+            shouldEvaluateToBe('4 != "2"', null, true);
 
-            itShouldEvaluate('1 < 2', null, true);
-            itShouldEvaluate('1 < 1', null, false);
-            itShouldEvaluate('1 <= 2', null, true);
-            itShouldEvaluate('1 <= 1', null, true);
-            itShouldEvaluate('1 <= 0', null, false);
+            shouldEvaluateToBe('1 < 2', null, true);
+            shouldEvaluateToBe('1 < 1', null, false);
+            shouldEvaluateToBe('1 <= 2', null, true);
+            shouldEvaluateToBe('1 <= 1', null, true);
+            shouldEvaluateToBe('1 <= 0', null, false);
 
-            itShouldEvaluate('2 > 1', null, true);
-            itShouldEvaluate('1 > 1', null, false);
-            itShouldEvaluate('2 >= 1', null, true);
-            itShouldEvaluate('1 >= 1', null, true);
-            itShouldEvaluate('0 >= 1', null, false);
+            shouldEvaluateToBe('2 > 1', null, true);
+            shouldEvaluateToBe('1 > 1', null, false);
+            shouldEvaluateToBe('2 >= 1', null, true);
+            shouldEvaluateToBe('1 >= 1', null, true);
+            shouldEvaluateToBe('0 >= 1', null, false);
         });
     });
 
     describe('groups', function () {
-        itShouldEvaluate('(1+2)*3', null, 9);
-        itShouldEvaluate('(3-1)*3', null, 6);
-        itShouldEvaluate('((3-1)*3)', null, 6);
+        shouldEvaluateToBe('(1+2)*3', null, 9);
+        shouldEvaluateToBe('(3-1)*3', null, 6);
+        shouldEvaluateToBe('((3-1)*3)', null, 6);
 
-        itShouldThrowUnexpected('((3-1)*6', null, ')', 'EOF', 0, 8);
+        shouldEvaluateAndThrowUnexpected('((3-1)*6', null, ')', 'EOF', 0, 8);
     });
 
-    describe('function', function () {
+    describe('arrays', function () {
+        shouldEvaluateToEqual('[1,"2",true, a()]', {a:function () {
+            return 3;
+        }}, [1, "2", true, 3]);
+    });
+
+    describe('functions', function () {
         function sum() {
             var result = photon.enumerable(arguments).sum();
             return isNaN(result) ? 0 : result;
@@ -169,31 +181,45 @@ describe('parser - ', function () {
                 sum:sum
             };
 
-            itShouldEvaluate('sum()', self, 0);
-            itShouldEvaluate('sum(1)', self, 1);
-            itShouldEvaluate('sum(1, 2)', self, 3);
-            itShouldEvaluate('sum(1, 2, 3)', self, 6);
-            itShouldEvaluate('sum(1, 2, 3, 4)', self, 10);
+            shouldEvaluateToBe('sum()', self, 0);
+            shouldEvaluateToBe('sum(1)', self, 1);
+            shouldEvaluateToBe('sum(1, 2)', self, 3);
+            shouldEvaluateToBe('sum(1, 2, 3)', self, 6);
+            shouldEvaluateToBe('sum(1, 2, 3, 4)', self, 10);
         });
 
         describe('chaining', function () {
-            itShouldEvaluate('true.toString()', {}, "true");
+            shouldEvaluateToBe('true.toString()', {}, "true");
 
             describe('functions that return functions', function () {
-                itShouldEvaluate('getSum()(1,2,3)',
+                shouldEvaluateToBe('getSum()(1,2,3)',
                     {
                         getSum:function () {
                             return sum;
                         }
                     }, 6);
 
-                itShouldEvaluate('getSum()(1,2,3).toString()',
+                shouldEvaluateToBe('getSum()(1,2,3).toString()',
                     {
                         getSum:function () {
                             return sum;
                         }
                     }, "6");
             });
+        });
+
+        describe('undefined', function() {
+            shouldEvaluateToBe('a()', null, undefined);
+            shouldEvaluateToBe('a()', {}, undefined);
+        });
+
+//        describe('when not a function', function() {
+//            // TODO: Due to IE we cannot determine if a non-function might still be callable....
+//            //shouldEvaluateAndThrow('a()', {a:1}, undefined);
+//        });
+
+        describe('callables', function() {
+            shouldEvaluateToBe('getElementsByTagName("foo").length', document, 0);
         });
 
         describe('context propagation', function () {
@@ -229,14 +255,14 @@ describe('parser - ', function () {
                 };
 
 
-            itShouldEvaluate('a1()', root, root);
-            itShouldEvaluate('b1.b2()', root, root.b1);
-            itShouldEvaluate('c1.c2.c3()', root, root.c1.c2);
-            itShouldEvaluate('d1().a1()', root, child);
-            itShouldEvaluate('d1().b1.b2()', root, child.b1);
+            shouldEvaluateToBe('a1()', root, root);
+            shouldEvaluateToBe('b1.b2()', root, root.b1);
+            shouldEvaluateToBe('c1.c2.c3()', root, root.c1.c2);
+            shouldEvaluateToBe('d1().a1()', root, child);
+            shouldEvaluateToBe('d1().b1.b2()', root, child.b1);
 
             // Should it get window, or expression global?
-            itShouldEvaluate('getFnThatGetsThis()()', {
+            shouldEvaluateToBe('getFnThatGetsThis()()', {
                 getFnThatGetsThis:function () {
                     return function () {
                         return this;

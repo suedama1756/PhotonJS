@@ -26,7 +26,7 @@ function compileBinary(tokenText) {
 function compileConstant(value) {
     var result = function () {
         return value;
-    }
+    };
     result.isPrimitive = isPrimitive(value);
     return result;
 }
@@ -69,7 +69,6 @@ function compileConstant(value) {
 
     defineTokens('\\s,\\r,\\t,\\n, '.split(','), TOKEN_WHITESPACE, false);
     defineTokens('=== == !== !='.split(' '), TOKEN_EQUALITY, false, compileBinary);
-
     defineTokens('<= < >= >'.split(' '), TOKEN_RELATIONAL, false, compileBinary);
     defineTokens('* % /'.split(' '), TOKEN_MULTIPLICATIVE, false, compileBinary);
     defineTokens('+ -'.split(' '), TOKEN_ADDITIVE, false, compileBinary);
@@ -81,14 +80,14 @@ function compileConstant(value) {
     defineTokens(['true', 'false'], TOKEN_BOOLEAN, false, [compileConstant(true), compileConstant(false)]);
     defineTokens(['null'], TOKEN_NULL, false, [compileConstant(null)]);
     defineTokens(['undefined'], TOKEN_UNDEFINED, false, [noop]);
-    defineTokens('typeof in'.split(' '), TOKEN_KEYWORD, false);
     defineTokens(['[a-z_$]{1}[\\da-z_]*'], TOKEN_IDENTIFIER, true);
+    defineTokens('typeof in'.split(' '), TOKEN_KEYWORD, false);
     defineTokens('.:,;'.split(''), TOKEN_DELIMITER, false);
 
     tokenizeRegex = compileTokens();
 })();
 
-function tokenize(text) {
+function tokenize(text, skipWhitespace) {
     var nextTokenIndex = 0;
 
     function createToken(type, text, index, fn) {
@@ -116,7 +115,7 @@ function tokenize(text) {
         if (match) {
             tokenText = match[0];
             tokenType = (match[8] && TOKEN_STRING) || (match[1] && TOKEN_WHITESPACE) ||
-                (match[20] && TOKEN_IDENTIFIER) || (match[13] && TOKEN_NUMBER);
+                (match[19] && TOKEN_IDENTIFIER) || (match[13] && TOKEN_NUMBER);
             checkIndex(index = match.index);
             nextTokenIndex += tokenText.length;
         } else {
@@ -134,7 +133,7 @@ function tokenize(text) {
         return createToken(entry.type, tokenText, index, entry.fn);
     }
 
-    return new Enumerable(function() {
+    var result = new Enumerable(function() {
         var controller = enumerator(), index = 0, restoreLastIndex;
         return exportEnumerator(function () {
                 var match, result;
@@ -155,4 +154,12 @@ function tokenize(text) {
             controller.current
         )
     });
+
+    if (skipWhitespace) {
+        result = result.where(function(x) {
+            return x.type !== TOKEN_WHITESPACE;
+        });
+    }
+
+    return result;
 }

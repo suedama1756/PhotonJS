@@ -442,6 +442,9 @@
             if (isFunction(source)) {
                 return source;
             }
+            if (isFunction(source.getEnumerator)) {
+                return source.getEnumerator;
+            }
         }
         
         function select(getEnumerator, selector) {
@@ -931,29 +934,49 @@
         }
         
         photon.enumerable = enumerable;
-        function scope(parent) {
-            function ctor() {
-            }
+        var List = photon['List'] = type(
+            function List() {
+                this.items_ = [];
         
-            ctor.prototype = parent || new (function () {
-            });
-            return new ctor();
-        }
-        
-        
-        photon['scope'] = scope;
-        
-        
-        function rootScope() {
-        }
-        
-        type(rootScope)['defines'](
-            {
-                $new: function() {
-        
+                // call base
+                var self = this;
+                Enumerable.call(this,
+                    // TODO: Support versions, remove quick enumerable "wrap" solution?
+                    function() {
+                        return enumerable(self.items_).getEnumerator()
+                    });
+            })
+            .defines({
+                add: function (item) {
+                    this.items_.push(item);
+                    return this.items_.length - 1;
+                },
+                addRange : function(items) {
+                    if (!isArray(items)) {
+                        items = enumerable(items).toArray();
+                    }
+                    this.items_ = this.items_.concat(items);
+                },
+                remove: function (item) {
+                    var index = this.items_.indexOf(item);
+                    if (index !== -1) {
+                        this.removeAt(index);
+                    }
+                    return index !== -1;
+                },
+                removeAt : function(index) {
+                    this.items.splice(index, 1);
+                },
+                count: function () {
+                    return this.items_.length;
+                },
+                itemAt: function (index) {
+                    return this.items_[index];
                 }
-            }
-        );
+            })
+            .inherits(
+                Enumerable)
+            .build();
         var strFormatRegEx = /\{(\d+)(:(([a-z])(\d*)))?\}/gi
         
         function strFormat(format /* args */) {
@@ -1007,6 +1030,247 @@
                 'format':strFormat
             }
         });
+        function registration(contract) {
+            function singletonLifetime(context, factory, contract, name) {
+                return context.root(context, factory, contract, name);
+            }
+        
+            function transLifetime(context, factory) {
+                return factory(context);
+            }
+        
+            function scopeLifetime(context, factory, contract, name) {
+                return context.current(context, factory, contract, name);
+            }
+        
+            function analyzeDependencies(fnOrArray) {
+                var fn = fnOrArray, deps = fnOrArray.$dependencies;
+                if (isArray(fnOrArray)) {
+                    var fnIndex = fnOrArray.length - 1;
+                    fn = fnOrArray[fnIndex];
+                    deps= fnOrArray.slice(0, fnIndex);
+                }
+                return { fn: fn, deps: deps || []};
+            }
+        
+            var name, factory, lifetimeManager;
+            return {
+                factory: function (value) {
+                    var analysis = analyzeDependencies(value), deps = analysis.deps, fn = analysis.fn;
+                    factory = function (context) {
+                        var args = deps.map(function (dep) {
+                            return context.resolve(dep);
+                        });
+                        return fn.apply(this, args);
+                    };
+                    return this;
+                },
+                instance: function (value) {
+                    factory = function () {
+                        return value;
+                    };
+                    return this;
+                },
+                type: function (value) {
+                    var analysis = analyzeDependencies(value), fn = analysis.fn;
+        
+                    function FactoryType() {}
+                    FactoryType.prototype = fn.prototype;
+        
+                    if (!(factory = fn.$containerFactory)) {
+                        factory = fn.$containerFactory = function (context) {
+                            var args = analysis.deps.map(function (dep) {
+                                    return context.resolve(dep);
+                                }),
+                                result = new FactoryType();
+                            fn.apply(result, args);
+                            return result;
+                        }
+                    }
+        
+                    return this;
+                },
+                trans: function () {
+                    lifetimeManager = transLifetime;
+                    return this;
+                },
+                singleton: function () {
+                    lifetimeManager = singletonLifetime;
+                    return this;
+                },
+                scope: function () {
+                    lifetimeManager = scopeLifetime;
+                    return this;
+                },
+                name: function (value) {
+                    name = value;
+                    return this;
+                },
+                build: function () {
+                    if (!factory) {
+                        throw new Error('Registration has no resolver.')
+                    }
+        
+                    lifetimeManager = lifetimeManager || singletonLifetime;
+                    return {
+                        name: name,
+                        resolver: function(context) {
+                            return lifetimeManager(context, factory, contract, name);
+                        },
+                        contract: contract
+                    };
+                }
+            }
+        }
+        
+        function module(build) {
+            return function () {
+                var registrations = [], builder = new ModuleBuilder(
+                    function (contract) {
+                        var result = registration(contract);
+                        registrations.push(result);
+                        return result;
+                    });
+                build(builder);
+                return enumerable(registrations).select(function (registration) {
+                    return registration.build();
+                });
+            };
+        }
+        
+        var ModuleBuilder = type(
+            function (registration) {
+                this.registration = registration;
+            }).defines(
+            /**
+             * @lends ModuleBuilder
+             */
+            {
+                factory: function (contract, factory) {
+                    return this.registration(contract)
+                        .factory(factory);
+                },
+                type: function (contract, type) {
+                    return this.registration(contract)
+                        .type(type);
+                },
+                instance: function (contract, instance) {
+                    return this.registration(contract)
+                        .instance(instance);
+                },
+                directive: function (name) {
+                    return this.registration('Directive')
+                        .name(name);
+                },
+                controller: function (name) {
+                    return this.registration('Controller')
+                        .name(name);
+                }
+            }).build();
+        
+        function container(modules) {
+            var _contractConfigMap = {}, _context;
+        
+        
+            function getResolver(contract, name) {
+                var contractConfig = _contractConfigMap[contract], registration;
+                if (contractConfig) {
+                    if (name) {
+                        registration = contractConfig.map[name];
+                    } else {
+                        registration = contractConfig.primary;
+                    }
+                }
+                return registration ? registration.resolver : null;
+        
+            }
+        
+            function resolve(contract, name) {
+                var result = tryResolve(contract, name);
+                if (!result) {
+                    throw new Error();
+                }
+                return result;
+            }
+        
+            function tryResolve(contract, name) {
+                var resolver = getResolver(contract, name);
+                return resolver ?
+                    resolver(_context) :
+                    null;
+            }
+        
+            function newScope() {
+                var _cache = {};
+        
+                function resolveInScope(context, factory, contract, name) {
+                    var key = contract + ':';
+                    if (name) {
+                        key += name;
+                    }
+                    return _cache[key] || (_cache[key] = factory(context));
+                }
+        
+                if (!_context.root) {
+                    _context.current = _context.root = resolveInScope;
+                }
+        
+                return {
+                    using : function(callback) {
+                        if (this._cache) {
+                            throw new Error('Object disposed');
+                        }
+        
+                        var previous = _context.current;
+                        _context.current = resolveInScope;
+                        try {
+                            callback();
+                        } finally {
+                            _context.current = previous;
+                        }
+                    },
+                    dispose : function() {
+                        if (!_cache) {
+                            return;
+                        }
+                        _cache = null;_
+                    }
+                }
+            }
+        
+            _context = {
+                resolve : resolve
+            };
+            newScope();
+        
+            enumerable(modules).select(
+                function (module) {
+                    return module();
+                }).forEach(function (registrations) {
+                    registrations.forEach(function (registration) {
+                        var current = _contractConfigMap[registration.contract] || (_contractConfigMap[registration.contract] = {
+                            primary: null,
+                            registrations: [],
+                            map: {}
+                        });
+                        if (registration.name) {
+                            current.map[registration.name] = registration;
+                        } else {
+                            current.primary = registration;
+                        }
+                        current.registrations.push(registration);
+                    });
+                });
+            return {
+                resolve : resolve,
+                tryResolve : tryResolve,
+                newScope : newScope
+            }
+        }
+        
+        photon.container = container;
+        
+        photon.module = module;
         (function() {
             var TOKEN_EOF = -1,
                 TOKEN_KEYWORD = 2,
@@ -1036,7 +1300,7 @@
             function compileConstant(value) {
                 var result = function () {
                     return value;
-                }
+                };
                 result.isPrimitive = isPrimitive(value);
                 return result;
             }
@@ -1079,7 +1343,6 @@
             
                 defineTokens('\\s,\\r,\\t,\\n, '.split(','), TOKEN_WHITESPACE, false);
                 defineTokens('=== == !== !='.split(' '), TOKEN_EQUALITY, false, compileBinary);
-            
                 defineTokens('<= < >= >'.split(' '), TOKEN_RELATIONAL, false, compileBinary);
                 defineTokens('* % /'.split(' '), TOKEN_MULTIPLICATIVE, false, compileBinary);
                 defineTokens('+ -'.split(' '), TOKEN_ADDITIVE, false, compileBinary);
@@ -1091,14 +1354,14 @@
                 defineTokens(['true', 'false'], TOKEN_BOOLEAN, false, [compileConstant(true), compileConstant(false)]);
                 defineTokens(['null'], TOKEN_NULL, false, [compileConstant(null)]);
                 defineTokens(['undefined'], TOKEN_UNDEFINED, false, [noop]);
-                defineTokens('typeof in'.split(' '), TOKEN_KEYWORD, false);
                 defineTokens(['[a-z_$]{1}[\\da-z_]*'], TOKEN_IDENTIFIER, true);
+                defineTokens('typeof in'.split(' '), TOKEN_KEYWORD, false);
                 defineTokens('.:,;'.split(''), TOKEN_DELIMITER, false);
             
                 tokenizeRegex = compileTokens();
             })();
             
-            function tokenize(text) {
+            function tokenize(text, skipWhitespace) {
                 var nextTokenIndex = 0;
             
                 function createToken(type, text, index, fn) {
@@ -1126,7 +1389,7 @@
                     if (match) {
                         tokenText = match[0];
                         tokenType = (match[8] && TOKEN_STRING) || (match[1] && TOKEN_WHITESPACE) ||
-                            (match[20] && TOKEN_IDENTIFIER) || (match[13] && TOKEN_NUMBER);
+                            (match[19] && TOKEN_IDENTIFIER) || (match[13] && TOKEN_NUMBER);
                         checkIndex(index = match.index);
                         nextTokenIndex += tokenText.length;
                     } else {
@@ -1144,7 +1407,7 @@
                     return createToken(entry.type, tokenText, index, entry.fn);
                 }
             
-                return new Enumerable(function() {
+                var result = new Enumerable(function() {
                     var controller = enumerator(), index = 0, restoreLastIndex;
                     return exportEnumerator(function () {
                             var match, result;
@@ -1165,6 +1428,14 @@
                         controller.current
                     )
                 });
+            
+                if (skipWhitespace) {
+                    result = result.where(function(x) {
+                        return x.type !== TOKEN_WHITESPACE;
+                    });
+                }
+            
+                return result;
             }
             function generateMemberAccessCode(path) {
                 var code = 'var c = $scope, u;';
@@ -1177,21 +1448,42 @@
             function member(path, contextFn) {
                 if (path && path.length) {
                     var code = generateMemberAccessCode(path), fn = Function('$scope', '$ctx', code);
-                    return contextFn ? function (self) {
+                    return extend(contextFn ? function (self) {
                         return fn(contextFn(self), ctx);
                     } : function (self) {
                         return fn(self, ctx);
-                    };
+                    }, {
+                        setter: function (self, value) {
+                            for (var i = 0, n = path.length - 1; i < n; i++) {
+                                if (isPrimitive(self)) {
+                                    return;
+                                }
+                                self = self[path[i]];
+                            }
+            
+                            if (!isPrimitive(self)) {
+                                self[path[path.length - 1]] = value;
+                            }
+                        },
+                        context : function(self) {
+                            for (var i = 0, n = path.length - 1; i < n; i++) {
+                                if (isPrimitive(self)) {
+                                    return;
+                                }
+                                self = self[path[i]];
+                            }
+                        }
+                    });
                 }
                 return null;
             }
             
             function evaluationContext() {
                 return {
-                    has:function (obj, property) {
+                    has: function (obj, property) {
                         return hasProperty(obj, property);
                     },
-                    isNullOrUndefined:function (obj) {
+                    isNullOrUndefined: function (obj) {
                         return isNullOrUndefined(obj);
                     }
                 }
@@ -1250,7 +1542,7 @@
                 matchMemberPathIndexer = [isOpenSquareBracket, isString, isCloseSquareBracket];
             
             function parser() {
-                function parse(text) {
+                function parse(text, options) {
                     var tokens = tokenize(text).where(function (x) {
                             return x.type !== TOKEN_WHITESPACE;
                         }).toArray(),
@@ -1279,7 +1571,7 @@
             
                     function makeError(message) {
                         return extend(new Error(strFormat("Parser error: {0} at position ({1}).", message, index)), {
-                            line:0, column:index
+                            line: 0, column: index
                         });
                     }
             
@@ -1452,20 +1744,20 @@
                             }
                             // TODO: Must test IE "callable workaround", added from memory, should probably pull out into utility fn
                             args.unshift(context);
-                            return functionPrototype.apply.call(fn, args);
+                            return functionPrototype.call.apply(fn, args);
                         };
                     }
             
                     function array() {
                         var elements = [];
                         if (!peekText(']')) {
-                        do {
-                            elements.push(expression());
-                        } while (readText(','));
+                            do {
+                                elements.push(expression());
+                            } while (readText(','));
                         }
             
-                        return function(self, locals) {
-                            return elements.map(function(e) {
+                        return function (self, locals) {
+                            return elements.map(function (e) {
                                 return e(self, locals);
                             });
                         }
@@ -1516,11 +1808,40 @@
                         return primary;
                     }
             
-                    return expression();
+                    var evaluator = expression();
+                    if (!options || !options.isBindingExpression) {
+                        return evaluator;
+                    }
+                    var result = {
+                        evaluator: evaluator,
+                        parameters: {
+            
+                        }
+                    };
+                    while (readText(',')) {
+                        var name = expectType(TOKEN_IDENTIFIER).text, prevIndex, token;
+                        expectText('=');
+                        prevIndex = index;
+                        if (token = tokens[index]) {
+                            index++;
+                            if (token.fn && token.fn.isPrimitive) {
+                                result.parameters[name] = token.fn();
+                            } else if (token.type === TOKEN_STRING) {
+                                result.parameters[name] = unquote(token.text);
+                            } else {
+                                index--;
+                            }
+                        }
+                        if (prevIndex === index) {
+                            throw makeError(strFormat("unexpected token '{0}', but found '{1}'", (token && token.text) || 'EOF'));
+                        }
+            
+                    }
+                    return result;
                 }
             
                 return {
-                    parse:parse
+                    parse: parse
                 }
             }
             
@@ -1558,6 +1879,540 @@
             photon.execFactory = execFactory;
             photon.exec = execFactory(parser());
         })();
+        var actionDirectiveFactory = ['$parse', function (parse) {
+            return {
+                link: function (node, context, options) {
+                    var expr = parse(options.expression), evaluate = expr.evaluator, on = expr.parameters['on'];
+                    if (on) {
+                        on.split(' ').forEach(function (x) {
+                            node.addEventListener(x, function () {
+                                evaluate(context);
+                            });
+                        });
+                    }
+                }
+            }
+        }];
+        var attrDirectiveFactory = ['$parse', function (parse) {
+            return {
+                link: function (node, dataContext, options) {
+                    var evaluator = parse(options.expression).evaluator;
+                    photon.bind(node,
+                        new ExpressionProperty(dataContext, evaluator),
+                        new AttributeProperty(node, options.qualifier));
+        
+                }
+            }
+        }];
+        
+        var eachDirectiveFactory = ['$parse', function (parse) {
+            return {
+                render: 'replace',
+                compile: function (options) {
+                    var expression = options.expression,
+                        itemInTokens = photon.tokenize(expression, true)
+                            .take(2).toArray();
+        
+                    options.itemName = 'item';
+        
+                    // extract the "<var> in" from expression
+                    if (itemInTokens.length === 2 && itemInTokens[0].type === photon.tokenize.TOKEN_IDENTIFIER && itemInTokens[1].text === 'in') {
+                        options.expression = expression.substring(itemInTokens[1].index + 2);
+                        options.itemName = itemInTokens[0].text || 'item';
+        
+                    }
+                },
+                link: function (linkNode, context, options) {
+                    var templateNode = options.templateNode, linker = options.linker;
+                    var evaluator = parse(options.expression).evaluator;
+                    var parentNode = linkNode.parentNode;
+                    linkNode = linkNode.nextSibling;
+                    var items = evaluator(context);
+                    if (items) {
+                        enumerable(items).forEach(
+                            function (x) {
+                                var itemNode = templateNode.cloneNode(true);
+                                parentNode.insertBefore(itemNode, linkNode);
+                                var childContext = context.$new();
+                                childContext[options.itemName] = x;
+                                linker.link(itemNode, childContext);
+                            }
+                        );
+                    }
+        
+                }
+            }
+        }];
+        
+        var modelDirectiveFactory = ['$parse', function (parse) {
+            return {
+                link: function (node, context, options) {
+                    var evaluator = parse(options.expression).evaluator;
+                    photon.bind(node,
+                        new ExpressionProperty(context, evaluator),
+                        new ModelProperty(node, 'value', 'change'));
+                }
+            }
+        }];
+        
+        var onDirectiveFactory = ['$parse', function (parse) {
+            return {
+                link: function (node, context, options) {
+                    var evaluator = parse(options.expression).evaluator;
+                    node.addEventListener(options.qualifier, function () {
+                        evaluator(context);
+                    });
+                }
+            }
+        }];
+        
+        
+        var propertyDirectiveFactory = ['$parse', function (parse) {
+            return {
+                link: function (node, context, options) {
+                    var evaluator = parse(options.expression).evaluator;
+                    photon.bind(node,
+                        new ExpressionProperty(context, evaluator),
+                        new Property(node, options.qualifier));
+                }
+            }
+        }];
+        
+        function defineChildDataContext(parent) {
+            function DataContext() {
+                this.$parent = parent;
+                parent.$children.add(this);
+            }
+            DataContext.prototype = parent;
+            return DataContext;
+        }
+        
+        var DataContext = photon['DataContext'] = type(
+            function DataContext() {
+                this.$children = new List();
+            })
+            .defines(
+            {
+                $new: function () {
+                    if (!this.hasOwnProperty('$childScopeType')) {
+                        this.$childScopeType = defineChildDataContext(this);
+                    }
+        
+                    return new this.$childScopeType(this);
+                },
+                $eval:function(value) {
+                    if (isString(value)) {
+                        return photon.parser().parse(value)(this);
+                    }
+                    if (isFunction(value)) {
+                        return value(this);
+                    }
+                    throw new Error(); // TODO:
+                }
+            })
+            .build();
+        
+        /**
+         * @const
+         * @type {number}
+         */
+        var NODE_DOCUMENT = 9;
+        
+        /**
+         * @const
+         * @type {number}
+         */
+        var NODE_ELEMENT = 1;
+        
+        /**
+         * @const
+         * @type {number}
+         */
+        var NODE_TEXT = 3;
+        
+        var AttributeProperty = photon.type(
+            function AttributeProperty(element, name) {
+                this.element_ = element;
+                this.name_ = mapName(name);
+            })
+            .defines(
+            {
+                setValue: function (value) {
+                    this.element_.setAttribute(this.name_, value);
+                }
+            })
+            .build();
+        
+        var Property = photon.type(
+            function Property(target, name) {
+                this.target_ = target;
+                name = name.split('_').map(function (x, i) {
+                    return i ? x.charAt(0).toUpperCase() + x.substring(1) : x;
+                }).join('');
+                this.name_ = mapName(name);
+            })
+            .defines({
+                setValue: function (value) {
+                    this.target_[this.name_] = value;
+                },
+                getValue: function () {
+                    return this.target_[this.name_];
+                }
+            })
+            .build();
+        
+        var ExpressionProperty = photon.type(
+            function ExpressionProperty(target, evaluator) {
+                this.target_ = target;
+                this.getter_ = evaluator;
+                this.setter_ = evaluator.setter;
+            })
+            .defines({
+                setValue: function (value) {
+                    var setter = this.setter_;
+                    if (setter) {
+                        setter(this.target_, value);
+                    }
+                },
+                getValue: function () {
+                    return this.getter_(this.target_);
+                }
+            })
+            .build();
+        
+        var ModelProperty = photon.type(
+            function ModelProperty(target, name, updateTriggers) {
+                Property.call(this, target, name);
+                var changed = this.changed_.bind(this);
+                updateTriggers.split(' ').forEach(function (x) {
+                    target.addEventListener(x, changed);
+                });
+        
+            })
+            .inherits(Property)
+            .defines({
+                changed_: function () {
+                    if (this.changed) {
+                        this.changed();
+                    }
+                }
+            })
+            .build();
+        
+        function mapName(name) {
+            return nameMap[name] || (nameMap[name] = name);
+        }
+        
+        var nameMap = {};
+        
+        var uiModule = module(function(x) {
+            x.directive('mdx-each').factory(eachDirectiveFactory);
+            x.directive('mdx-action').factory(actionDirectiveFactory);
+            x.directive('mdx-on-').factory(onDirectiveFactory);
+            x.directive('mdx-model').factory(modelDirectiveFactory);
+            x.directive('mdx-attr-').factory(attrDirectiveFactory);
+            x.directive('mdx-').factory(propertyDirectiveFactory);
+            x.factory('$parse', function() {
+                var parse = photon.parser().parse;
+                return function (text) {
+                    return parse(text, {isBindingExpression: true});
+                };
+            });
+        });
+        
+        var uiContainer = container([uiModule]);
+        
+        function getAttributeDirective(type) {
+            return uiContainer.tryResolve('Directive', type);
+        }
+        
+        function compileAttributes(node) {
+            var attributes = node && node.attributes;
+            return attributes ? enumerable(attributes).select(
+                function (x) {
+                    var type = x.name,
+                        qualifier,
+                        directive;
+        
+                    if (!(directive = getAttributeDirective(type))) {
+                        var qualifierIndex = type.lastIndexOf('-') + 1;
+                        if (qualifierIndex !== 0 && (directive = getAttributeDirective(type.substring(0, qualifierIndex)))) {
+                            qualifier = type.substring(qualifierIndex);
+                            type = type.substring(0, qualifierIndex - 1);
+                        }
+                    }
+                    return directive ? {
+                        directive: directive,
+                        options: {
+                            type: type,
+                            qualifier: qualifier,
+                            expression: x.value
+                        }
+                    } : null;
+                }).where(function (x) {
+                    return x;
+                }).orderBy(function (x) {
+                    if (x.directive.render === 'replace') {
+                        return -1;
+                    }
+                    return 0;
+                }).toArray() : null;
+        
+            // what we are really doing here is searching ahead for complex attributes, we could
+            // inspect their types by querying the directive, e.g. is it a template, etc.
+        //    if (node.nodeType === NODE_ELEMENT && node.childNodes.length) {
+        //        enumerable(node.childNodes).where(function(x) {
+        //            return x.nodeType === NODE_ELEMENT && x.tagName.substring(0, node.tagName.length) === x.tagName + '.';
+        //
+        //
+        //        })
+        //    }
+        }
+        
+        
+        photon.bootstrap = function (element, initialData) {
+            var dataContext = new DataContext();
+            element.dataContext = dataContext;
+            if (initialData) {
+                extend(dataContext, initialData);
+            }
+            var linker = compile(element);
+            linker.link(element, dataContext);
+            return dataContext;
+        };
+        
+        
+        var Binding = type(
+            function Binding(source, target) {
+                this.source_ = source;
+                this.target_ = target;
+                this.target_.changed = this.updateSource.bind(this);
+                this.updateTarget();
+            })
+            .defines({
+                updateSource: function () {
+                    this.source_.setValue(this.target_.getValue());
+                },
+                updateTarget: function () {
+                    this.target_.setValue(this.source_.getValue());
+                }
+            })
+            .build();
+        
+        photon.bind = function (element, source, target) {
+            element.bindings = element.bindings || [];
+            element.bindings.push(new Binding(source, target));
+        };
+        
+        
+        function compile(element) {
+            function makeLinkerChainFn(parent, child) {
+                if (!parent && !child) {
+                    return null;
+                }
+                if (!child) {
+                    return parent;
+                }
+        
+                return function (node, context) {
+                    if (parent) {
+                        parent(node, context);
+                    }
+                    child(node.childNodes, context);
+                }
+        
+            }
+        
+            function makeLinkerFn(compileInfos, action) {
+                if (compileInfos.length === 1) {
+                    var compileInfo = compileInfos[0];
+                    return function (node, context) {
+                        action(compileInfo.directive, node, context, compileInfo.options);
+                    }
+                }
+                return function (node, context) {
+                    for (var i = 0, n = compileInfos.length; i < n; i++) {
+                        action(compileInfos[i].directive, node, context, compileInfos[i].options);
+                    }
+                };
+            }
+        
+            function makeLinkFn(compileInfos) {
+                return makeLinkerFn(compileInfos, function (directive, node, context, options) {
+                    directive.link(node, context, options);
+                });
+            }
+        
+            function makeUnlinkFn(compileInfos) {
+                return makeLinkerFn(compileInfos, function (directive, node, context, options) {
+                    directive.unlink(node, context, options);
+                });
+            }
+        
+        
+            function compileNode(node, compileInfos) {
+                /**
+                 *
+                 * @type {Array}
+                 */
+                var link, unlink, templateLinker;
+                compileInfos = compileInfos || compileAttributes(node);
+                if (compileInfos && compileInfos.length) {
+                    if (compileInfos[0].directive.render === 'replace') {
+                        compileInfos[0].options.linker = compileNode(node, compileInfos.slice(1));
+                        compileInfos = compileInfos.slice(0, 1);
+                    } else {
+                        templateLinker = null;
+                    }
+        
+                    // Can only walk this route with a templateLinker once due to the array reduction.
+                    compileInfos.forEach(function (compileInfo) {
+                        var directive = compileInfo.directive;
+                        if (directive.compile) {
+                            directive.compile(compileInfo.options);
+                            if (compileInfo.directive.render === 'replace') {
+                                compileInfo.options.templateNode = node;
+                                node.parentNode.replaceChild(document.createComment(compileInfo.type), node);
+                            }
+                        }
+                    });
+        
+                    link = makeLinkFn(compileInfos);
+                    unlink = makeUnlinkFn(compileInfos);
+                }
+        
+                if (node.childNodes.length) {
+                    var childLinker = compileNodes(node.childNodes);
+                    if (childLinker) {
+                        link = makeLinkerChainFn(link, childLinker.link);
+                        unlink = makeLinkerChainFn(unlink, childLinker.unlink);
+                    }
+                }
+        
+                return link ? {
+                    link: link,
+                    unlink: unlink
+                } : null;
+            }
+        
+            function compileNodes(nodeList) {
+                var nodeLinkers = enumerable(nodeList)
+                    .select(function (node) {
+                        return compileNode(node);
+                    })
+                    .toArray();
+                return {
+                    link: function (nodeList, context) {
+                        for (var i = 0, n = nodeList.length; i < n; i++) {
+                            var nodeLinker = nodeLinkers[i];
+                            if (nodeLinker) {
+                                nodeLinker.link(nodeList[i], context);
+                            }
+                        }
+                    },
+                    unlink: function (nodeList, context) {
+                        for (var i = 0, n = nodeList.length; i < n; i++) {
+                            var nodeLinker = nodeLinkers[i];
+                            if (nodeLinker) {
+                                nodeLinker.unlink(nodeList[i], context);
+                            }
+                        }
+                    }
+                };
+            }
+        
+        
+            return compileNode(element);
+        }
+        
+        /*
+         Binding Options:
+        
+         API 1.
+        
+         var binding = binding.create(source, target);
+         binding.updateSource();
+         binding.updateTarget();
+        
+        
+         The idea of being able to bind any property to another property is appealing, but does it fit within the
+         whole "dataContext" model;
+        
+         The data context acts as a source of data, but what are the real use cases?
+        
+        
+        
+         Regardless of whether we are hanging simple properties from the context or complex nested model structures, the
+         context acts as the entry point for binding.
+        
+         It is responsible for monitoring changes to bound expressions and notifying observers.
+        
+         It should monitoring objects that deliver change notification, as well as pojo's in an optimized manner.
+        
+         There are several options here:
+        
+         For example, with pojo's, given a.b, a.c we could either.
+        
+         1) listen to changes in a.b and a.c, which would cause two evaluations of a to occur.
+        
+         b) build a watch tree that would monitor a, then b & c separately. This would result in a only being
+         evaluated once per cycle.
+        
+         NOTE: Property update triggers could make a big difference here. For example, if we are updating and
+         re-evaluating pojo's expressions on every key press rather than on commit.
+        
+         IDEA: Operators in bindings are just a convenience method for multi-bindings in WPF. The key difference is that
+         in WPF we are always explicitly monitoring changes in property paths, with operators in bindings we need to derive
+         this information.
+        
+        
+         BINDING SYNTAX:
+        
+         CONSTANTS: Often properties can be set to constant values, the fact that everything is seen as an expression is
+         awkward. There should be a distinct different between binding syntax and constants. Binding syntax should also support
+         extensions.
+        
+         <component width="20">       // can be validated and rejected an run time (or during template compilation)
+         <component width="{value}">  //
+        
+         We should be able to pick the default binding handler for a property, for example, with click as a command.
+        
+         <component click="{update}">  // model = { update : function(a, b), canUpdate : function(a, b) }
+        
+         We also need a generic way to bind to certain events.
+        
+         <component action={update => (a, b), on=click,mousedown}>
+        
+         <button mvx-action="{(a, b) => update, on=click,mousedown}" mvx-text="{firstName}" />
+         <img mvx-attr-src="{}" />
+         <input mvx-text="salary, converter=expandNumber" />
+        
+         So what have we learned:
+        
+         1. We need IoC quickly
+        
+         2. We have a binding concept which binds source properties to target properties.
+        
+         3. We need to consider cleanup
+        
+         4. We need to consider watches
+        
+         5. We need to consider complex templates
+        
+         6. We need to consider element based directives
+        
+         7. Would like to flesh out the parameter parsing options for attribute directives, e.g. specify what is valid,
+            parser, coercer rules.
+        
+         8. Need to support <control.property> syntax for complex properties, e.g. templates
+        
+         9. Need to optimize constant expressions
+        
+         10.  Need to ensure that if we provide a callback function to a binding, we do not lose its context, e.g. commands.
+        
+         */
+        
+        
     });
 })(window, document);
 //@ sourceMappingURL=photon-2.0-debug.js.map

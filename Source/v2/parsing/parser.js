@@ -9,21 +9,42 @@ function generateMemberAccessCode(path) {
 function member(path, contextFn) {
     if (path && path.length) {
         var code = generateMemberAccessCode(path), fn = Function('$scope', '$ctx', code);
-        return contextFn ? function (self) {
+        return extend(contextFn ? function (self) {
             return fn(contextFn(self), ctx);
         } : function (self) {
             return fn(self, ctx);
-        };
+        }, {
+            setter: function (self, value) {
+                for (var i = 0, n = path.length - 1; i < n; i++) {
+                    if (isPrimitive(self)) {
+                        return;
+                    }
+                    self = self[path[i]];
+                }
+
+                if (!isPrimitive(self)) {
+                    self[path[path.length - 1]] = value;
+                }
+            },
+            context : function(self) {
+                for (var i = 0, n = path.length - 1; i < n; i++) {
+                    if (isPrimitive(self)) {
+                        return;
+                    }
+                    self = self[path[i]];
+                }
+            }
+        });
     }
     return null;
 }
 
 function evaluationContext() {
     return {
-        has:function (obj, property) {
+        has: function (obj, property) {
             return hasProperty(obj, property);
         },
-        isNullOrUndefined:function (obj) {
+        isNullOrUndefined: function (obj) {
             return isNullOrUndefined(obj);
         }
     }
@@ -82,7 +103,7 @@ var isString = isType(TOKEN_STRING),
     matchMemberPathIndexer = [isOpenSquareBracket, isString, isCloseSquareBracket];
 
 function parser() {
-    function parse(text) {
+    function parse(text, options) {
         var tokens = tokenize(text).where(function (x) {
                 return x.type !== TOKEN_WHITESPACE;
             }).toArray(),
@@ -111,7 +132,7 @@ function parser() {
 
         function makeError(message) {
             return extend(new Error(strFormat("Parser error: {0} at position ({1}).", message, index)), {
-                line:0, column:index
+                line: 0, column: index
             });
         }
 
@@ -284,7 +305,7 @@ function parser() {
                 }
                 // TODO: Must test IE "callable workaround", added from memory, should probably pull out into utility fn
                 args.unshift(context);
-                return functionPrototype.apply.call(fn, args);
+                return functionPrototype.call.apply(fn, args);
             };
         }
 
@@ -348,11 +369,40 @@ function parser() {
             return primary;
         }
 
-        return expression();
+        var evaluator = expression();
+        if (!options || !options.isBindingExpression) {
+            return evaluator;
+        }
+        var result = {
+            evaluator: evaluator,
+            parameters: {
+
+            }
+        };
+        while (readText(',')) {
+            var name = expectType(TOKEN_IDENTIFIER).text, prevIndex, token;
+            expectText('=');
+            prevIndex = index;
+            if (token = tokens[index]) {
+                index++;
+                if (token.fn && token.fn.isPrimitive) {
+                    result.parameters[name] = token.fn();
+                } else if (token.type === TOKEN_STRING) {
+                    result.parameters[name] = unquote(token.text);
+                } else {
+                    index--;
+                }
+            }
+            if (prevIndex === index) {
+                throw makeError(strFormat("unexpected token '{0}', but found '{1}'", (token && token.text) || 'EOF'));
+            }
+
+        }
+        return result;
     }
 
     return {
-        parse:parse
+        parse: parse
     }
 }
 
