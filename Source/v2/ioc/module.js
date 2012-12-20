@@ -1,27 +1,28 @@
+function singletonLifetime(context, factory, contract, name) {
+    return context.root(context, factory, contract, name);
+}
+
+function transLifetime(context, factory) {
+    return factory(context);
+}
+
+function scopeLifetime(context, factory, contract, name) {
+    return context.current(context, factory, contract, name);
+}
+
+function analyzeDependencies(fnOrArray) {
+    var fn = fnOrArray, deps = fnOrArray.$dependencies;
+    if (isArray(fnOrArray)) {
+        var fnIndex = fnOrArray.length - 1;
+        fn = fnOrArray[fnIndex];
+        deps= fnOrArray.slice(0, fnIndex);
+    }
+    return { fn: fn, deps: deps || []};
+}
+
 function registration(contract) {
-    function singletonLifetime(context, factory, contract, name) {
-        return context.root(context, factory, contract, name);
-    }
-
-    function transLifetime(context, factory) {
-        return factory(context);
-    }
-
-    function scopeLifetime(context, factory, contract, name) {
-        return context.current(context, factory, contract, name);
-    }
-
-    function analyzeDependencies(fnOrArray) {
-        var fn = fnOrArray, deps = fnOrArray.$dependencies;
-        if (isArray(fnOrArray)) {
-            var fnIndex = fnOrArray.length - 1;
-            fn = fnOrArray[fnIndex];
-            deps= fnOrArray.slice(0, fnIndex);
-        }
-        return { fn: fn, deps: deps || []};
-    }
-
     var name, factory, lifetimeManager;
+
     return {
         factory: function (value) {
             var analysis = analyzeDependencies(value), deps = analysis.deps, fn = analysis.fn;
