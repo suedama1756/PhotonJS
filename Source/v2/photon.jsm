@@ -19,13 +19,19 @@
             'collections/enumerable.js',
             'collections/List.js',
             'string.js',
+
+            'ioc/lifetimes.js',
+            'ioc/registration.js',
             'ioc/module.js',
+            'ioc/container.js',
+
             beginEnclosure,
             'parsing/tokenize.js',
             'parsing/parser.js',
             'parsing/exec.js',
             'parsing/testing.js',
             endEnclosure,
+
             'directives/action.js',
             'directives/attr.js',
             'directives/each.js',

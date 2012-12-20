@@ -1031,29 +1031,31 @@
             }
         });
         function singletonLifetime(context, factory, contract, name) {
+            // create objects through the root scope
             return context.root(context, factory, contract, name);
         }
         
         function transLifetime(context, factory) {
+            // create object directly, not cached anywhere
             return factory(context);
         }
         
         function scopeLifetime(context, factory, contract, name) {
+            // create objects through the current scope
             return context.current(context, factory, contract, name);
         }
-        
         function analyzeDependencies(fnOrArray) {
             var fn = fnOrArray, deps = fnOrArray.$dependencies;
             if (isArray(fnOrArray)) {
                 var fnIndex = fnOrArray.length - 1;
                 fn = fnOrArray[fnIndex];
-                deps= fnOrArray.slice(0, fnIndex);
+                deps = fnOrArray.slice(0, fnIndex);
             }
             return { fn: fn, deps: deps || []};
         }
         
         function registration(contract) {
-            var name, factory, lifetimeManager;
+            var name, factory, lifetimeManager, memberOf;
         
             return {
                 factory: function (value) {
@@ -1075,7 +1077,9 @@
                 type: function (value) {
                     var analysis = analyzeDependencies(value), fn = analysis.fn;
         
-                    function FactoryType() {}
+                    function FactoryType() {
+                    }
+        
                     FactoryType.prototype = fn.prototype;
         
                     if (!(factory = fn.$containerFactory)) {
@@ -1107,6 +1111,10 @@
                     name = value;
                     return this;
                 },
+                memberOf: function (value) {
+                    memberOf = value;
+                    return this;
+                },
                 build: function () {
                     if (!factory) {
                         throw new Error('Registration has no resolver.')
@@ -1115,7 +1123,8 @@
                     lifetimeManager = lifetimeManager || singletonLifetime;
                     return {
                         name: name,
-                        resolver: function(context) {
+                        memberOf: memberOf,
+                        resolver: function (context) {
                             return lifetimeManager(context, factory, contract, name);
                         },
                         contract: contract
@@ -1123,7 +1132,6 @@
                 }
             }
         }
-        
         function module(build) {
             return function () {
                 var registrations = [], builder = new ModuleBuilder(
@@ -1169,27 +1177,26 @@
                 }
             }).build();
         
+        photon.module = module;
         function container(modules) {
-            var _contractConfigMap = {}, _context;
-        
+            var _configMap = {}, _context;
         
             function getResolver(contract, name) {
-                var contractConfig = _contractConfigMap[contract], registration;
+                var contractConfig = _configMap[contract], registration;
                 if (contractConfig) {
                     if (name) {
-                        registration = contractConfig.map[name];
+                        registration = contractConfig.keys[name];
                     } else {
-                        registration = contractConfig.primary;
+                        registration = contractConfig.main;
                     }
                 }
                 return registration ? registration.resolver : null;
-        
             }
         
             function resolve(contract, name) {
                 var result = tryResolve(contract, name);
                 if (!result) {
-                    throw new Error();
+                    throw new Error('Could not resolve instance: ' + contract + ':' + (name || ''));
                 }
                 return result;
             }
@@ -1201,7 +1208,7 @@
                     null;
             }
         
-            function newScope() {
+            function createScope() {
                 var _cache = {};
         
                 function resolveInScope(context, factory, contract, name) {
@@ -1217,7 +1224,7 @@
                 }
         
                 return {
-                    using : function(callback) {
+                    using: function (callback) {
                         if (this._cache) {
                             throw new Error('Object disposed');
                         }
@@ -1230,48 +1237,72 @@
                             _context.current = previous;
                         }
                     },
-                    dispose : function() {
+                    dispose: function () {
                         if (!_cache) {
                             return;
                         }
-                        _cache = null;_
+                        _cache = null;
+                        _
                     }
                 }
             }
         
+            // initialize the content and root scope
             _context = {
-                resolve : resolve
+                resolve: resolve
             };
-            newScope();
+            createScope();
+        
+            function containerConfig() {
+                return {
+                    main: null,
+                    keys: {}
+                };
+            }
+        
+            function addCollectionMember(collection, member) {
+                var collectionConfig = _configMap[collection] ||
+                    (_configMap[collection] = containerConfig());
+        
+                if (!collectionConfig.members) {
+                    collectionConfig.members = [];
+                    collectionConfig.main = registration(collection).factory(function () {
+                        return collectionConfig.members.map(function (member) {
+                            return member.resolver(_context);
+                        });
+                    }).trans().build()
+                }
+        
+                collectionConfig.members.push(member);
+            }
         
             enumerable(modules).select(
                 function (module) {
                     return module();
-                }).forEach(function (registrations) {
-                    registrations.forEach(function (registration) {
-                        var current = _contractConfigMap[registration.contract] || (_contractConfigMap[registration.contract] = {
-                            primary: null,
-                            registrations: [],
-                            map: {}
-                        });
-                        if (registration.name) {
-                            current.map[registration.name] = registration;
-                        } else {
-                            current.primary = registration;
+                }).forEach(function (regs) {
+                    regs.forEach(function (reg) {
+                        var current = _configMap[reg.contract] ||
+                            (_configMap[reg.contract] = containerConfig());
+        
+                        if (reg.memberOf) {
+                            addCollectionMember(reg.memberOf, req);
                         }
-                        current.registrations.push(registration);
+        
+                        if (reg.name) {
+                            current.keys[reg.name] = reg;
+                        } else {
+                            current.main = reg;
+                        }
                     });
                 });
             return {
-                resolve : resolve,
-                tryResolve : tryResolve,
-                newScope : newScope
+                resolve: resolve,
+                tryResolve: tryResolve,
+                createScope: createScope
             }
         }
         
         photon.container = container;
-        
-        photon.module = module;
         (function() {
             var TOKEN_EOF = -1,
                 TOKEN_KEYWORD = 2,
