@@ -1287,7 +1287,7 @@
                             (_configMap[reg.contract] = containerConfig());
         
                         if (reg.memberOf) {
-                            addCollectionMember(reg.memberOf, req);
+                            addCollectionMember(reg.memberOf, reg);
                         }
         
                         if (reg.name) {

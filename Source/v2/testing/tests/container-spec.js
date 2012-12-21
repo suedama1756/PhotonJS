@@ -1,4 +1,4 @@
-describe('container', function () {
+describe('container -', function () {
     function valueFactory(value) {
         return function () {
             return value;
@@ -220,6 +220,97 @@ describe('container', function () {
                     expect(resolved && resolved.value).toBe('AB');
                 });
             });
+        });
+    });
+
+    describe('when using life time', function() {
+        describe('singleton,', function() {
+            it ('should return same instance over successive calls', function() {
+                var container = buildContainer(function(builder) {
+                    builder.factory('A', function() {
+                       return {};
+                    }).singleton();
+                });
+                expect(container.resolve('A')=== container.resolve('A')).toBe(true);
+            });
+        });
+
+        describe('transient,', function() {
+            it ('should return different instances over successive calls', function() {
+                var container = buildContainer(function(builder) {
+                    builder.factory('A', function() {
+                        return {};
+                    }).trans();
+                });
+                expect(container.resolve('A') === container.resolve('A')).toBe(false);
+            });
+        });
+
+        describe('scope,', function() {
+            describe('and resolving in same scope', function() {
+                it ('should return same instance over successive calls', function() {
+                    var container = buildContainer(function(builder) {
+                        builder.factory('A', function() {
+                            return {};
+                        }).scope();
+                    });
+
+                    container.createScope().using(function() {
+                        expect(container.resolve('A')=== container.resolve('A')).toBe(true);
+                    });
+                });
+            });
+
+            describe('and resolving in different scopes', function() {
+                it ('should return different instances for each scope', function() {
+                    var container = buildContainer(function(builder) {
+                        builder.factory('A', function() {
+                            return {};
+                        }).scope();
+                    });
+
+                    var resolved1, resolved2;
+                    container.createScope().using(function() {
+                        resolved1 = container.resolve('A');
+                    });
+                    container.createScope().using(function() {
+                        resolved2 = container.resolve('A');
+                    });
+                    expect(resolved1 === resolved2).toBe(false);
+                });
+            });
+        });
+    });
+
+    describe('when using names', function() {
+        var container;
+        beforeEach(function() {
+            container = buildContainer(function(builder) {
+                builder.factory('A', valueFactory('NamedA')).name('NamedA');
+                builder.factory('A', valueFactory('A'));
+            });
+        });
+
+        it ('should resolve by name', function() {
+            expect(container.resolve('A', 'NamedA')).toBe('NamedA');
+        });
+
+        it ('should resolve using non-named registration when no name is specified', function() {
+            expect(container.resolve('A')).toBe('A');
+        });
+    });
+
+    describe('when using collections', function() {
+        var container;
+        beforeEach(function() {
+            container = buildContainer(function(builder) {
+                builder.factory('A', valueFactory('A')).memberOf('Messages');
+                builder.factory('B', valueFactory('B')).memberOf('Messages');
+            });
+        });
+
+        it ('should resolve collection', function() {
+            expect(container.resolve('Messages')).toEqual(['A', 'B']);
         });
     });
 });
