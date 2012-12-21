@@ -1,0 +1,1 @@
+node ../grunt/grunt/bin/grunt module closureCompiler %1 --force

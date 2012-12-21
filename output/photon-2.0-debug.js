@@ -1,6 +1,8 @@
 (function(window, document){
     (function(factory) {
-        if (typeof define === 'function' && define.amd) {
+        if (typeof require === 'function' && typeof exports === 'object' && typeof module === 'object') {
+            factory(module['exports'] || exports, require('undefined'));
+        } else if (typeof define === 'function' && define.amd) {
             define(['exports', 'jquery'], factory);
         } else if (window) {
             var ns = window['photon'] = window['photon'] || {};
