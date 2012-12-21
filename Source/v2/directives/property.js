@@ -4,7 +4,7 @@ var propertyDirectiveFactory = ['$parse', function (parse) {
             var evaluator = parse(options.expression).evaluator;
             photon.bind(node,
                 new ExpressionProperty(context, evaluator),
-                new Property(node, options.qualifier));
+                new ObjectProperty(node, options.qualifier));
         }
     }
 }];

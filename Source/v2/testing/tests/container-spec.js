@@ -314,3 +314,13 @@ describe('container -', function () {
         });
     });
 });
+
+/*  TODO:
+
+    1.  Objects should not be allowed to depend on objects that have a lesser lifetime policy (this needs some thought, in
+        regard to the actual rules).
+
+    2.  Scopes should support nesting
+
+    3.  Object disposal should be supported, this probably requires 1.
+*/

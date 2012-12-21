@@ -38,6 +38,12 @@
             'directives/model.js',
             'directives/on.js',
             'directives/property.js',
+
+            'binding/properties/AttributeProperty.js',
+            'binding/properties/ExpressionProperty.js',
+            'binding/properties/ObjectProperty.js',
+            'binding/properties/ModelProperty.js',
+
             'binding/DataContext.js',
             'binding/bind.js'
         ],

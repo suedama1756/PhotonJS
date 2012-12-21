@@ -1287,7 +1287,7 @@
                             (_configMap[reg.contract] = containerConfig());
         
                         if (reg.memberOf) {
-                            addCollectionMember(reg.memberOf, reg);
+                            addCollectionMember(reg.memberOf, req);
                         }
         
                         if (reg.name) {
@@ -2007,10 +2007,79 @@
                     var evaluator = parse(options.expression).evaluator;
                     photon.bind(node,
                         new ExpressionProperty(context, evaluator),
-                        new Property(node, options.qualifier));
+                        new ObjectProperty(node, options.qualifier));
                 }
             }
         }];
+        
+        var AttributeProperty = photon.type(
+            function AttributeProperty(element, name) {
+                this.element_ = element;
+                this.name_ = mapName(name);
+            })
+            .defines(
+            {
+                setValue: function (value) {
+                    this.element_.setAttribute(this.name_, value);
+                }
+            })
+            .build();
+        
+        var ExpressionProperty = photon.type(
+            function ExpressionProperty(target, evaluator) {
+                this.target_ = target;
+                this.getter_ = evaluator;
+                this.setter_ = evaluator.setter;
+            })
+            .defines({
+                setValue: function (value) {
+                    var setter = this.setter_;
+                    if (setter) {
+                        setter(this.target_, value);
+                    }
+                },
+                getValue: function () {
+                    return this.getter_(this.target_);
+                }
+            })
+            .build();
+        
+        var ObjectProperty = photon.type(
+            function Property(target, name) {
+                this.target_ = target;
+                name = name.split('_').map(function (x, i) {
+                    return i ? x.charAt(0).toUpperCase() + x.substring(1) : x;
+                }).join('');
+                this.name_ = mapName(name);
+            })
+            .defines({
+                setValue: function (value) {
+                    this.target_[this.name_] = value;
+                },
+                getValue: function () {
+                    return this.target_[this.name_];
+                }
+            })
+            .build();
+        
+        var ModelProperty = photon.type(
+            function ModelProperty(target, name, updateTriggers) {
+                ObjectProperty.call(this, target, name);
+                var changed = this.changed_.bind(this);
+                updateTriggers.split(' ').forEach(function (x) {
+                    target.addEventListener(x, changed);
+                });
+        
+            })
+            .inherits(ObjectProperty)
+            .defines({
+                changed_: function () {
+                    if (this.changed) {
+                        this.changed();
+                    }
+                }
+            })
+            .build();
         
         function defineChildDataContext(parent) {
             function DataContext() {
@@ -2063,75 +2132,6 @@
          * @type {number}
          */
         var NODE_TEXT = 3;
-        
-        var AttributeProperty = photon.type(
-            function AttributeProperty(element, name) {
-                this.element_ = element;
-                this.name_ = mapName(name);
-            })
-            .defines(
-            {
-                setValue: function (value) {
-                    this.element_.setAttribute(this.name_, value);
-                }
-            })
-            .build();
-        
-        var Property = photon.type(
-            function Property(target, name) {
-                this.target_ = target;
-                name = name.split('_').map(function (x, i) {
-                    return i ? x.charAt(0).toUpperCase() + x.substring(1) : x;
-                }).join('');
-                this.name_ = mapName(name);
-            })
-            .defines({
-                setValue: function (value) {
-                    this.target_[this.name_] = value;
-                },
-                getValue: function () {
-                    return this.target_[this.name_];
-                }
-            })
-            .build();
-        
-        var ExpressionProperty = photon.type(
-            function ExpressionProperty(target, evaluator) {
-                this.target_ = target;
-                this.getter_ = evaluator;
-                this.setter_ = evaluator.setter;
-            })
-            .defines({
-                setValue: function (value) {
-                    var setter = this.setter_;
-                    if (setter) {
-                        setter(this.target_, value);
-                    }
-                },
-                getValue: function () {
-                    return this.getter_(this.target_);
-                }
-            })
-            .build();
-        
-        var ModelProperty = photon.type(
-            function ModelProperty(target, name, updateTriggers) {
-                Property.call(this, target, name);
-                var changed = this.changed_.bind(this);
-                updateTriggers.split(' ').forEach(function (x) {
-                    target.addEventListener(x, changed);
-                });
-        
-            })
-            .inherits(Property)
-            .defines({
-                changed_: function () {
-                    if (this.changed) {
-                        this.changed();
-                    }
-                }
-            })
-            .build();
         
         function mapName(name) {
             return nameMap[name] || (nameMap[name] = name);
@@ -2360,70 +2360,7 @@
         }
         
         /*
-         Binding Options:
-        
-         API 1.
-        
-         var binding = binding.create(source, target);
-         binding.updateSource();
-         binding.updateTarget();
-        
-        
-         The idea of being able to bind any property to another property is appealing, but does it fit within the
-         whole "dataContext" model;
-        
-         The data context acts as a source of data, but what are the real use cases?
-        
-        
-        
-         Regardless of whether we are hanging simple properties from the context or complex nested model structures, the
-         context acts as the entry point for binding.
-        
-         It is responsible for monitoring changes to bound expressions and notifying observers.
-        
-         It should monitoring objects that deliver change notification, as well as pojo's in an optimized manner.
-        
-         There are several options here:
-        
-         For example, with pojo's, given a.b, a.c we could either.
-        
-         1) listen to changes in a.b and a.c, which would cause two evaluations of a to occur.
-        
-         b) build a watch tree that would monitor a, then b & c separately. This would result in a only being
-         evaluated once per cycle.
-        
-         NOTE: Property update triggers could make a big difference here. For example, if we are updating and
-         re-evaluating pojo's expressions on every key press rather than on commit.
-        
-         IDEA: Operators in bindings are just a convenience method for multi-bindings in WPF. The key difference is that
-         in WPF we are always explicitly monitoring changes in property paths, with operators in bindings we need to derive
-         this information.
-        
-        
-         BINDING SYNTAX:
-        
-         CONSTANTS: Often properties can be set to constant values, the fact that everything is seen as an expression is
-         awkward. There should be a distinct different between binding syntax and constants. Binding syntax should also support
-         extensions.
-        
-         <component width="20">       // can be validated and rejected an run time (or during template compilation)
-         <component width="{value}">  //
-        
-         We should be able to pick the default binding handler for a property, for example, with click as a command.
-        
-         <component click="{update}">  // model = { update : function(a, b), canUpdate : function(a, b) }
-        
-         We also need a generic way to bind to certain events.
-        
-         <component action={update => (a, b), on=click,mousedown}>
-        
-         <button mvx-action="{(a, b) => update, on=click,mousedown}" mvx-text="{firstName}" />
-         <img mvx-attr-src="{}" />
-         <input mvx-text="salary, converter=expandNumber" />
-        
          So what have we learned:
-        
-         1. We need IoC quickly
         
          2. We have a binding concept which binds source properties to target properties.
         
