@@ -6,7 +6,7 @@
     <inspection_tool class="HtmlUnknownAttribute" enabled="true" level="WARNING" enabled_by_default="true">
       <option name="myValues">
         <value>
-          <list size="15">
+          <list size="16">
             <item index="0" class="java.lang.String" itemvalue="data-bind" />
             <item index="1" class="java.lang.String" itemvalue="mdx-attr-role" />
             <item index="2" class="java.lang.String" itemvalue="mdx-attr-style" />
@@ -22,6 +22,7 @@
             <item index="12" class="java.lang.String" itemvalue="mdx-on-click" />
             <item index="13" class="java.lang.String" itemvalue="mdx-repeat" />
             <item index="14" class="java.lang.String" itemvalue="mdx-each" />
+            <item index="15" class="java.lang.String" itemvalue="mdx-decorator" />
           </list>
         </value>
       </option>

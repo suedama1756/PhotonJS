@@ -1,11 +1,9 @@
-var attrDirectiveFactory = ['$parse', function (parse) {
+var attrDirectiveFactory = [function () {
     return {
-        link: function (node, dataContext, options) {
-            var evaluator = parse(options.expression).evaluator;
-            photon.bind(node,
-                new ExpressionProperty(dataContext, evaluator),
-                new AttributeProperty(node, options.qualifier));
-
+        link: function (node, context, options) {
+            context.$observe(options.expression, function(newValue) {
+                node.setAttribute(options.qualifier, newValue)
+            });
         }
     }
 }];

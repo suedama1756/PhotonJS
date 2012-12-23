@@ -29,12 +29,14 @@ var uiModule = module(function(x) {
     x.directive('mdx-model').factory(modelDirectiveFactory);
     x.directive('mdx-attr-').factory(attrDirectiveFactory);
     x.directive('mdx-').factory(propertyDirectiveFactory);
+    x.directive('mdx-decorator').factory(decorateDirectiveFactory);
     x.factory('$parse', function() {
         var parse = photon.parser().parse;
         return function (text) {
             return parse(text, {isBindingExpression: true});
         };
     });
+    x.type('$rootContext', ['$parse', DataContext]);
 });
 
 var uiContainer = container([uiModule]);
@@ -88,7 +90,9 @@ function compileAttributes(node) {
 
 
 photon.bootstrap = function (element, initialData) {
-    var dataContext = new DataContext();
+    var container = photon.container([uiModule]);
+
+    var dataContext = container.resolve('$rootContext');
     element.dataContext = dataContext;
     if (initialData) {
         extend(dataContext, initialData);
@@ -98,27 +102,14 @@ photon.bootstrap = function (element, initialData) {
     return dataContext;
 };
 
-
-var Binding = type(
-    function Binding(source, target) {
-        this.source_ = source;
-        this.target_ = target;
-        this.target_.changed = this.updateSource.bind(this);
-        this.updateTarget();
-    })
-    .defines({
-        updateSource: function () {
-            this.source_.setValue(this.target_.getValue());
-        },
-        updateTarget: function () {
-            this.target_.setValue(this.source_.getValue());
-        }
-    })
-    .build();
-
-photon.bind = function (element, source, target) {
+photon.bind = function (element, updateSource, updateTarget) {
     element.bindings = element.bindings || [];
-    element.bindings.push(new Binding(source, target));
+    var binding = {
+        updateSource : updateSource,
+        updateTarget : updateTarget
+    };
+    element.bindings.push(binding);
+    return binding;
 };
 
 

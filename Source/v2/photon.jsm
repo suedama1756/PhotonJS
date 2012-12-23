@@ -20,6 +20,8 @@
             'collections/List.js',
             'string.js',
 
+            'dom/element.js',
+
             'ioc/lifetimes.js',
             'ioc/registration.js',
             'ioc/module.js',
@@ -36,13 +38,9 @@
             'directives/attr.js',
             'directives/each.js',
             'directives/model.js',
+            'directives/decorate.js',
             'directives/on.js',
             'directives/property.js',
-
-            'binding/properties/AttributeProperty.js',
-            'binding/properties/ExpressionProperty.js',
-            'binding/properties/ObjectProperty.js',
-            'binding/properties/ModelProperty.js',
 
             'binding/DataContext.js',
             'binding/bind.js'

@@ -1,8 +1,6 @@
 (function(window, document){
     (function(factory) {
-        if (typeof require === 'function' && typeof exports === 'object' && typeof module === 'object') {
-            factory(module['exports'] || exports, require('undefined'));
-        } else if (typeof define === 'function' && define.amd) {
+        if (typeof define === 'function' && define.amd) {
             define(['exports', 'jquery'], factory);
         } else if (window) {
             var ns = window['photon'] = window['photon'] || {};
@@ -1032,6 +1030,48 @@
                 'format':strFormat
             }
         });
+        var parseHtmlMap = {
+            option: [ 1, "<select multiple='multiple'>", "</select>" ],
+            legend: [ 1, "<fieldset>", "</fieldset>" ],
+            thead: [ 1, "<table>", "</table>" ],
+            tr: [ 2, "<table><tbody>", "</tbody></table>" ],
+            td: [ 3, "<table><tbody><tr>", "</tr></tbody></table>" ],
+            col: [ 2, "<table><tbody></tbody><colgroup>", "</colgroup></table>" ],
+            area: [ 1, "<map>", "</map>" ]
+        };
+        parseHtmlMap.optgroup = parseHtmlMap.option;
+        parseHtmlMap.tbody = parseHtmlMap.tfoot = parseHtmlMap.colgroup = parseHtmlMap.caption = parseHtmlMap.thead;
+        parseHtmlMap.th = parseHtmlMap.td;
+        
+        function element(html, doc) {
+            doc = doc || document;
+        
+            var container = doc.createElement("div"),
+                match = html.match(/^\s*<(t[dhr]|tbody|tfoot|thead|option|legend|col|area|optgroup|colgroup|caption)/i);
+            if (match){
+                var wrapper = parseHtmlMap[match[1].toLowerCase()],
+                    wrapperDepth = wrapper[0];
+                container.innerHTML = wrapper[1] + html + wrapper[2];
+                while (wrapperDepth--) {
+                    container = container.lastChild;
+                }
+            }
+            else {
+                container.innerHTML = '<br>' + html;
+                container.removeChild(container.firstChild);
+            }
+        
+            // convert to fragment
+            if (container.childNodes.length === 1) {
+                return (container.removeChild(container.firstChild));
+            } else {
+                var fragment = doc.createDocumentFragment();
+                while (container.firstChild) {
+                    fragment.appendChild(container.firstChild);
+                }
+                return fragment;
+            }
+        }
         function singletonLifetime(context, factory, contract, name) {
             // create objects through the root scope
             return context.root(context, factory, contract, name);
@@ -1927,14 +1967,12 @@
                 }
             }
         }];
-        var attrDirectiveFactory = ['$parse', function (parse) {
+        var attrDirectiveFactory = [function () {
             return {
-                link: function (node, dataContext, options) {
-                    var evaluator = parse(options.expression).evaluator;
-                    photon.bind(node,
-                        new ExpressionProperty(dataContext, evaluator),
-                        new AttributeProperty(node, options.qualifier));
-        
+                link: function (node, context, options) {
+                    context.$observe(options.expression, function(newValue) {
+                        node.setAttribute(options.qualifier, newValue)
+                    });
                 }
             }
         }];
@@ -1981,10 +2019,65 @@
         var modelDirectiveFactory = ['$parse', function (parse) {
             return {
                 link: function (node, context, options) {
-                    var evaluator = parse(options.expression).evaluator;
-                    photon.bind(node,
-                        new ExpressionProperty(context, evaluator),
-                        new ModelProperty(node, 'value', 'change'));
+                    // TODO: input is not supported in IE8, need to use property change, should not use property change in IE9 as apparently its buggy
+                    var expr = parse(options.expression), evaluator = expr.evaluator, updateOn = expr.parameters['updateOn'],
+                        event = updateOn === 'change' ?  'input' : 'change';
+        
+                    node.addEventListener(event, function() {
+                        evaluator.setter(context, node.value);
+                        context.$sync();
+                    });
+        
+                    context.$observe(options.expression, function(newValue) {
+                        node.value = newValue;
+                    });
+                }
+            }
+        }];
+        
+        var decorateDirectiveFactory = ['$parse', function (parse) {
+            return {
+                render: 'replace',
+                compile: function (options) {
+                    options.decoratorNodes = element('<div><h2 mdx-inner_text="label"></h2><content></content></div>');
+                    options.decoratorLinker = compile(options.decoratorNodes);
+                },
+                link: function (linkNode, context, options) {
+                    var parentNode = linkNode.parentNode, relNode = linkNode.nextSibling,
+                        decoratorNodes = options.decoratorNodes.cloneNode(true);
+        
+                    parentNode.insertBefore(decoratorNodes, relNode);
+        
+                    var optionsContext = context.$new();
+                    var exp = parse(options.expression);
+        
+                    // only supporting constants at the moment
+                    Object.getOwnPropertyNames(exp.parameters).forEach(function(propertyName) {
+                        optionsContext[propertyName] = exp.parameters[propertyName];
+                    });
+        
+        
+        //            options.decoratorLinker.link(decoratorNodes, optionsContext, {
+        //                contentLinker : {
+        //                    link : function() {
+        //
+        //                    },
+        //                    unlink : function() {
+        //
+        //                    }
+        //                }
+        //            });
+                    // using a selector here is a pain, we should be able to pass in a function that can be used to
+                    // set the correct context,
+                    //
+                    // THINK..., what we are really doing is creating a function that is compiled up for
+                    // the
+        
+        
+                    var content = decoratorNodes.querySelector('content');
+                    var node = options.templateNode.cloneNode(true);
+                    content.parentNode.replaceChild(node, content);
+                    options.linker.link(node, context);
                 }
             }
         }];
@@ -2001,88 +2094,27 @@
         }];
         
         
-        var propertyDirectiveFactory = ['$parse', function (parse) {
+        var propertyDirectiveFactory = [function () {
             return {
+                compile : function(options) {
+                    options.propertyName = mapName(options.qualifier.split('_').map(function (x, i) {
+                        return i ? x.charAt(0).toUpperCase() + x.substring(1) : x;
+                    }).join(''));
+                },
                 link: function (node, context, options) {
-                    var evaluator = parse(options.expression).evaluator;
-                    photon.bind(node,
-                        new ExpressionProperty(context, evaluator),
-                        new ObjectProperty(node, options.qualifier));
+                    context.$observe(options.expression, function(newValue) {
+                        node[options.propertyName] = newValue;
+                    });
                 }
             }
         }];
         
-        var AttributeProperty = photon.type(
-            function AttributeProperty(element, name) {
-                this.element_ = element;
-                this.name_ = mapName(name);
-            })
-            .defines(
-            {
-                setValue: function (value) {
-                    this.element_.setAttribute(this.name_, value);
-                }
-            })
-            .build();
-        
-        var ExpressionProperty = photon.type(
-            function ExpressionProperty(target, evaluator) {
-                this.target_ = target;
-                this.getter_ = evaluator;
-                this.setter_ = evaluator.setter;
-            })
-            .defines({
-                setValue: function (value) {
-                    var setter = this.setter_;
-                    if (setter) {
-                        setter(this.target_, value);
-                    }
-                },
-                getValue: function () {
-                    return this.getter_(this.target_);
-                }
-            })
-            .build();
-        
-        var ObjectProperty = photon.type(
-            function Property(target, name) {
-                this.target_ = target;
-                name = name.split('_').map(function (x, i) {
-                    return i ? x.charAt(0).toUpperCase() + x.substring(1) : x;
-                }).join('');
-                this.name_ = mapName(name);
-            })
-            .defines({
-                setValue: function (value) {
-                    this.target_[this.name_] = value;
-                },
-                getValue: function () {
-                    return this.target_[this.name_];
-                }
-            })
-            .build();
-        
-        var ModelProperty = photon.type(
-            function ModelProperty(target, name, updateTriggers) {
-                ObjectProperty.call(this, target, name);
-                var changed = this.changed_.bind(this);
-                updateTriggers.split(' ').forEach(function (x) {
-                    target.addEventListener(x, changed);
-                });
-        
-            })
-            .inherits(ObjectProperty)
-            .defines({
-                changed_: function () {
-                    if (this.changed) {
-                        this.changed();
-                    }
-                }
-            })
-            .build();
-        
         function defineChildDataContext(parent) {
-            function DataContext() {
+            function DataContext(parent) {
+                // invoke parent constructor
+                parent.constructor.call(this, parent.$parse);
+        
+                // update parent/child linkage
                 this.$parent = parent;
                 parent.$children.add(this);
             }
@@ -2091,8 +2123,9 @@
         }
         
         var DataContext = photon['DataContext'] = type(
-            function DataContext() {
+            function DataContext(parse) {
                 this.$children = new List();
+                this.$parse = parse;
             })
             .defines(
             {
@@ -2105,16 +2138,56 @@
                 },
                 $eval:function(value) {
                     if (isString(value)) {
-                        return photon.parser().parse(value)(this);
+                        return this.$parse(value)(this);
                     }
                     if (isFunction(value)) {
                         return value(this);
                     }
                     throw new Error(); // TODO:
+                },
+                $sync : function() {
+                    Object.getOwnPropertyNames(this.$observers).forEach(function(name) {
+                       this.$observers[name].sync();
+                    }.bind(this));
+                },
+                $observe : function(expression, handler) {
+                    var observers = this.$observers || (this.$observers = {}), observer = observers[expression];
+                    if (!observer) {
+                        var evaluator = this.$parse(expression).evaluator;
+                        observer = observers[expression] = new ExpressionObserver(
+                            function() {
+                                return evaluator(this);
+                            }.bind(this));
+                    }
+                    observer.on(handler);
                 }
             })
             .build();
         
+        var ExpressionObserver = photon.type(
+            function(evaluator) {
+                this._handlers = new List();
+                this._evaluator = evaluator;
+                this._value = evaluator();
+            })
+            .defines({
+                sync : function() {
+                    var oldValue = this._value, newValue = this._evaluator();
+                    if (oldValue !== newValue) {
+                        this._handlers.forEach(function(handler) {
+                            handler(newValue, oldValue);
+                        });
+                    }
+                },
+                on : function(handler) {
+                    this._handlers.add(handler);
+                    handler(this._value);
+                },
+                off : function(handler) {
+                    this._handlers.remove(handler);
+                }
+            })
+            .build();
         /**
          * @const
          * @type {number}
@@ -2146,12 +2219,14 @@
             x.directive('mdx-model').factory(modelDirectiveFactory);
             x.directive('mdx-attr-').factory(attrDirectiveFactory);
             x.directive('mdx-').factory(propertyDirectiveFactory);
+            x.directive('mdx-decorator').factory(decorateDirectiveFactory);
             x.factory('$parse', function() {
                 var parse = photon.parser().parse;
                 return function (text) {
                     return parse(text, {isBindingExpression: true});
                 };
             });
+            x.type('$rootContext', ['$parse', DataContext]);
         });
         
         var uiContainer = container([uiModule]);
@@ -2205,7 +2280,9 @@
         
         
         photon.bootstrap = function (element, initialData) {
-            var dataContext = new DataContext();
+            var container = photon.container([uiModule]);
+        
+            var dataContext = container.resolve('$rootContext');
             element.dataContext = dataContext;
             if (initialData) {
                 extend(dataContext, initialData);
@@ -2215,27 +2292,14 @@
             return dataContext;
         };
         
-        
-        var Binding = type(
-            function Binding(source, target) {
-                this.source_ = source;
-                this.target_ = target;
-                this.target_.changed = this.updateSource.bind(this);
-                this.updateTarget();
-            })
-            .defines({
-                updateSource: function () {
-                    this.source_.setValue(this.target_.getValue());
-                },
-                updateTarget: function () {
-                    this.target_.setValue(this.source_.getValue());
-                }
-            })
-            .build();
-        
-        photon.bind = function (element, source, target) {
+        photon.bind = function (element, updateSource, updateTarget) {
             element.bindings = element.bindings || [];
-            element.bindings.push(new Binding(source, target));
+            var binding = {
+                updateSource : updateSource,
+                updateTarget : updateTarget
+            };
+            element.bindings.push(binding);
+            return binding;
         };
         
         

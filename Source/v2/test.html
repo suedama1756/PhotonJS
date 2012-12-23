@@ -7,7 +7,7 @@
 </head>
 <body>
 <span mdx-attr-style="'color:red;'" mdx-inner_text="model.value"></span>
-<input mdx-model="model.value">
+<input mdx-model="model.value,updateOn='change'">
 <button mdx-action="model.invoke(),on='click'">Click</button>
 <span mdx-on-mouseover="model.enter(model.value)">Some Text</span>
 <button mdx-on-click="model.invoke()"></button>
@@ -27,7 +27,9 @@
 
     </div>
     <p></p>
+    <span mdx-decorator="null, label='Test Label'"> Test</span>
 </div>
+
 
 <script>
     testModule = photon.module(function (x) {
