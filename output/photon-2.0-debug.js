@@ -2035,12 +2035,12 @@
             }
         }];
         
-        var decorateDirectiveFactory = ['$parse', function (parse) {
+        var decorateDirectiveFactory = ['$parse', '$container', function (parse, container) {
             return {
                 render: 'replace',
                 compile: function (options) {
-                    options.decoratorNodes = element('<div><h2 mdx-inner_text="label"></h2><content></content></div>');
-                    options.decoratorLinker = compile(options.decoratorNodes);
+                    options.decoratorNodes = element(container.resolve('Template', parse(options.expression).evaluator(null)));
+                    options.decoratorLinker = compile(container, options.decoratorNodes);
                 },
                 link: function (linkNode, context, options) {
                     var parentNode = linkNode.parentNode, relNode = linkNode.nextSibling,
@@ -2213,65 +2213,27 @@
             x.type('$rootContext', ['$parse', DataContext]);
         });
         
-        var uiContainer = container([uiModule]);
-        
-        function getAttributeDirective(type) {
-            return uiContainer.tryResolve('Directive', type);
-        }
-        
-        function compileAttributes(node) {
-            var attributes = node && node.attributes;
-            return attributes ? enumerable(attributes).select(
-                function (x) {
-                    var type = x.name,
-                        qualifier,
-                        directive;
-        
-                    if (!(directive = getAttributeDirective(type))) {
-                        var qualifierIndex = type.lastIndexOf('-') + 1;
-                        if (qualifierIndex !== 0 && (directive = getAttributeDirective(type.substring(0, qualifierIndex)))) {
-                            qualifier = type.substring(qualifierIndex);
-                            type = type.substring(0, qualifierIndex - 1);
-                        }
-                    }
-                    return directive ? {
-                        directive: directive,
-                        options: {
-                            type: type,
-                            qualifier: qualifier,
-                            expression: x.value
-                        }
-                    } : null;
-                }).where(function (x) {
-                    return x;
-                }).orderBy(function (x) {
-                    if (x.directive.render === 'replace') {
-                        return -1;
-                    }
-                    return 0;
-                }).toArray() : null;
-        
-            // what we are really doing here is searching ahead for complex attributes, we could
-            // inspect their types by querying the directive, e.g. is it a template, etc.
-        //    if (node.nodeType === NODE_ELEMENT && node.childNodes.length) {
-        //        enumerable(node.childNodes).where(function(x) {
-        //            return x.nodeType === NODE_ELEMENT && x.tagName.substring(0, node.tagName.length) === x.tagName + '.';
-        //
-        //
-        //        })
-        //    }
-        }
         
         
-        photon.bootstrap = function (element, initialData) {
-            var container = photon.container([uiModule]);
+        photon.bootstrap = function (element, modules, initialData) {
+            var container;
+        
+            modules = modules || [];
+            modules.unshift(uiModule);
+            modules.unshift(module(function(builder) {
+                builder.factory('$container', function() {
+                    return container;
+                });
+            }));
+        
+            container = photon.container(modules);
         
             var dataContext = container.resolve('$rootContext');
             element.dataContext = dataContext;
             if (initialData) {
                 extend(dataContext, initialData);
             }
-            var linker = compile(element);
+            var linker = compile(container, element);
             linker.link(element, dataContext);
             return dataContext;
         };
@@ -2287,7 +2249,54 @@
         };
         
         
-        function compile(element) {
+        function compile(container, element) {
+            function getAttributeDirective(type) {
+                return container.tryResolve('Directive', type);
+            }
+        
+            function compileAttributes(node) {
+                var attributes = node && node.attributes;
+                return attributes ? enumerable(attributes).select(
+                    function (x) {
+                        var type = x.name,
+                            qualifier,
+                            directive;
+        
+                        if (!(directive = getAttributeDirective(type))) {
+                            var qualifierIndex = type.lastIndexOf('-') + 1;
+                            if (qualifierIndex !== 0 && (directive = getAttributeDirective(type.substring(0, qualifierIndex)))) {
+                                qualifier = type.substring(qualifierIndex);
+                                type = type.substring(0, qualifierIndex - 1);
+                            }
+                        }
+                        return directive ? {
+                            directive: directive,
+                            options: {
+                                type: type,
+                                qualifier: qualifier,
+                                expression: x.value
+                            }
+                        } : null;
+                    }).where(function (x) {
+                        return x;
+                    }).orderBy(function (x) {
+                        if (x.directive.render === 'replace') {
+                            return -1;
+                        }
+                        return 0;
+                    }).toArray() : null;
+        
+                // what we are really doing here is searching ahead for complex attributes, we could
+                // inspect their types by querying the directive, e.g. is it a template, etc.
+        //    if (node.nodeType === NODE_ELEMENT && node.childNodes.length) {
+        //        enumerable(node.childNodes).where(function(x) {
+        //            return x.nodeType === NODE_ELEMENT && x.tagName.substring(0, node.tagName.length) === x.tagName + '.';
+        //
+        //
+        //        })
+        //    }
+            }
+        
             function makeLinkerChainFn(parent, child) {
                 if (!parent && !child) {
                     return null;

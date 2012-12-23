@@ -1,9 +1,9 @@
-var decorateDirectiveFactory = ['$parse', function (parse) {
+var decorateDirectiveFactory = ['$parse', '$container', function (parse, container) {
     return {
         render: 'replace',
         compile: function (options) {
-            options.decoratorNodes = element('<div><h2 mdx-inner_text="label"></h2><content></content></div>');
-            options.decoratorLinker = compile(options.decoratorNodes);
+            options.decoratorNodes = element(container.resolve('Template', parse(options.expression).evaluator(null)));
+            options.decoratorLinker = compile(container, options.decoratorNodes);
         },
         link: function (linkNode, context, options) {
             var parentNode = linkNode.parentNode, relNode = linkNode.nextSibling,

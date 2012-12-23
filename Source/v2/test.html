@@ -27,7 +27,9 @@
 
     </div>
     <p></p>
-    <span mdx-decorator="null, label='Test Label'"> Test</span>
+    <input mdx-decorator="'Field', label='Firstname'" mdx-model="firstName">
+    <!--<input mdx-decorator="'Field', label='Surname'" mdx-model="surname">-->
+    <!--<input mdx-decorator="'Field', label='DOB'" mdx-model="dateOfBirth">-->
 </div>
 
 
@@ -85,7 +87,11 @@
         ]
     };
 
-    photon.bootstrap(document.body, {model: model});
+    var testModule = photon.module(function(builder) {
+        builder.instance('Template', '<div><h2 mdx-inner_text="label"></h2><content></content></div>')
+                .name('Field');
+    });
+    photon.bootstrap(document.body, [testModule], {model: model});
 </script>
 </body>
 </html>
