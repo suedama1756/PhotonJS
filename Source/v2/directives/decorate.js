@@ -20,23 +20,7 @@ var decorateDirectiveFactory = ['$parse', function (parse) {
             });
 
 
-//            options.decoratorLinker.link(decoratorNodes, optionsContext, {
-//                contentLinker : {
-//                    link : function() {
-//
-//                    },
-//                    unlink : function() {
-//
-//                    }
-//                }
-//            });
-            // using a selector here is a pain, we should be able to pass in a function that can be used to
-            // set the correct context,
-            //
-            // THINK..., what we are really doing is creating a function that is compiled up for
-            // the
-
-
+            options.decoratorLinker.link(decoratorNodes, optionsContext);
             var content = decoratorNodes.querySelector('content');
             var node = options.templateNode.cloneNode(true);
             content.parentNode.replaceChild(node, content);
