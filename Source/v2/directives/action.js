@@ -4,7 +4,7 @@ var actionDirectiveFactory = ['$parse', function (parse) {
             var expr = parse(options.expression), evaluate = expr.evaluator, on = expr.parameters['on'];
             if (on) {
                 on.split(' ').forEach(function (x) {
-                    node.addEventListener(x, function () {
+                    node.on(x, function () {
                         evaluate(context);
                     });
                 });

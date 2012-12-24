@@ -1,10 +1,4 @@
 (function () {
-    /**
-     * Rejects or resolves the supplied defer instance
-     * @param defer
-     * @param {boolean} isRejected
-     * @param {*} valueOrReason
-     */
     function rejectOrResolve(defer, isRejected, valueOrReason) {
         if (isRejected) {
             defer.reject(valueOrReason);
@@ -14,19 +8,13 @@
     }
 
     function isPromise(value) {
-        return value && ruf.isFunction(value.then);
+        return value && isFunction(value.then);
     }
 
-    /**
-     * Factory for creating async instances
-     * @param dispatcher
-     * @return {*}
-     */
     function factory(dispatcher) {
         function defer() {
             var pending_ = [],
                 isResolved_ = false,
-                pendingAlways = [],
                 isRejected_,
                 value_;
 
@@ -187,7 +175,6 @@
         }
 
         function all(promises) {
-            assertArg(Array.isArray(promises), 'promises', 'expected an array');
             if (!promises.length) {
                 return resolve([]);
             }
@@ -254,17 +241,16 @@
             return deferred.promise;
         }
 
-        var AsyncCallback = ruf.defineType(
+        var AsyncCallback = type(
             function (callback, isErrback) {
                 this.callback = callback;
                 if (isErrback) {
                     this.isErrback = isErrback;
                 }
-            },
+            }).defines(
             {
                 isAsyncCallback: true, isErrback: false
-            }
-        );
+            }).build();
 
         function callback(fn) {
             return new AsyncCallback(fn, false);
@@ -275,8 +261,7 @@
         }
 
         function invoke(fn, context /* args */) {
-            var deferred = defer(),
-                args = ruf.array.fromArrayLike(arguments).slice(2);
+            var deferred = defer(), args = enumerable(arguments).toArray().slice(2);
 
             function makeCallback(asyncCallback) {
                 var isErrback = asyncCallback.isErrback, callback = asyncCallback.callback;
@@ -329,5 +314,5 @@
         task();
     }
 
-    ruf['async'] = factory(synchronousDispatcher);
+    photon['async'] = factory(synchronousDispatcher);
 })();

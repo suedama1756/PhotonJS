@@ -5,13 +5,13 @@ var modelDirectiveFactory = ['$parse', function (parse) {
             var expr = parse(options.expression), evaluator = expr.evaluator, updateOn = expr.parameters['updateOn'],
                 event = updateOn === 'change' ?  'input' : 'change';
 
-            node.addEventListener(event, function() {
+            node.on(event, function() {
                 evaluator.setter(context, node.value);
                 context.$sync();
             });
 
             context.$observe(options.expression, function(newValue) {
-                node.value = newValue;
+                node.value = isNullOrUndefined(newValue) ? '' : newValue;
             });
         }
     }

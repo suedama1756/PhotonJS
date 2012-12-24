@@ -14,13 +14,17 @@
     return {
         name:'photon',
         files:[
-            'photon.js',
+            'core/core.js',
+            'core/core-ecma5.js',
             'type.js',
             'collections/enumerable.js',
             'collections/List.js',
             'string.js',
 
-            'dom/element.js',
+            'async/async.js',
+            'async/TimeoutError.js',
+
+            'dom/nodes.js',
 
             'ioc/lifetimes.js',
             'ioc/registration.js',
@@ -38,6 +42,7 @@
             'directives/attr.js',
             'directives/each.js',
             'directives/model.js',
+            'directives/text.js',
             'directives/decorate.js',
             'directives/on.js',
             'directives/property.js',

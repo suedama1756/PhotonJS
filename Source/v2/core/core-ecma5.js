@@ -1,31 +1,22 @@
-/**
- * Internal helper method used to add modern JS features to legacy browsers.
- *
- * @param {*} target
- * @param {string} method
- * @param {function} alternativeFactory
- * @return {*}
- */
 function modernize(target, method, alternativeFactory) {
     return (method in target) ?
         target[method] :
         (target[method] = alternativeFactory());
 }
 
-/**
- * Defines Array.isArray if not already supported by the browser.
- *
- * @type {function(*) :boolean}
- */
-modernize(Array, 'isArray', function () {
+function assertCallTarget(target, methodName) {
+    if (isNullOrUndefined(target)) {
+        throw new TypeError((methodName || '?') + ' called on null or undefined.');
+    }
+    return target;
+}
+
+var isArray = modernize(Array, 'isArray', function () {
     return function (obj) {
-        return instanceOf(obj, '[object Array]');
+        return isType(obj, '[object Array]');
     };
 });
 
-/**
- * Defines Array.prototype.forEach if not already supported by the browser.
- */
 modernize(arrayPrototype, 'forEach', function () {
     return function (callback, thisObj) {
         // verify target
@@ -45,19 +36,16 @@ modernize(arrayPrototype, 'forEach', function () {
     };
 });
 
-/**
- * Defines Array.prototype.filter if not already supported by the browser
- */
 modernize(arrayPrototype, 'filter', function () {
     return function (callback, thisObj) {
-        var array = assertCallTarget(this, 'Array.filter');
-
-        var length = array.length,
+        var array = assertCallTarget(this, 'Array.filter'),
+            length = array.length,
             result = [],
-            resultIndex = 0,
-            array = isString(array) ?
-                array.split('') :
-                array;
+            resultIndex = 0;
+
+        array = isString(array) ?
+            array.split('') :
+            array;
 
         for (var index = 0; index < length; index++) {
             if (index in array) {
@@ -72,9 +60,6 @@ modernize(arrayPrototype, 'filter', function () {
     }
 });
 
-/**
- * Defines Array.prototype.indexOf if not already supported by the browser
- */
 modernize(arrayPrototype, 'indexOf', function () {
     return function (searchElement, fromIndex) {
         var array = assertCallTarget(this, 'Array.indexOf');
@@ -117,8 +102,8 @@ modernize(arrayPrototype, 'map', function () {
     };
 });
 
-modernize(stringPrototype, 'trim', function() {
-    return function() {
+modernize(stringPrototype, 'trim', function () {
+    return function () {
         return assertCallTarget(this).replace(/^[\s\xa0]+|[\s\xa0]+$/g, '');
     }
 });
@@ -132,7 +117,7 @@ modernize(functionPrototype, 'bind', function () {
             args = arrayPrototype.slice.call(arguments, 1);
 
         if (typeof fn === 'object') {
-            var result = function() {
+            var result = function () {
                 var args = [context].concat(arrayPrototype.slice.call(arguments));
                 return Function.prototype.call.apply(fn, args);
             };
@@ -154,10 +139,6 @@ modernize(functionPrototype, 'bind', function () {
     };
 });
 
-/**
- * Cross browser method for getting all the owned property names of an object.
- * @type {function(*) : Array.<string>}
- */
 modernize(Object, 'getOwnPropertyNames', function () {
     // basic version
     var result = function (obj) {
@@ -176,7 +157,7 @@ modernize(Object, 'getOwnPropertyNames', function () {
         'valueOf'
     ];
 
-    for (var key in {toString:noop}) {
+    for (var key in {toString: noop}) {
         if (key === natives[0]) {
             return result;  // no work around required
         }

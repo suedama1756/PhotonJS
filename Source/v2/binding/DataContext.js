@@ -15,6 +15,7 @@ var DataContext = photon['DataContext'] = type(
     function DataContext(parse) {
         this.$children = new List();
         this.$parse = parse;
+        this.$observers = {};
     })
     .defines(
     {
@@ -40,7 +41,7 @@ var DataContext = photon['DataContext'] = type(
             }.bind(this));
         },
         $observe : function(expression, handler) {
-            var observers = this.$observers || (this.$observers = {}), observer = observers[expression];
+            var observers = this.$observers = {}, observer = observers[expression];
             if (!observer) {
                 var evaluator = this.$parse(expression).evaluator;
                 observer = observers[expression] = new ExpressionObserver(

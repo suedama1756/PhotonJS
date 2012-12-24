@@ -23,13 +23,15 @@ function mapName(name) {
 var nameMap = {};
 
 var uiModule = module(function(x) {
-    x.directive('mdx-each').factory(eachDirectiveFactory);
-    x.directive('mdx-action').factory(actionDirectiveFactory);
-    x.directive('mdx-on-').factory(onDirectiveFactory);
-    x.directive('mdx-model').factory(modelDirectiveFactory);
-    x.directive('mdx-attr-').factory(attrDirectiveFactory);
-    x.directive('mdx-').factory(propertyDirectiveFactory);
-    x.directive('mdx-decorator').factory(decorateDirectiveFactory);
+    x.directive('mv-each').factory(eachDirectiveFactory);
+    x.directive('mv-action').factory(actionDirectiveFactory);
+    x.directive('mv-on-').factory(onDirectiveFactory);
+    x.directive('mv-model').factory(modelDirectiveFactory);
+    x.directive('mv-attr-').factory(attrDirectiveFactory);
+    x.directive('mv-').factory(propertyDirectiveFactory);
+    x.directive('mv-decorator').factory(decorateDirectiveFactory);
+    x.directive('mv-text').factory(textDirectiveFactory);
+
     x.factory('$parse', function() {
         var parse = photon.parser().parse;
         return function (text) {
@@ -75,12 +77,20 @@ photon.bind = function (element, updateSource, updateTarget) {
 };
 
 
-function compile(container, element) {
+function compile(container, element, templateLinkers) {
     function getAttributeDirective(type) {
         return container.tryResolve('Directive', type);
     }
 
     function compileAttributes(node) {
+        if (node.tagName === 'CONTENT') {
+            return [{
+                directive : templateLinkers.content,
+                options : {
+                }
+            }]
+        }
+
         var attributes = node && node.attributes;
         return attributes ? enumerable(attributes).select(
             function (x) {
@@ -111,16 +121,6 @@ function compile(container, element) {
                 }
                 return 0;
             }).toArray() : null;
-
-        // what we are really doing here is searching ahead for complex attributes, we could
-        // inspect their types by querying the directive, e.g. is it a template, etc.
-//    if (node.nodeType === NODE_ELEMENT && node.childNodes.length) {
-//        enumerable(node.childNodes).where(function(x) {
-//            return x.nodeType === NODE_ELEMENT && x.tagName.substring(0, node.tagName.length) === x.tagName + '.';
-//
-//
-//        })
-//    }
     }
 
     function makeLinkerChainFn(parent, child) {
@@ -156,16 +156,15 @@ function compile(container, element) {
 
     function makeLinkFn(compileInfos) {
         return makeLinkerFn(compileInfos, function (directive, node, context, options) {
-            directive.link(node, context, options);
+            directive.link(nodes(node), context, options);
         });
     }
 
     function makeUnlinkFn(compileInfos) {
         return makeLinkerFn(compileInfos, function (directive, node, context, options) {
-            directive.unlink(node, context, options);
+            directive.unlink(nodes(node), context, options);
         });
     }
-
 
     function compileNode(node, compileInfos) {
         /**
@@ -187,10 +186,10 @@ function compile(container, element) {
                 var directive = compileInfo.directive;
                 if (directive.compile) {
                     directive.compile(compileInfo.options);
-                    if (compileInfo.directive.render === 'replace') {
-                        compileInfo.options.templateNode = node;
-                        node.parentNode.replaceChild(document.createComment(compileInfo.type), node);
-                    }
+                }
+                if (compileInfo.directive.render === 'replace') {
+                    compileInfo.options.templateNode = node;
+                    node.parentNode.replaceChild(document.createComment(compileInfo.type), node);
                 }
             });
 
@@ -199,7 +198,7 @@ function compile(container, element) {
         }
 
         if (node.childNodes.length) {
-            var childLinker = compileNodes(node.childNodes);
+            var childLinker = compileNodes(enumerable(node.childNodes));
             if (childLinker) {
                 link = makeLinkerChainFn(link, childLinker.link);
                 unlink = makeLinkerChainFn(unlink, childLinker.unlink);
@@ -212,33 +211,37 @@ function compile(container, element) {
         } : null;
     }
 
-    function compileNodes(nodeList) {
-        var nodeLinkers = enumerable(nodeList)
-            .select(function (node) {
-                return compileNode(node);
-            })
-            .toArray();
+    function compileNodes(nodes) {
+        var nodeLinkers = nodes.select(function (node) {
+            return compileNode(node);
+        }).toArray();
+
         return {
-            link: function (nodeList, context) {
-                for (var i = 0, n = nodeList.length; i < n; i++) {
+            link: function (nodes, context) {
+                enumerable(nodes).forEach(function(x, i) {
                     var nodeLinker = nodeLinkers[i];
                     if (nodeLinker) {
-                        nodeLinker.link(nodeList[i], context);
+                        nodeLinker.link(x, context);
                     }
-                }
+                });
             },
-            unlink: function (nodeList, context) {
-                for (var i = 0, n = nodeList.length; i < n; i++) {
+            unlink: function (nodes, context) {
+                enumerable(nodes).forEach(function(x, i) {
                     var nodeLinker = nodeLinkers[i];
                     if (nodeLinker) {
-                        nodeLinker.unlink(nodeList[i], context);
+                        nodeLinker.unlink(nodes[i], context);
                     }
-                }
+                });
             }
         };
     }
 
-
+    if (element.getEnumerator) {
+        return compileNodes(element);
+    }
+    if (isArrayLike(element)) {
+        return compileNodes(enumerable(element));
+    }
     return compileNode(element);
 }
 

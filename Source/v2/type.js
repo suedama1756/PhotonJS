@@ -11,74 +11,73 @@ var TypeBuilder;
  * @return {TypeBuilder}
  */
 function type(constructor) {
-    var members_ = {
-
-    };
-
-    var typeInfo_ = {
-        name : null,
-        baseType : null,
-        base : null,
-        type : null
-    };
+    var _members = {},
+        _staticMembers = {},
+        _typeInfo = {
+            name: null,
+            baseType: null,
+            base: null,
+            type: null
+        };
 
     return  {
-        'name':function (name) {
-            typeInfo_.name = name;
+        'name': function (name) {
+            _typeInfo.name = name;
             return this;
         },
-        'inherits':function (baseType) {
-            typeInfo_.baseType = baseType;
+        'inherits': function (baseType) {
+            _typeInfo.baseType = baseType;
             return this;
         },
-        'defines':function (members) {
+        'defines': function (members) {
             if (isFunction(members)) {
-                members = members(function() {
-                    return typeInfo_.base;
+                members = members(function () {
+                    return _typeInfo.base;
                 });
             }
-            extend(members_, members);
+            extend(_members, members);
             return this;
         },
-        'exports' : function(callback) {
-            extend(members_, callback(members_));
+        'definesStatic': function (members) {
+            if (isFunction(members)) {
+                members = members(function () {
+                    return _typeInfo.base;
+                });
+            }
+            extend(_staticMembers, members);
             return this;
         },
-        'build':function () {
+        'exports': function (callback) {
+            extend(_members, callback(_members));
+            return this;
+        },
+        'build': function () {
             if (isNullOrUndefined(constructor)) {
                 constructor = function () {
                 };
             }
-            typeInfo_.name = typeInfo_.name || constructor.name;
+            _typeInfo.name = _typeInfo.name || constructor.name;
 
-
-            // how do we avoid this, can we simply create a constructor with two many arguments? is that faster?
-            /*
-                Why are we trying to do this again? Because we can FIX methods like toString, valueOf in IE...
-                Should also copy existing methods from constructor prototype.
-                Calling base on toString for types in IE will probably fail, we need to validate this.
-             */
-
-            if (!members_.hasOwnProperty('toString')) {
-                members_['toString'] = function() {
-                    return "[object " + (typeInfo_.name || "Object") + "]";
+            if (!_members.hasOwnProperty('toString')) {
+                _members['toString'] = function () {
+                    return "[object " + (_typeInfo.name || "Object") + "]";
                 };
             }
 
             function Prototype() {
             }
 
-            if (typeInfo_.baseType) {
-                typeInfo_.base = typeInfo_.baseType.prototype;
-                Prototype.prototype = typeInfo_.base;
+            if (_typeInfo.baseType) {
+                _typeInfo.base = _typeInfo.baseType.prototype;
+                Prototype.prototype = _typeInfo.base;
             }
 
             var typeInfo = {
-                'name':function () {
-                    return typeInfo_.name;
+                'name': function () {
+                    return _typeInfo.name;
                 },
-                'baseType':function () {
-                    return typeInfo_.baseType;
+                'baseType': function () {
+                    return _typeInfo.baseType;
                 }
             };
 
@@ -88,14 +87,14 @@ function type(constructor) {
             var prototype = constructor.prototype = new Prototype();
             prototype.constructor = constructor;
 
-            if (members_) {
-                photon.extend(prototype, members_,
+            if (_members) {
+                photon.extend(prototype, _members,
                     photon.extend.filterHasOwnProperty, function (source, propertyName) {
                         return source[propertyName];
                     });
             }
             prototype['__TYPE_INFO__'] = constructor['typeInfo'];
-            return constructor;
+            return extend(constructor, _staticMembers);
         }
     };
 }

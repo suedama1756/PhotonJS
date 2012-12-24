@@ -1,30 +1,35 @@
 var decorateDirectiveFactory = ['$parse', '$container', function (parse, container) {
     return {
         render: 'replace',
-        compile: function (options) {
-            options.decoratorNodes = element(container.resolve('Template', parse(options.expression).evaluator(null)));
-            options.decoratorLinker = compile(container, options.decoratorNodes);
-        },
         link: function (linkNode, context, options) {
-            var parentNode = linkNode.parentNode, relNode = linkNode.nextSibling,
-                decoratorNodes = options.decoratorNodes.cloneNode(true);
+            var optionsContext = context.$new(); // Probably should be detached, and compiled against supported attributes
 
-            parentNode.insertBefore(decoratorNodes, relNode);
+            context.$observe(options.expression, function (newValue) {
+                var expression = parse(options.expression),
+                    decoratorNodes = nodes(container.resolve('Template', newValue)),
+                    decoratorLinker = compile(container, decoratorNodes, {
+                        content: {
+                            link: function (node) {
+                                // insert node into structure
+                                var contentNode = options.templateNode.cloneNode(true);
+                                node.parentNode.replaceChild(contentNode, node);
 
-            var optionsContext = context.$new();
-            var exp = parse(options.expression);
+                                // link
+                                options.linker.link(contentNode, context);
+                            }
+                        }
+                    });
 
-            // only supporting constants at the moment
-            Object.getOwnPropertyNames(exp.parameters).forEach(function(propertyName) {
-                optionsContext[propertyName] = exp.parameters[propertyName];
+                decoratorNodes = decoratorNodes.clone(true);
+                decoratorNodes.insertAfter(linkNode);
+
+                // we supporting constants at the moment :(
+                Object.getOwnPropertyNames(expression.parameters).forEach(function (propertyName) {
+                    optionsContext[propertyName] = expression.parameters[propertyName];
+                });
+
+                decoratorLinker.link(decoratorNodes, optionsContext);
             });
-
-
-            options.decoratorLinker.link(decoratorNodes, optionsContext);
-            var content = decoratorNodes.querySelector('content');
-            var node = options.templateNode.cloneNode(true);
-            content.parentNode.replaceChild(node, content);
-            options.linker.link(node, context);
         }
     }
 }];
