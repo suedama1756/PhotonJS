@@ -1,8 +1,6 @@
 (function(window, document){
     (function(factory) {
-        if (typeof require === 'function' && typeof exports === 'object' && typeof module === 'object') {
-            factory(module['exports'] || exports, require('undefined'));
-        } else if (typeof define === 'function' && define.amd) {
+        if (typeof define === 'function' && define.amd) {
             define(['exports', 'jquery'], factory);
         } else if (window) {
             var ns = window['photon'] = window['photon'] || {};
@@ -1587,6 +1585,26 @@
                         shouldClone = true;
                     });
                 },
+                replace : function(newNodes) {
+                    newNodes = nodes(newNodes);
+                    this.forEach(function(node) {
+                       var parent = node.parentNode;
+                        if (parent != null) {
+                            parent.replaceChild(newNodes.first(), node);
+                        }
+                    });
+                },
+                parent : function() {
+                    // todo: from enumerable
+                    return nodes(this.first().parentNode);
+                },
+                nextSibling : function() {
+                    return nodes(this.select(function(node) {
+                        return node.nextSibling;
+                    }).where(function(node) {
+                            return node;
+                    }).distinct().toArray());
+                },
                 on : function(name, handler) {
                     this.forEach(function(node) {
                         node.addEventListener(name, handler);
@@ -2553,19 +2571,22 @@
                     }
                 },
                 link: function (linkNode, context, options) {
-                    var templateNode = options.templateNode, linker = options.linker;
-                    var evaluator = parse(options.expression).evaluator;
-                    var parentNode = linkNode.parentNode;
-                    linkNode = linkNode.nextSibling;
+                    var templateNode = nodes(options.templateNode),
+                        linker = options.linker,
+                        evaluator = parse(options.expression).evaluator;
+        
+                    linkNode = linkNode.nextSibling();
+        
                     var items = evaluator(context);
                     if (items) {
                         enumerable(items).forEach(
-                            function (x) {
-                                var itemNode = templateNode.cloneNode(true);
-                                parentNode.insertBefore(itemNode, linkNode);
-                                var childContext = context.$new();
-                                childContext[options.itemName] = x;
-                                linker.link(itemNode, childContext);
+                            function (item) {
+                                var itemNode = templateNode.clone(true),
+                                    childContext = context.$new();
+                                itemNode.insertAfter(linkNode);
+                                childContext[options.itemName] = item;
+                                linker.link(itemNode.first(), childContext);
+                                linkNode = linkNode.nextSibling();
                             }
                         );
                     }
@@ -2617,7 +2638,7 @@
                                     link: function (node) {
                                         // insert node into structure
                                         var contentNode = options.templateNode.cloneNode(true);
-                                        node.parentNode.replaceChild(contentNode, node);
+                                        node.replace(contentNode);
         
                                         // link
                                         options.linker.link(contentNode, context);

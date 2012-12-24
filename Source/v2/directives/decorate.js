@@ -12,7 +12,7 @@ var decorateDirectiveFactory = ['$parse', '$container', function (parse, contain
                             link: function (node) {
                                 // insert node into structure
                                 var contentNode = options.templateNode.cloneNode(true);
-                                node.parentNode.replaceChild(contentNode, node);
+                                node.replace(contentNode);
 
                                 // link
                                 options.linker.link(contentNode, context);

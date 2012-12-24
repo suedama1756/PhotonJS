@@ -118,6 +118,26 @@ var Nodes = type(
                 shouldClone = true;
             });
         },
+        replace : function(newNodes) {
+            newNodes = nodes(newNodes);
+            this.forEach(function(node) {
+               var parent = node.parentNode;
+                if (parent != null) {
+                    parent.replaceChild(newNodes.first(), node);
+                }
+            });
+        },
+        parent : function() {
+            // todo: from enumerable
+            return nodes(this.first().parentNode);
+        },
+        nextSibling : function() {
+            return nodes(this.select(function(node) {
+                return node.nextSibling;
+            }).where(function(node) {
+                    return node;
+            }).distinct().toArray());
+        },
         on : function(name, handler) {
             this.forEach(function(node) {
                 node.addEventListener(name, handler);

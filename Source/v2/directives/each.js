@@ -16,19 +16,22 @@ var eachDirectiveFactory = ['$parse', function (parse) {
             }
         },
         link: function (linkNode, context, options) {
-            var templateNode = options.templateNode, linker = options.linker;
-            var evaluator = parse(options.expression).evaluator;
-            var parentNode = linkNode.parentNode;
-            linkNode = linkNode.nextSibling;
+            var templateNode = nodes(options.templateNode),
+                linker = options.linker,
+                evaluator = parse(options.expression).evaluator;
+
+            linkNode = linkNode.nextSibling();
+
             var items = evaluator(context);
             if (items) {
                 enumerable(items).forEach(
-                    function (x) {
-                        var itemNode = templateNode.cloneNode(true);
-                        parentNode.insertBefore(itemNode, linkNode);
-                        var childContext = context.$new();
-                        childContext[options.itemName] = x;
-                        linker.link(itemNode, childContext);
+                    function (item) {
+                        var itemNode = templateNode.clone(true),
+                            childContext = context.$new();
+                        itemNode.insertAfter(linkNode);
+                        childContext[options.itemName] = item;
+                        linker.link(itemNode.first(), childContext);
+                        linkNode = linkNode.nextSibling();
                     }
                 );
             }
