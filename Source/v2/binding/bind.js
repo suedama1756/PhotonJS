@@ -31,6 +31,7 @@ var uiModule = module(function(x) {
     x.directive('mv-').factory(propertyDirectiveFactory);
     x.directive('mv-decorator').factory(decorateDirectiveFactory);
     x.directive('mv-text').factory(textDirectiveFactory);
+    x.directive('mv-show').factory(showDirectiveFactory);
 
     x.factory('$parse', function() {
         var parse = photon.parser().parse;

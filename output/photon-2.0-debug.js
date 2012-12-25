@@ -1483,6 +1483,41 @@
             }
         };
         
+        function getNodeValue(node) {
+            return node.value;
+        }
+        
+        function setNodeValue(node, newValue) {
+            node.value = newValue;
+        }
+        
+        function getNodeAttribute(node, name) {
+            return node.getAttribute(name);
+        }
+        
+        function setNodeAttribute(node, name, newValue) {
+            node.setAttribute(name, newValue);
+        }
+        
+        function getNodeStyle(node, name) {
+            return node.style[name];
+        }
+        
+        function setNodeStyle(node, name, newValue) {
+            node.style[name] = newValue;
+        }
+        
+        
+        // TODO: Node functions will need to change when we support multiple, we should also provide
+        function getNodeParent(node) {
+            return nodes(node.parentNode);
+        }
+        
+        function getNodeNextSibling(node) {
+            return nodes(node.nextSibling);
+        }
+        
+        
         var parseHtmlMap = {
             option: [ 1, "<select multiple='multiple'>", "</select>" ],
             legend: [ 1, "<fieldset>", "</fieldset>" ],
@@ -1554,6 +1589,58 @@
             });
         }
         
+        function keyValueFunction(getter, setter) {
+            return function (key, newValue) {
+                var nodes = this._nodes;
+                if (arguments.length) {
+                    setter(nodes[0], key, newValue);
+                    return this;
+                }
+                return getter(nodes[0], key);
+            }
+        }
+        
+        function keyValuesFunction(getter, setter) {
+            return function (key, newValue) {
+                if (arguments.length === 2) {
+                    this.forEach(function (node) {
+                        setter(node, key, newValue);
+                    });
+                    return this;
+                }
+                return this.select(function(node) {
+                    return getter(node, key);
+                });
+            }
+        }
+        
+        
+        function valueFunction(getter, setter) {
+            return function (newValue) {
+                var nodes = this._nodes;
+                if (arguments.length) {
+                    if (!setter) {
+                        throw new Error('Property is readonly.');
+                    }
+                    setter(nodes[0], newValue);
+                    return this;
+                }
+                return getter(nodes[0]);
+            }
+        }
+        
+        function valuesFunction(getter, setter) {
+            return function (newValue) {
+                if (arguments.length) {
+                    this.forEach(function (node) {
+                        setter(node, newValue);
+                    });
+                    return this;
+                }
+                return this.select(getter);
+            }
+        }
+        
         
         var Nodes = type(
             function Nodes(nodes) {
@@ -1563,16 +1650,71 @@
             .name('Nodes')
             .inherits(Enumerable)
             .defines({
-                appendTo: function (node) {
-                    applyNodeFunction(node, this, null, function (targetNode, sourceNode) {
-                        targetNode.appendChild(sourceNode);
+                value: valueFunction(
+                    getNodeValue,
+                    setNodeValue
+                ),
+                allValues: valuesFunction(
+                    getNodeValue,
+                    setNodeValue
+                ),
+                text: valueFunction(
+                    getNodeText,
+                    setNodeText
+                ),
+                allTexts: valuesFunction(
+                    getNodeText,
+                    setNodeText
+                ),
+                attribute: keyValueFunction(
+                    getNodeAttribute,
+                    setNodeAttribute
+                ),
+                allAttributes: keyValuesFunction(
+                    getNodeAttribute,
+                    setNodeAttribute
+                ),
+                style:keyValueFunction(
+                    getNodeStyle,
+                    setNodeStyle
+                ),
+                allStyles : keyValuesFunction(
+                    getNodeStyle,
+                    setNodeStyle
+                ),
+                parent: valueFunction(getNodeParent),
+        
+                nextSibling: valueFunction(getNodeNextSibling),
+        
+                on: function (name, handler) {
+                    this.forEach(function (node) {
+                        node.addEventListener(name, handler);
                     });
-                    return this;
+                },
+                off : function(name, handler) {
+                    this.forEach(function (node) {
+                        node.removeEventListener(name, handler);
+                    });
                 },
                 clone: function (deep) {
                     return new Nodes(this._nodes.map(function (node) {
                         return node.cloneNode(deep);
                     }));
+                },
+                replace: function (newNodes) {
+                    newNodes = nodes(newNodes);
+                    this.forEach(function (node) {
+                        var parent = node.parentNode;
+                        if (parent != null) {
+                            parent.replaceChild(newNodes.first(), node);
+                        }
+                    });
+                },
+                appendTo: function (node) {
+                    applyNodeFunction(node, this, null, function (targetNode, sourceNode) {
+                        targetNode.appendChild(sourceNode);
+                    });
+                    return this;
                 },
                 insertBefore: function (node) {
                     var shouldClone = false, source = this;
@@ -1584,51 +1726,6 @@
         
                         shouldClone = true;
                     });
-                },
-                replace : function(newNodes) {
-                    newNodes = nodes(newNodes);
-                    this.forEach(function(node) {
-                       var parent = node.parentNode;
-                        if (parent != null) {
-                            parent.replaceChild(newNodes.first(), node);
-                        }
-                    });
-                },
-                parent : function() {
-                    // todo: from enumerable
-                    return nodes(this.first().parentNode);
-                },
-                nextSibling : function() {
-                    return nodes(this.select(function(node) {
-                        return node.nextSibling;
-                    }).where(function(node) {
-                            return node;
-                    }).distinct().toArray());
-                },
-                on : function(name, handler) {
-                    this.forEach(function(node) {
-                        node.addEventListener(name, handler);
-                    });
-                },
-                attr: function (name, value) {
-                    if (arguments.length === 0) {
-                        return this.select(function(node) {
-                            return node.getAttribute(name);
-                        });
-                    }
-                    this.forEach(function (node) {
-                        node.setAttribute(name, value);
-                    });
-                    return this;
-                },
-                text: function (text) {
-                    if (arguments.length === 0) {
-                        return this.select(getNodeText);
-                    }
-                    this.forEach(function (node) {
-                        setNodeText(node, text);
-                    });
-                    return this;
                 },
                 insertAfter: function (node) {
                     var shouldClone = false, source = this;
@@ -2547,7 +2644,7 @@
             return {
                 link: function (node, context, options) {
                     context.$observe(options.expression, function(newValue) {
-                        node.attr(options.qualifier, newValue)
+                        node.attribute(options.qualifier, newValue)
                     });
                 }
             }
@@ -2603,12 +2700,12 @@
                         event = updateOn === 'change' ?  'input' : 'change';
         
                     node.on(event, function() {
-                        evaluator.setter(context, node.value);
+                        evaluator.setter(context, node.value());
                         context.$sync();
                     });
         
                     context.$observe(options.expression, function(newValue) {
-                        node.value = isNullOrUndefined(newValue) ? '' : newValue;
+                        node.value(isNullOrUndefined(newValue) ? '' : newValue);
                     });
                 }
             }
@@ -2619,6 +2716,17 @@
                 link: function (linkNode, context, options) {
                     context.$observe(options.expression, function (newValue) {
                         linkNode.text(newValue);
+                    });
+                }
+            }
+        };
+        
+        
+        var showDirectiveFactory = function () {
+            return {
+                link: function (linkNode, context, options) {
+                    context.$observe(options.expression, function (newValue) {
+                        linkNode.style('display', !!newValue ? '' : 'none');
                     });
                 }
             }
@@ -2800,6 +2908,7 @@
             x.directive('mv-').factory(propertyDirectiveFactory);
             x.directive('mv-decorator').factory(decorateDirectiveFactory);
             x.directive('mv-text').factory(textDirectiveFactory);
+            x.directive('mv-show').factory(showDirectiveFactory);
         
             x.factory('$parse', function() {
                 var parse = photon.parser().parse;

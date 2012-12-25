@@ -6,6 +6,7 @@
     <script src="angular.js"></script>
 </head>
 <body>
+
 <span mv-attr-style="'color:red;'" mv-text="model.value"></span>
 <input mv-model="model.value,updateOn='change'">
 <button mv-action="model.invoke(),on='click'">Click</button>
@@ -29,6 +30,8 @@
     <p></p>
     <div mv-decorator="'FieldGroup', label='Add comment'">
         <input mv-decorator="'Field', label='Surname:'" mv-model="surname">
+        // dom has been affected and caused this to break!! (probably should take copy)
+        <span mv-show="(surname.length || 0) > 10">Ohh thans a bit long isn't it?</span>
         <input mv-decorator="'Field', label='Forename:'" mv-model="firstName">
         <input mv-decorator="'Field', label='DOB:'" mv-model="dateOfBirth">
         <input mv-decorator="'Field', label='Surname:'" mv-model="surname">
