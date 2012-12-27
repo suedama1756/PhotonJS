@@ -13,30 +13,35 @@ function container(modules) {
         return registration ? registration.resolver : null;
     }
 
-    function resolve(contract, name) {
-        var result = tryResolve(contract, name);
+    function resolve(contract, name, parameterOverrides) {
+        var result = tryResolve(contract, name, parameterOverrides);
         if (!result) {
             throw new Error('Could not resolve instance: ' + contract + ':' + (name || ''));
         }
         return result;
     }
 
-    function tryResolve(contract, name) {
+    function tryResolve(contract, name, parameterOverrides) {
+        if (!parameterOverrides && name && !isPrimitive(name)) {
+            parameterOverrides = name;
+            name = '';
+        }
+
         var resolver = getResolver(contract, name);
         return resolver ?
-            resolver(_context) :
+            resolver(_context, parameterOverrides) :
             null;
     }
 
     function createScope() {
         var _cache = {};
 
-        function resolveInScope(context, factory, contract, name) {
+        function resolveInScope(context, factory, contract, name, parameterOverrides) {
             var key = contract + ':';
             if (name) {
                 key += name;
             }
-            return _cache[key] || (_cache[key] = factory(context));
+            return _cache[key] || (_cache[key] = factory(context, parameterOverrides));
         }
 
         if (!_context.root) {

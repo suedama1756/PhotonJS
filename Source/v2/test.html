@@ -25,52 +25,25 @@
         <div mv-each="comment in child.comments" >
             <span mv-text="comment"></span>
         </div>
-
     </div>
     <p></p>
     <div mv-decorator="'FieldGroup', label='Add comment'">
+        <span mv-text="surname">Oh that's a bit long isn't it?</span>
         <input mv-decorator="'Field', label='Surname:'" mv-model="surname">
-        // dom has been affected and caused this to break!! (probably should take copy)
-        <span mv-show="(surname.length || 0) > 10">Ohh thans a bit long isn't it?</span>
+        <span mv-show="(surname.length || 0) > 10">Oh that's a bit long isn't it?</span>
         <input mv-decorator="'Field', label='Forename:'" mv-model="firstName">
         <input mv-decorator="'Field', label='DOB:'" mv-model="dateOfBirth">
         <input mv-decorator="'Field', label='Surname:'" mv-model="surname">
     </div>
 </div>
-
+<div mv-controller="TestController">
+    <input mv-decorator="'Field', label='Forename:'" mv-model="forename">
+    <input mv-decorator="'Field', label='Surname:'" mv-model="surname">
+    <span mv-text="'Hello:' + forename + ' ' + surname"></span>
+    <button mv-action="$controller.show(), on='click'">Show Message</button>
+</div>
 
 <script>
-    testModule = photon.module(function (x) {
-        x.factory('A', ['B', function (b) {
-            return {
-                b: b
-            }
-        }]).trans();
-
-        x.factory('B', function () {
-            return {
-                message : 'B'
-            };
-        }).scope();
-
-        x.factory('C', function () {
-            return {
-                value : 0
-            };
-        }).singleton();
-
-        x.directive('A').factory(function () {
-            return 'Directive A';
-        });
-
-        x.directive('B').factory(function () {
-            return 'Directive B';
-        });
-
-
-    });
-
-
     var model = {
         invoke: function () {
             alert('invoked');
@@ -93,11 +66,23 @@
         ]
     };
 
+    var testControllerFactory = ['$context', function(context) {
+        context.forename = 'Jason';
+        context.surname = 'Young';
+        return {
+            show: function() {
+                alert(context.surname);
+            }
+        };
+    }];
+
     var testModule = photon.module(function(builder) {
         builder.instance('Template', '<div><div><span mv-text="label" style="width: 200px"></span></div><content></content></div><span>Some thing else</span>')
                 .name('Field');
         builder.instance('Template', '<div><h2 mv-text="label"></h2><content></content></div>').name('FieldGroup');
+        builder.factory('Controller', testControllerFactory).name('TestController');
     });
+
     photon.bootstrap(document.body, [testModule], {model: model});
 </script>
 </body>

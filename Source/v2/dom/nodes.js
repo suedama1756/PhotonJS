@@ -1,14 +1,15 @@
 var isTextContentAvailable = 'textContent' in document.createElement('span');
 
 var getNodeText = isTextContentAvailable ? function (node) {
-    return node.textContent;
+    return (node.textContent) || '';
 } : function (node) {
-    return node.nodeType == NODE_ELEMENT ? node.innerText : node.nodeValue;
+    return (node.nodeType == NODE_ELEMENT ? node.innerText : node.nodeValue) || '';
 };
 
 var setNodeText = isTextContentAvailable ? function (node, text) {
-    node.textContent = text;
+    node.textContent = text ? text : '';
 } : function (node, text) {
+    text = text || '';
     if (node.nodeType == NODE_ELEMENT) {
         node.innerText = text;
     } else {
@@ -187,7 +188,7 @@ var Nodes = type(
             getNodeValue,
             setNodeValue
         ),
-        allValues: valuesFunction(
+        valueList: valuesFunction(
             getNodeValue,
             setNodeValue
         ),
@@ -195,7 +196,7 @@ var Nodes = type(
             getNodeText,
             setNodeText
         ),
-        allTexts: valuesFunction(
+        textList: valuesFunction(
             getNodeText,
             setNodeText
         ),
@@ -203,7 +204,7 @@ var Nodes = type(
             getNodeAttribute,
             setNodeAttribute
         ),
-        allAttributes: keyValuesFunction(
+        attributeList: keyValuesFunction(
             getNodeAttribute,
             setNodeAttribute
         ),
@@ -211,7 +212,7 @@ var Nodes = type(
             getNodeStyle,
             setNodeStyle
         ),
-        allStyles : keyValuesFunction(
+        styleList : keyValuesFunction(
             getNodeStyle,
             setNodeStyle
         ),

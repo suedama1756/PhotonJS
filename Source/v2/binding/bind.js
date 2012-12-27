@@ -33,6 +33,8 @@ var uiModule = module(function(x) {
     x.directive('mv-text').factory(textDirectiveFactory);
     x.directive('mv-show').factory(showDirectiveFactory);
 
+    x.directive('mv-controller').factory(controllerDirectiveFactory);
+
     x.factory('$parse', function() {
         var parse = photon.parser().parse;
         return function (text) {
@@ -172,7 +174,7 @@ function compile(container, element, templateLinkers) {
          *
          * @type {Array}
          */
-        var link, unlink, templateLinker;
+        var link, unlink, templateLinker, requiresNewContext = false;
         compileInfos = compileInfos || compileAttributes(node);
         if (compileInfos && compileInfos.length) {
             if (compileInfos[0].directive.render === 'replace') {
@@ -184,13 +186,19 @@ function compile(container, element, templateLinkers) {
 
             // Can only walk this route with a templateLinker once due to the array reduction.
             compileInfos.forEach(function (compileInfo) {
+                if (compileInfo.directive.context) {
+                    requiresNewContext = true;
+                }
+
                 var directive = compileInfo.directive;
                 if (directive.compile) {
                     directive.compile(compileInfo.options);
                 }
                 if (compileInfo.directive.render === 'replace') {
                     compileInfo.options.templateNode = node;
-                    node.parentNode.replaceChild(document.createComment(compileInfo.type), node);
+                    var commentNode = document.createComment(compileInfo.type);
+                    node.parentNode.replaceChild(commentNode, node);
+                    node = commentNode;
                 }
             });
 
@@ -206,6 +214,14 @@ function compile(container, element, templateLinkers) {
             }
         }
 
+        if (requiresNewContext) {
+            var childLink = link;
+            // big problem with unlink here as we cannot maintain context :(
+            link = function(linkNode, context, options) {
+                childLink(linkNode, context.$new(), options);
+            }
+        }
+
         return link ? {
             link: link,
             unlink: unlink
@@ -213,13 +229,15 @@ function compile(container, element, templateLinkers) {
     }
 
     function compileNodes(nodes) {
-        var nodeLinkers = nodes.select(function (node) {
+        nodes = nodes.toArray();
+
+        var nodeLinkers = nodes.map(function (node) {
             return compileNode(node);
-        }).toArray();
+        });
 
         return {
             link: function (nodes, context) {
-                enumerable(nodes).forEach(function(x, i) {
+                enumerable(nodes).toArray().forEach(function(x, i) {
                     var nodeLinker = nodeLinkers[i];
                     if (nodeLinker) {
                         nodeLinker.link(x, context);
@@ -227,7 +245,7 @@ function compile(container, element, templateLinkers) {
                 });
             },
             unlink: function (nodes, context) {
-                enumerable(nodes).forEach(function(x, i) {
+                enumerable(nodes).toArray().forEach(function(x, i) {
                     var nodeLinker = nodeLinkers[i];
                     if (nodeLinker) {
                         nodeLinker.unlink(nodes[i], context);

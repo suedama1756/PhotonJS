@@ -1468,14 +1468,15 @@
         var isTextContentAvailable = 'textContent' in document.createElement('span');
         
         var getNodeText = isTextContentAvailable ? function (node) {
-            return node.textContent;
+            return (node.textContent) || '';
         } : function (node) {
-            return node.nodeType == NODE_ELEMENT ? node.innerText : node.nodeValue;
+            return (node.nodeType == NODE_ELEMENT ? node.innerText : node.nodeValue) || '';
         };
         
         var setNodeText = isTextContentAvailable ? function (node, text) {
-            node.textContent = text;
+            node.textContent = text ? text : '';
         } : function (node, text) {
+            text = text || '';
             if (node.nodeType == NODE_ELEMENT) {
                 node.innerText = text;
             } else {
@@ -1654,7 +1655,7 @@
                     getNodeValue,
                     setNodeValue
                 ),
-                allValues: valuesFunction(
+                valueList: valuesFunction(
                     getNodeValue,
                     setNodeValue
                 ),
@@ -1662,7 +1663,7 @@
                     getNodeText,
                     setNodeText
                 ),
-                allTexts: valuesFunction(
+                textList: valuesFunction(
                     getNodeText,
                     setNodeText
                 ),
@@ -1670,7 +1671,7 @@
                     getNodeAttribute,
                     setNodeAttribute
                 ),
-                allAttributes: keyValuesFunction(
+                attributeList: keyValuesFunction(
                     getNodeAttribute,
                     setNodeAttribute
                 ),
@@ -1678,7 +1679,7 @@
                     getNodeStyle,
                     setNodeStyle
                 ),
-                allStyles : keyValuesFunction(
+                styleList : keyValuesFunction(
                     getNodeStyle,
                     setNodeStyle
                 ),
@@ -1745,19 +1746,19 @@
             build();
         
         photon.nodes = nodes;
-        function singletonLifetime(context, factory, contract, name) {
+        function singletonLifetime(context, factory, contract, name, parameterOverrides) {
             // create objects through the root scope
-            return context.root(context, factory, contract, name);
+            return context.root(context, factory, contract, name, parameterOverrides);
         }
         
-        function transLifetime(context, factory) {
+        function transLifetime(context, factory, parameterOverrides) {
             // create object directly, not cached anywhere
-            return factory(context);
+            return factory(context, parameterOverrides);
         }
         
-        function scopeLifetime(context, factory, contract, name) {
+        function scopeLifetime(context, factory, contract, name, parameterOverrides) {
             // create objects through the current scope
-            return context.current(context, factory, contract, name);
+            return context.current(context, factory, contract, name, parameterOverrides);
         }
         function analyzeDependencies(fnOrArray) {
             var fn = fnOrArray, deps = fnOrArray.$dependencies;
@@ -1769,16 +1770,24 @@
             return { fn: fn, deps: deps || []};
         }
         
+        function mapArguments(dependencies, context, parameterOverrides) {
+            return dependencies.map(function (dependency) {
+                if (parameterOverrides && parameterOverrides.hasOwnProperty(dependency)) {
+                    return parameterOverrides[dependency];
+                } else {
+                    return context.resolve(dependency);
+                }
+            });
+        }
+        
         function registration(contract) {
             var name, factory, lifetimeManager, memberOf;
         
             return {
                 factory: function (value) {
                     var analysis = analyzeDependencies(value), deps = analysis.deps, fn = analysis.fn;
-                    factory = function (context) {
-                        var args = deps.map(function (dep) {
-                            return context.resolve(dep);
-                        });
+                    factory = function (context, parameterOverrides) {
+                        var args = mapArguments(deps, context, parameterOverrides);
                         return fn.apply(this, args);
                     };
                     return this;
@@ -1790,7 +1799,7 @@
                     return this;
                 },
                 type: function (value) {
-                    var analysis = analyzeDependencies(value), fn = analysis.fn;
+                    var analysis = analyzeDependencies(value), deps = analysis.deps, fn = analysis.fn;
         
                     function FactoryType() {
                     }
@@ -1798,12 +1807,9 @@
                     FactoryType.prototype = fn.prototype;
         
                     if (!(factory = fn.$containerFactory)) {
-                        factory = fn.$containerFactory = function (context) {
-                            var args = analysis.deps.map(function (dep) {
-                                    return context.resolve(dep);
-                                }),
-                                result = new FactoryType();
-                            fn.apply(result, args);
+                        factory = fn.$containerFactory = function (context, parameterOverrides) {
+                            var result = new FactoryType();
+                            fn.apply(result, mapArguments(deps, context, parameterOverrides));
                             return result;
                         }
                     }
@@ -1839,8 +1845,8 @@
                     return {
                         name: name,
                         memberOf: memberOf,
-                        resolver: function (context) {
-                            return lifetimeManager(context, factory, contract, name);
+                        resolver: function (context, parameterOverrides) {
+                            return lifetimeManager(context, factory, contract, name, parameterOverrides);
                         },
                         contract: contract
                     };
@@ -1908,30 +1914,35 @@
                 return registration ? registration.resolver : null;
             }
         
-            function resolve(contract, name) {
-                var result = tryResolve(contract, name);
+            function resolve(contract, name, parameterOverrides) {
+                var result = tryResolve(contract, name, parameterOverrides);
                 if (!result) {
                     throw new Error('Could not resolve instance: ' + contract + ':' + (name || ''));
                 }
                 return result;
             }
         
-            function tryResolve(contract, name) {
+            function tryResolve(contract, name, parameterOverrides) {
+                if (!parameterOverrides && name && !isPrimitive(name)) {
+                    parameterOverrides = name;
+                    name = '';
+                }
+        
                 var resolver = getResolver(contract, name);
                 return resolver ?
-                    resolver(_context) :
+                    resolver(_context, parameterOverrides) :
                     null;
             }
         
             function createScope() {
                 var _cache = {};
         
-                function resolveInScope(context, factory, contract, name) {
+                function resolveInScope(context, factory, contract, name, parameterOverrides) {
                     var key = contract + ':';
                     if (name) {
                         key += name;
                     }
-                    return _cache[key] || (_cache[key] = factory(context));
+                    return _cache[key] || (_cache[key] = factory(context, parameterOverrides));
                 }
         
                 if (!_context.root) {
@@ -2795,6 +2806,18 @@
             }
         }];
         
+        var controllerDirectiveFactory = ['$parse', '$container', function (parse, container) {
+            return {
+                context : {
+        
+                },
+                link: function (linkNode, context, options) {
+                    context.$controller = container.resolve('Controller', options.expression, { $context: context });
+                }
+            }
+        }];
+        
+        
         function defineChildDataContext(parent) {
             function DataContext(parent) {
                 // invoke parent constructor
@@ -2838,7 +2861,7 @@
                     }.bind(this));
                 },
                 $observe : function(expression, handler) {
-                    var observers = this.$observers = {}, observer = observers[expression];
+                    var observers = this.$observers, observer = observers[expression];
                     if (!observer) {
                         var evaluator = this.$parse(expression).evaluator;
                         observer = observers[expression] = new ExpressionObserver(
@@ -2859,7 +2882,7 @@
             })
             .defines({
                 sync : function() {
-                    var oldValue = this._value, newValue = this._evaluator();
+                    var oldValue = this._value, newValue = this._value = this._evaluator();
                     if (oldValue !== newValue) {
                         this._handlers.forEach(function(handler) {
                             handler(newValue, oldValue);
@@ -2909,6 +2932,8 @@
             x.directive('mv-decorator').factory(decorateDirectiveFactory);
             x.directive('mv-text').factory(textDirectiveFactory);
             x.directive('mv-show').factory(showDirectiveFactory);
+        
+            x.directive('mv-controller').factory(controllerDirectiveFactory);
         
             x.factory('$parse', function() {
                 var parse = photon.parser().parse;
@@ -3049,7 +3074,7 @@
                  *
                  * @type {Array}
                  */
-                var link, unlink, templateLinker;
+                var link, unlink, templateLinker, requiresNewContext = false;
                 compileInfos = compileInfos || compileAttributes(node);
                 if (compileInfos && compileInfos.length) {
                     if (compileInfos[0].directive.render === 'replace') {
@@ -3061,13 +3086,19 @@
         
                     // Can only walk this route with a templateLinker once due to the array reduction.
                     compileInfos.forEach(function (compileInfo) {
+                        if (compileInfo.directive.context) {
+                            requiresNewContext = true;
+                        }
+        
                         var directive = compileInfo.directive;
                         if (directive.compile) {
                             directive.compile(compileInfo.options);
                         }
                         if (compileInfo.directive.render === 'replace') {
                             compileInfo.options.templateNode = node;
-                            node.parentNode.replaceChild(document.createComment(compileInfo.type), node);
+                            var commentNode = document.createComment(compileInfo.type);
+                            node.parentNode.replaceChild(commentNode, node);
+                            node = commentNode;
                         }
                     });
         
@@ -3083,6 +3114,14 @@
                     }
                 }
         
+                if (requiresNewContext) {
+                    var childLink = link;
+                    // big problem with unlink here as we cannot maintain context :(
+                    link = function(linkNode, context, options) {
+                        childLink(linkNode, context.$new(), options);
+                    }
+                }
+        
                 return link ? {
                     link: link,
                     unlink: unlink
@@ -3090,13 +3129,15 @@
             }
         
             function compileNodes(nodes) {
-                var nodeLinkers = nodes.select(function (node) {
+                nodes = nodes.toArray();
+        
+                var nodeLinkers = nodes.map(function (node) {
                     return compileNode(node);
-                }).toArray();
+                });
         
                 return {
                     link: function (nodes, context) {
-                        enumerable(nodes).forEach(function(x, i) {
+                        enumerable(nodes).toArray().forEach(function(x, i) {
                             var nodeLinker = nodeLinkers[i];
                             if (nodeLinker) {
                                 nodeLinker.link(x, context);
@@ -3104,7 +3145,7 @@
                         });
                     },
                     unlink: function (nodes, context) {
-                        enumerable(nodes).forEach(function(x, i) {
+                        enumerable(nodes).toArray().forEach(function(x, i) {
                             var nodeLinker = nodeLinkers[i];
                             if (nodeLinker) {
                                 nodeLinker.unlink(nodes[i], context);

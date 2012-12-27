@@ -8,16 +8,24 @@ function analyzeDependencies(fnOrArray) {
     return { fn: fn, deps: deps || []};
 }
 
+function mapArguments(dependencies, context, parameterOverrides) {
+    return dependencies.map(function (dependency) {
+        if (parameterOverrides && parameterOverrides.hasOwnProperty(dependency)) {
+            return parameterOverrides[dependency];
+        } else {
+            return context.resolve(dependency);
+        }
+    });
+}
+
 function registration(contract) {
     var name, factory, lifetimeManager, memberOf;
 
     return {
         factory: function (value) {
             var analysis = analyzeDependencies(value), deps = analysis.deps, fn = analysis.fn;
-            factory = function (context) {
-                var args = deps.map(function (dep) {
-                    return context.resolve(dep);
-                });
+            factory = function (context, parameterOverrides) {
+                var args = mapArguments(deps, context, parameterOverrides);
                 return fn.apply(this, args);
             };
             return this;
@@ -29,7 +37,7 @@ function registration(contract) {
             return this;
         },
         type: function (value) {
-            var analysis = analyzeDependencies(value), fn = analysis.fn;
+            var analysis = analyzeDependencies(value), deps = analysis.deps, fn = analysis.fn;
 
             function FactoryType() {
             }
@@ -37,12 +45,9 @@ function registration(contract) {
             FactoryType.prototype = fn.prototype;
 
             if (!(factory = fn.$containerFactory)) {
-                factory = fn.$containerFactory = function (context) {
-                    var args = analysis.deps.map(function (dep) {
-                            return context.resolve(dep);
-                        }),
-                        result = new FactoryType();
-                    fn.apply(result, args);
+                factory = fn.$containerFactory = function (context, parameterOverrides) {
+                    var result = new FactoryType();
+                    fn.apply(result, mapArguments(deps, context, parameterOverrides));
                     return result;
                 }
             }
@@ -78,8 +83,8 @@ function registration(contract) {
             return {
                 name: name,
                 memberOf: memberOf,
-                resolver: function (context) {
-                    return lifetimeManager(context, factory, contract, name);
+                resolver: function (context, parameterOverrides) {
+                    return lifetimeManager(context, factory, contract, name, parameterOverrides);
                 },
                 contract: contract
             };

@@ -46,6 +46,7 @@
             'directives/decorate.js',
             'directives/on.js',
             'directives/property.js',
+            'directives/controller.js',
 
             'binding/DataContext.js',
             'binding/bind.js'
