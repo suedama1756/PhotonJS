@@ -81,7 +81,7 @@ function autoObserve(context, expression, handler) {
     var evaluator = context.$parse(expression).evaluator;
 
     var path = evaluator.path;
-    if (!path || evaluator.context.fn) { // should return merged paths
+    if (!Object.observe || !path || evaluator.context.fn) { // should return merged paths
         return false;
     }
 
@@ -112,6 +112,7 @@ function autoObserve(context, expression, handler) {
         }
     };
     watcher.handlers = [handler];
+    handler(oldValue);
 
     var value = context, parent = data.root;
     for (var i = 0; i < path.length; i++) {
