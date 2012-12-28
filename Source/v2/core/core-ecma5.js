@@ -174,3 +174,9 @@ modernize(Object, 'getOwnPropertyNames', function () {
         return names;
     };
 });
+
+modernize(Object, 'observe' , function() {
+    return function(obj, handler) {
+
+    }
+});

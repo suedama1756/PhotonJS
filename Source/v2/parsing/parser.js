@@ -26,14 +26,15 @@ function member(path, contextFn) {
                     self[path[path.length - 1]] = value;
                 }
             },
-            context : function(self) {
-                for (var i = 0, n = path.length - 1; i < n; i++) {
-                    if (isPrimitive(self)) {
-                        return;
-                    }
-                    self = self[path[i]];
+            context: extend(function (self) {
+                if (contextFn) {
+                    return contextFn(self);
                 }
-            }
+                return self;
+            }, {
+                fn: contextFn
+            }),
+            path: path
         });
     }
     return null;
@@ -80,10 +81,13 @@ function makeUnary(fn, right) {
     };
 }
 
-function makeBinary(left, fn, right) {
-    return function (self, locals) {
-        return fn(self, locals, left, right);
-    };
+function makeBinary(lhs, fn, rhs) {
+    return extend(function (self, locals) {
+        return fn(self, locals, lhs, rhs);
+    }, {
+        lhs : lhs,
+        rhs : rhs
+    });
 }
 
 function chainBinary(lhsEvaluator, readToken, tokenMatch) {
