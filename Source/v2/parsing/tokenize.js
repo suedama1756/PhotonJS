@@ -27,7 +27,7 @@ function compileConstant(value) {
     var result = function () {
         return value;
     };
-    result.isPrimitive = isPrimitive(value);
+    result.isConstant = true;
     return result;
 }
 

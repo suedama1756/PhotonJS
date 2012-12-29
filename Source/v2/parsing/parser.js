@@ -31,10 +31,9 @@ function member(path, contextFn) {
                     return contextFn(self);
                 }
                 return self;
-            }, {
-                fn: contextFn
             }),
-            path: path
+            paths: [path],
+            isObservable: !contextFn
         });
     }
     return null;
@@ -82,11 +81,24 @@ function makeUnary(fn, right) {
 }
 
 function makeBinary(lhs, fn, rhs) {
+    var isObservable, paths;
+
+    isObservable = (lhs.isObservable && (rhs.isObservable || rhs.isConstant)) ||
+        (rhs.isObservable && (lhs.isObservable || lhs.isConstant));
+    if (isObservable) {
+        paths = lhs.paths;
+        if (!paths) {
+            paths = rhs.paths;
+        }  else if (rhs.paths) {
+            paths  = paths.concat(rhs.paths);
+        }
+    }
+
     return extend(function (self, locals) {
         return fn(self, locals, lhs, rhs);
     }, {
-        lhs : lhs,
-        rhs : rhs
+        isObservable: isObservable,
+        paths: paths
     });
 }
 
@@ -97,7 +109,7 @@ function chainBinary(lhsEvaluator, readToken, tokenMatch) {
             lhs = makeBinary(lhs, token.fn, result());
         }
         return lhs;
-    }
+    };
     return result;
 }
 
@@ -389,7 +401,7 @@ function parser() {
             prevIndex = index;
             if (token = tokens[index]) {
                 index++;
-                if (token.fn && token.fn.isPrimitive) {
+                if (token.fn && token.fn.isConstant) {
                     result.parameters[name] = token.fn();
                 } else if (token.type === TOKEN_STRING) {
                     result.parameters[name] = unquote(token.text);

@@ -2065,7 +2065,7 @@
                 var result = function () {
                     return value;
                 };
-                result.isPrimitive = isPrimitive(value);
+                result.isConstant = true;
                 return result;
             }
             
@@ -2234,10 +2234,9 @@
                                 return contextFn(self);
                             }
                             return self;
-                        }, {
-                            fn: contextFn
                         }),
-                        path: path
+                        paths: [path],
+                        isObservable: !contextFn
                     });
                 }
                 return null;
@@ -2285,11 +2284,23 @@
             }
             
             function makeBinary(lhs, fn, rhs) {
+                var isObservable, paths;
+            
+                isObservable = (lhs.isObservable && (rhs.isObservable || rhs.isConstant)) ||
+                    (rhs.isObservable && (lhs.isObservable || lhs.isConstant));
+                if (isObservable) {
+                    paths = lhs.paths;
+                    if (!paths) {
+                        paths = rhs.paths;
+                    }  else if (rhs.paths) {
+                        paths  = paths.concat(rhs.paths);
+                    }
+                }
                 return extend(function (self, locals) {
                     return fn(self, locals, lhs, rhs);
                 }, {
-                    lhs : lhs,
-                    rhs : rhs
+                    isObservable: isObservable,
+                    paths: paths
                 });
             }
             
@@ -2300,7 +2311,7 @@
                         lhs = makeBinary(lhs, token.fn, result());
                     }
                     return lhs;
-                }
+                };
                 return result;
             }
             
@@ -2592,7 +2603,7 @@
                         prevIndex = index;
                         if (token = tokens[index]) {
                             index++;
-                            if (token.fn && token.fn.isPrimitive) {
+                            if (token.fn && token.fn.isConstant) {
                                 result.parameters[name] = token.fn();
                             } else if (token.type === TOKEN_STRING) {
                                 result.parameters[name] = unquote(token.text);
@@ -2847,6 +2858,7 @@
                 this.$children = new List();
                 this.$parse = parse;
                 this.$observers = {};
+                this.$autoObservers = {};
             })
             .defines(
             {
@@ -2874,7 +2886,7 @@
                 $observe: function (expression, handler) {
                     var observers = this.$observers, observer = observers[expression];
                     if (!observer) {
-                        if (!autoObserve(this, expression, handler)) {
+                        if (!observeObject(this, expression, handler)) {
                             expression = this.$parse(expression);
                             var evaluator = expression.evaluator;
                             observer = observers[expression] = new ExpressionObserver(
@@ -2884,86 +2896,111 @@
                         }
                     }
                     if (observer) { // TODO: Added as workaround whilst working on auto observe
-                    observer.on(handler);
+                        observer.on(handler);
                     }
                 }
             })
             .build();
         
-        function observe(entry) {
-            if (!entry.observerFn) {
-                entry.observerFn = function(changes) {
-                    changes.forEach(function(change) {
-                        var child = entry.children[change.name];
-                        if (child) {
-                            child.watchers.forEach(function(fn) {
-                                fn();
-                            });
-                        }
-                    });
-                };
-                Object.observe(entry.value, entry.observerFn);
-            }
-            return entry;
-        }
-        
-        function autoObserve(context, expression, handler) {
-            var evaluator = context.$parse(expression).evaluator;
-        
-            var path = evaluator.path;
-            if (!Object.observe || !path || evaluator.context.fn) { // should return merged paths
+        function observeObject(context, expression, handler) {
+            if (!Object.observe) {
                 return false;
             }
         
-            var data = context._autoObjserveData = context._autoObjserveData || {
-                watchers : {},
-                root : {
-                    value : context,
-                    children : []
-                }
+            var evaluator = context.$parse(expression).evaluator;
+            var paths = evaluator.paths;
+            if (!evaluator.isObservable) { // should return merged paths
+                return false;
+            }
         
-            };
+            var rootNode = context.$observeRoot = (context.$observeRoot || new ObservationNode(context));
         
             // are we already watching this expression?
-            var watcher = data.watchers[expression];
-            if (watcher) {
-                watcher.handlers.push(handler);
-                return;
+            var observer = context.$autoObservers[expression];
+            if (observer) {
+                observer.on(handler);
+                return true;
             }
         
             // create new watcher for the expression
-            var oldValue = evaluator(context);
-            watcher = data.watchers[expression] = function () {
-                var newValue = evaluator(context);
-                if (oldValue !== newValue) {
-                    watcher.handlers.forEach(function (handler) {
-                        handler(newValue, oldValue);
-                    });
+            observer = context.$autoObservers[expression] = new ExpressionObserver(function() { // TODO, make it context.$eval?
+                return evaluator(context);
+            });
+            observer.on(handler);
+        
+            for (var j=0; j<paths.length; j++) {
+                var path = paths[j];
+                var value = context, parent = rootNode, current;
+                for (var i = 0; i < path.length; i++) {
+                    current = parent.getOrAddChild(path[i]);
+                    current.on(observer);
+                    parent = current;
+                    value = current.value;
                 }
-            };
-            watcher.handlers = [handler];
-            handler(oldValue);
-        
-            var value = context, parent = data.root;
-            for (var i = 0; i < path.length; i++) {
-                observe(parent);
-                var memberName = path[i];
-                var entry = parent.children[memberName] = parent.children[memberName] || {
-                    value : value[memberName],
-                    watchers : [],
-                    children : {}
-                };
-                entry.watchers.push(watcher);
-        
-                parent = entry;
-        
-                value = entry.value;
-        
-                /* This is the basic structure, needs far more testing */
             }
         
             return true;
         }
+        
+        var ObservationNode = type(
+            function ObservationNode(value) {
+                this._children = null;
+                this._handlers = [];
+                this._changedHandler = this.changed.bind(this);
+        
+                this.setValue(value);
+            }).defines(
+            /**
+             * @lends ObservationNode.prototype
+             */
+            {
+                changed: function (changes) {
+                    var children = this._children;
+                    if (!children) {
+                        return;
+                    }
+        
+                    changes.forEach(function (change) {
+                        var child = children[change.name];
+                        if (child) {
+                            child.setValue(change.object[change.name]);
+                            child._handlers.forEach(function (handler) {
+                                handler.sync();
+                            });
+                        }
+                    });
+                },
+                getOrAddChild: function (name) {
+                    this._children = this._children || [];
+        
+                    return this._children[name] || (this._children[name] =
+                        new ObservationNode(isNullOrUndefined(this._value) ? null : this._value[name]));
+                },
+                getValue: function () {
+                    return this._value;
+                },
+                setValue: function (newValue) {
+                    var oldValue = this._value;
+                    if (oldValue !== newValue) {
+                        var handler = this._changedHandler;
+        
+                        // detach from old
+                        if (!isNullOrUndefined(oldValue) && !isPrimitive(oldValue)) {
+                            Object.unobserve(oldValue, handler);
+                        }
+        
+                        // attach to new
+                        if (!isNullOrUndefined(newValue) && !isPrimitive(newValue)) {
+                            Object.observe(newValue, handler);
+                        }
+        
+                        this._value = newValue;
+                    }
+                },
+                on: function (handler) {
+                    this._handlers.push(handler);
+                }
+            }).build();
         
         var ExpressionObserver = photon.type(
             function (evaluator) {
