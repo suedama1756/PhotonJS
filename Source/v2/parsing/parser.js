@@ -1,7 +1,9 @@
 function generateMemberAccessCode(path) {
-    var code = 'var c = $scope, u;';
+    var code = 'var c = $scope, d = c, u;';
     code += enumerable(path).aggregate(function (accumulated, next) {
-        return accumulated + " if ($ctx.isNullOrUndefined(c)) return u; c=c['" + next + "'];";
+        return accumulated + " if ($ctx.isNullOrUndefined(c)) return u; d=c['" + next + "'];" +
+            "if ($ctx.isPropertyAccessor(d)) d = d.call(c); c = d;"
+            ;
     }, '') + ' return c';
     return code;
 }
@@ -26,12 +28,12 @@ function member(path, contextFn) {
                     self[path[path.length - 1]] = value;
                 }
             },
-            context: extend(function (self) {
+            context: function (self) {
                 if (contextFn) {
                     return contextFn(self);
                 }
                 return self;
-            }),
+            },
             paths: [path],
             isObservable: !contextFn
         });
@@ -46,6 +48,9 @@ function evaluationContext() {
         },
         isNullOrUndefined: function (obj) {
             return isNullOrUndefined(obj);
+        },
+        isPropertyAccessor :function(obj) {
+            return isFunction(obj) && obj.isPropertyAccessor;
         }
     }
 }
@@ -83,8 +88,11 @@ function makeUnary(fn, right) {
 function makeBinary(lhs, fn, rhs) {
     var isObservable, paths;
 
+    // are the child expressions observable?
     isObservable = (lhs.isObservable && (rhs.isObservable || rhs.isConstant)) ||
         (rhs.isObservable && (lhs.isObservable || lhs.isConstant));
+
+    // if so then combine the paths
     if (isObservable) {
         paths = lhs.paths;
         if (!paths) {

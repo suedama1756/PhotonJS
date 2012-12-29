@@ -2202,9 +2202,11 @@
                 return result;
             }
             function generateMemberAccessCode(path) {
-                var code = 'var c = $scope, u;';
+                var code = 'var c = $scope, d = c, u;';
                 code += enumerable(path).aggregate(function (accumulated, next) {
-                    return accumulated + " if ($ctx.isNullOrUndefined(c)) return u; c=c['" + next + "'];";
+                    return accumulated + " if ($ctx.isNullOrUndefined(c)) return u; d=c['" + next + "'];" +
+                        "if ($ctx.isPropertyAccessor(d)) d = d.call(c); c = d;"
+                        ;
                 }, '') + ' return c';
                 return code;
             }
@@ -2229,12 +2231,12 @@
                                 self[path[path.length - 1]] = value;
                             }
                         },
-                        context: extend(function (self) {
+                        context: function (self) {
                             if (contextFn) {
                                 return contextFn(self);
                             }
                             return self;
-                        }),
+                        },
                         paths: [path],
                         isObservable: !contextFn
                     });
@@ -2249,6 +2251,9 @@
                     },
                     isNullOrUndefined: function (obj) {
                         return isNullOrUndefined(obj);
+                    },
+                    isPropertyAccessor :function(obj) {
+                        return isFunction(obj) && obj.isPropertyAccessor;
                     }
                 }
             }
@@ -2286,8 +2291,11 @@
             function makeBinary(lhs, fn, rhs) {
                 var isObservable, paths;
             
+                // are the child expressions observable?
                 isObservable = (lhs.isObservable && (rhs.isObservable || rhs.isConstant)) ||
                     (rhs.isObservable && (lhs.isObservable || lhs.isConstant));
+            
+                // if so then combine the paths
                 if (isObservable) {
                     paths = lhs.paths;
                     if (!paths) {
@@ -2296,6 +2304,7 @@
                         paths  = paths.concat(rhs.paths);
                     }
                 }
+            
                 return extend(function (self, locals) {
                     return fn(self, locals, lhs, rhs);
                 }, {
@@ -2839,6 +2848,57 @@
         }];
         
         
+        function defaultEqualityComparer(x, y) {
+            return x === y;
+        }
+        
+        var Observable = type(
+            function Observable() {
+                this._observers = [];
+                this._observableProperties = {};
+            }).defines({
+                notify: function (changes) {
+                    this._observers.forEach(function (observer) {
+                        observer(changes);
+                    });
+                },
+                observe: function (callback) {
+                    this._observers.push(callback);
+                },
+                unobserve: function (callback) {
+                    var index = this._observers.indexOf(callback);
+                    if (index !== -1) {
+                        this._observers.splice(index, 1);
+                    }
+                }
+            }).definesStatic({
+                property: function (name, equalityComparer) {
+                    equalityComparer = equalityComparer || defaultEqualityComparer;
+                    return extend(function (newValue) {
+                            var oldValue = this._observableProperties[name];
+                            if (arguments.length) {
+                                if (!equalityComparer(oldValue, newValue)) {
+                                    this._observableProperties[name] = newValue;
+                                    this.notify({
+                                        type: "updated",
+                                        name: "seen",
+                                        oldValue: oldValue
+                                    });
+                                    return true;
+                                }
+                                return false;
+                            }
+        
+                            return oldValue;
+                        },
+                        {
+                            isPropertyAccessor: true
+                        });
+                }
+            }).build();
+        
+        
+        photon.Observable = Observable;
         function defineChildDataContext(parent) {
             function DataContext(parent) {
                 // invoke parent constructor
@@ -2932,7 +2992,7 @@
                 var path = paths[j];
                 var value = context, parent = rootNode, current;
                 for (var i = 0; i < path.length; i++) {
-                    current = parent.getOrAddChild(path[i]);
+                    current = parent.getOrCreateChild(path[i]);
                     current.on(observer);
                     parent = current;
                     value = current.value;
@@ -2945,7 +3005,7 @@
         var ObservationNode = type(
             function ObservationNode(value) {
                 this._children = null;
-                this._handlers = [];
+                this._observers = [];
                 this._changedHandler = this.changed.bind(this);
         
                 this.setValue(value);
@@ -2964,13 +3024,13 @@
                         var child = children[change.name];
                         if (child) {
                             child.setValue(change.object[change.name]);
-                            child._handlers.forEach(function (handler) {
-                                handler.sync();
+                            child._observers.forEach(function (observer) {
+                                observer.sync();
                             });
                         }
                     });
                 },
-                getOrAddChild: function (name) {
+                getOrCreateChild: function (name) {
                     this._children = this._children || [];
         
                     return this._children[name] || (this._children[name] =
@@ -2997,13 +3057,13 @@
                         this._value = newValue;
                     }
                 },
-                on: function (handler) {
-                    this._handlers.push(handler);
+                on: function (observer) {
+                    this._observers.push(observer);
                 }
             }).build();
         
         var ExpressionObserver = photon.type(
-            function (evaluator) {
+            function ExpressionObserver (evaluator) {
                 this._handlers = new List();
                 this._evaluator = evaluator;
                 this._value = evaluator();

@@ -91,7 +91,7 @@ function observeObject(context, expression, handler) {
         var path = paths[j];
         var value = context, parent = rootNode, current;
         for (var i = 0; i < path.length; i++) {
-            current = parent.getOrAddChild(path[i]);
+            current = parent.getOrCreateChild(path[i]);
             current.on(observer);
             parent = current;
             value = current.value;
@@ -104,7 +104,7 @@ function observeObject(context, expression, handler) {
 var ObservationNode = type(
     function ObservationNode(value) {
         this._children = null;
-        this._handlers = [];
+        this._observers = [];
         this._changedHandler = this.changed.bind(this);
 
         this.setValue(value);
@@ -123,13 +123,13 @@ var ObservationNode = type(
                 var child = children[change.name];
                 if (child) {
                     child.setValue(change.object[change.name]);
-                    child._handlers.forEach(function (handler) {
-                        handler.sync();
+                    child._observers.forEach(function (observer) {
+                        observer.sync();
                     });
                 }
             });
         },
-        getOrAddChild: function (name) {
+        getOrCreateChild: function (name) {
             this._children = this._children || [];
 
             return this._children[name] || (this._children[name] =
@@ -156,13 +156,13 @@ var ObservationNode = type(
                 this._value = newValue;
             }
         },
-        on: function (handler) {
-            this._handlers.push(handler);
+        on: function (observer) {
+            this._observers.push(observer);
         }
     }).build();
 
 var ExpressionObserver = photon.type(
-    function (evaluator) {
+    function ExpressionObserver (evaluator) {
         this._handlers = new List();
         this._evaluator = evaluator;
         this._value = evaluator();

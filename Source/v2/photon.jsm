@@ -48,6 +48,8 @@
             'directives/property.js',
             'directives/controller.js',
 
+            'observable/observable.js',
+
             'binding/DataContext.js',
             'binding/bind.js'
         ],
