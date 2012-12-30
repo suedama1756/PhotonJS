@@ -17,15 +17,25 @@ function member(path, contextFn) {
             return fn(self, ctx);
         }, {
             setter: function (self, value) {
+                var next;
                 for (var i = 0, n = path.length - 1; i < n; i++) {
                     if (isPrimitive(self)) {
                         return;
                     }
-                    self = self[path[i]];
+                    next = self[path[i]];
+                    if (isFunction(next) && next.isPropertyAccessor) {
+                        next = next.call(self);
+                    }
+                    self = next;
                 }
 
                 if (!isPrimitive(self)) {
-                    self[path[path.length - 1]] = value;
+                    next = self[path[path.length - 1]];
+                    if (isFunction(next) && next.isPropertyAccessor) {
+                        next.call(self, value);
+                    } else {
+                        self[path[path.length - 1]] = value;
+                    }
                 }
             },
             context: function (self) {

@@ -2,6 +2,8 @@ function defaultEqualityComparer(x, y) {
     return x === y;
 }
 
+var accessorCounter = 0;
+
 var Observable = type(
     function Observable() {
         this._observers = [];
@@ -29,16 +31,17 @@ var Observable = type(
                     if (arguments.length) {
                         if (!equalityComparer(oldValue, newValue)) {
                             this._observableProperties[name] = newValue;
-                            this.notify({
+                            this.notify([{
+                                object:this,
                                 type: "updated",
-                                name: "seen",
+                                name: name,
                                 oldValue: oldValue
-                            });
+                            }]);
                             return true;
                         }
                         return false;
                     }
-
+                    console.log('changed ' + name + (accessorCounter++));
                     return oldValue;
                 },
                 {

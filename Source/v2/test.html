@@ -3,11 +3,11 @@
 <head>
     <title></title>
     <script src="../../output/photon-2.0-debug.js"></script>
-    <script src="angular.js"></script>
+    <!--<script src="angular.js"></script>-->
 </head>
 <body>
 
-<!--<span mv-attr-style="'color:red;'" mv-text="model.value"></span>-->
+<span mv-attr-style="'color:red;'" mv-text="model.value"></span>
 <!--<input mv-model="model.value,updateOn='change'">-->
 <!--<button mv-action="model.invoke(),on='click'">Click</button>-->
 <!--<span mv-on-mouseover="model.enter(model.value)">Some Text</span>-->
@@ -30,17 +30,15 @@
 <!--</div>-->
 <!--</div>-->
 <div mv-controller="TestController">
-    <div mv-decorator="'FieldGroup', label='Add comment'">
-
-        <input mv-decorator="'Field', label='Forename:'" mv-model="person.forename, updateOn='change'">
-        <input mv-decorator="'Field', label='Surname:'" mv-model="person.surname">
-        <span mv-text="'Hello:' + person.forename + ' ' + person.surname"></span>
-
-        <button mv-action="$controller.toggle(), on='click'">Show Message</button>
-    </div>
+    <input mv-model="person.forename, updateOn='change'">
+    <input mv-model="person.surname, updateOn='change'">
+    <button mv-action="$controller.toggle(), on='click'">Show Message</button>
 </div>
 
 <script>
+
+    //    Object.observe = null;
+    //    Object.unobserve = null;
     var model = {
         invoke: function () {
             alert('invoked');
@@ -83,6 +81,7 @@
         return {
             toggle: function () {
                 context.person = context.person === person1 ? person2 : person1;
+                context.$sync();
             }
         };
     }];

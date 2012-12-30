@@ -38,6 +38,9 @@ var DataContext = photon['DataContext'] = type(
             throw new Error(); // TODO:
         },
         $sync: function () {
+            if (this.$observeRoot) {
+                this.$observeRoot.update();
+            }
             Object.getOwnPropertyNames(this.$observers).forEach(function (name) {
                 this.$observers[name].sync();
             }.bind(this));
@@ -46,8 +49,7 @@ var DataContext = photon['DataContext'] = type(
             var observers = this.$observers, observer = observers[expression];
             if (!observer) {
                 if (!observeObject(this, expression, handler)) {
-                    expression = this.$parse(expression);
-                    var evaluator = expression.evaluator;
+                    var evaluator = this.$parse(expression).evaluator;
                     observer = observers[expression] = new ExpressionObserver(
                         function () {
                             return evaluator(this);
@@ -62,17 +64,14 @@ var DataContext = photon['DataContext'] = type(
     .build();
 
 function observeObject(context, expression, handler) {
-    if (!Object.observe) {
-        return false;
-    }
-
     var evaluator = context.$parse(expression).evaluator;
     var paths = evaluator.paths;
     if (!evaluator.isObservable) { // should return merged paths
         return false;
     }
 
-    var rootNode = context.$observeRoot = (context.$observeRoot || new ObservationNode(context));
+    var rootNode = (context.hasOwnProperty('$observeRoot') && context.$observeRoot) ||
+        (context.$observeRoot = new ObservationNode(context));
 
     // are we already watching this expression?
     var observer = context.$autoObservers[expression];
@@ -82,37 +81,102 @@ function observeObject(context, expression, handler) {
     }
 
     // create new watcher for the expression
-    observer = context.$autoObservers[expression] = new ExpressionObserver(function() { // TODO, make it context.$eval?
+    observer = context.$autoObservers[expression] = new ExpressionObserver(function () { // TODO, make it context.$eval?
         return evaluator(context);
     });
     observer.on(handler);
 
-    for (var j=0; j<paths.length; j++) {
-        var path = paths[j];
-        var value = context, parent = rootNode, current;
+    for (var j = 0; j < paths.length; j++) {
+        var path = paths[j], parent = rootNode, current;
         for (var i = 0; i < path.length; i++) {
             current = parent.getOrCreateChild(path[i]);
-            current.on(observer);
             parent = current;
-            value = current.value;
         }
+        current.addObserver(observer);
     }
 
     return true;
 }
 
+/**
+ * Sometimes it seems to be available in chrome, but not working, so we'll test
+ */
+var isObserveSupportedNatively = Object.observe && (function() {
+   var o = {x:0}, changed = false;
+    Object.observe(o, function() {
+        changed = true;
+    });
+    o.x = 1;
+    return changed;
+})();
+
+function observe(obj, callback) {
+    if (isFunction(obj.observe)) {
+        obj.observe(callback);
+        return true;
+    }
+    if (isObserveSupportedNatively) {
+        Object.observe(obj, callback);
+        return true;
+    }
+    return false;
+}
+
+function unobserve(obj, callback) {
+    if (isFunction(obj.unobserve)) {
+        obj.unobserve(callback);
+    } else if (isObserveSupportedNatively) {
+        Object.unobserve(obj, callback);
+    }
+}
+
+function isPropertyAccessor(value) {
+    return isFunction(value) && value.isPropertyAccessor;
+}
+
+function getPropertyValue(obj, propertyName) {
+    var value;
+    if (!isNullOrUndefined(obj)) {
+        value = obj[propertyName];
+        value = isPropertyAccessor(value) ? value.call(obj) : value;
+    }
+    return value;
+}
+
+
 var ObservationNode = type(
     function ObservationNode(value) {
         this._children = null;
-        this._observers = [];
+        this._observers = null;
         this._changedHandler = this.changed.bind(this);
-
+        this._isObserving = false;
         this.setValue(value);
     }).defines(
     /**
      * @lends ObservationNode.prototype
      */
     {
+        update: function (valueChanged) {
+            if (valueChanged) {
+                this.syncObservers();
+            }
+
+            var children = this._children, isObserving = this._isObserving, value = this._value;
+            if (!children) {
+                return;
+            }
+
+            Object.getOwnPropertyNames(children).forEach(function (propertyName) {
+                var child = children[propertyName];
+                if (valueChanged || !isObserving) {
+                    if (!child.setValue(getPropertyValue(value, propertyName))) {
+                        child.update();
+                    }
+                } else {
+                    child.update();
+                }
+            });
+        },
         changed: function (changes) {
             var children = this._children;
             if (!children) {
@@ -122,18 +186,23 @@ var ObservationNode = type(
             changes.forEach(function (change) {
                 var child = children[change.name];
                 if (child) {
-                    child.setValue(change.object[change.name]);
-                    child._observers.forEach(function (observer) {
-                        observer.sync();
-                    });
+                    child.setValue(getPropertyValue(change.object, change.name));
                 }
             });
         },
+        syncObservers : function() {
+            var observers = this._observers;
+            if (observers) {
+                observers.forEach(function (observer) {
+                    observer.sync();
+                });
+            }
+        },
         getOrCreateChild: function (name) {
-            this._children = this._children || [];
+            this._children = this._children || {};
 
             return this._children[name] || (this._children[name] =
-                new ObservationNode(isNullOrUndefined(this._value) ? null : this._value[name]));
+                new ObservationNode(getPropertyValue(this._value, name)));
         },
         getValue: function () {
             return this._value;
@@ -143,26 +212,33 @@ var ObservationNode = type(
             if (oldValue !== newValue) {
                 var handler = this._changedHandler;
 
-                // detach from old
                 if (!isNullOrUndefined(oldValue) && !isPrimitive(oldValue)) {
-                    Object.unobserve(oldValue, handler);
-                }
-
-                // attach to new
-                if (!isNullOrUndefined(newValue) && !isPrimitive(newValue)) {
-                    Object.observe(newValue, handler);
+                    unobserve(oldValue, handler);
                 }
 
                 this._value = newValue;
+
+                if (!isNullOrUndefined(newValue) && !isPrimitive(newValue)) {
+                    this._isObserving = observe(newValue, handler);
+                } else {
+                    // it's not really observing, as if we are null or primitive then the value is constant
+                    this._isObserving = false;
+                }
+
+                this.update(true);
+
+                return true;
             }
+            return false;
         },
-        on: function (observer) {
-            this._observers.push(observer);
+        addObserver: function (observer) {
+            var observers = this._observers || (this._observers = []);
+            observers.push(observer);
         }
     }).build();
 
 var ExpressionObserver = photon.type(
-    function ExpressionObserver (evaluator) {
+    function ExpressionObserver(evaluator) {
         this._handlers = new List();
         this._evaluator = evaluator;
         this._value = evaluator();
@@ -185,3 +261,10 @@ var ExpressionObserver = photon.type(
         }
     })
     .build();
+
+// it may get tempting to get an observer to read its value from ObservationNodes. The problem with this is that
+// we need to ensure the whole tree of observations is up to date before we trigger the notification.
+//
+// We also need to be aware that we cannot track the value if the expression has some king of adapter, e.g.
+// -,method(path, etc.)
+
