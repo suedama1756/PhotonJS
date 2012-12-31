@@ -1,6 +1,8 @@
 (function(window, document){
     (function(factory) {
-        if (typeof define === 'function' && define.amd) {
+        if (typeof require === 'function' && typeof exports === 'object' && typeof module === 'object') {
+            factory(module['exports'] || exports, require('undefined'));
+        } else if (typeof define === 'function' && define.amd) {
             define(['exports', 'jquery'], factory);
         } else if (window) {
             var ns = window['photon'] = window['photon'] || {};
@@ -2606,7 +2608,9 @@
                         return primary;
                     }
             
-                    var evaluator = expression();
+                    var evaluator = extend(expression(), {
+                        text : text.substring(0, tokens[index].index)
+                    });
                     if (!options || !options.isBindingExpression) {
                         return evaluator;
                     }
@@ -2928,8 +2932,7 @@
             function DataContext(parse) {
                 this.$children = new List();
                 this.$parse = parse;
-                this.$observers = {};
-                this.$autoObservers = {};
+                this.$observer = observer(this);
             })
             .defines(
             {
@@ -2950,72 +2953,86 @@
                     throw new Error(); // TODO:
                 },
                 $sync: function () {
-                    if (this.$observeRoot) {
-                        this.$observeRoot.update();
-                    }
-                    Object.getOwnPropertyNames(this.$observers).forEach(function (name) {
-                        this.$observers[name].sync();
-                    }.bind(this));
+                    this.$observer.sync();
                 },
                 $observe: function (expression, handler) {
-                    var observers = this.$observers, observer = observers[expression];
-                    if (!observer) {
-                        if (!observeObject(this, expression, handler)) {
-                            var evaluator = this.$parse(expression).evaluator;
-                            observer = observers[expression] = new ExpressionObserver(
-                                function () {
-                                    return evaluator(this);
-                                }.bind(this));
-                        }
-                    }
-                    if (observer) { // TODO: Added as workaround whilst working on auto observe
-                        observer.on(handler);
-                    }
+                    this.$observer.observe(this.$parse(expression).evaluator, handler);
                 }
             })
             .build();
         
-        function observeObject(context, expression, handler) {
-            var evaluator = context.$parse(expression).evaluator;
-            var paths = evaluator.paths;
-            if (!evaluator.isObservable) { // should return merged paths
-                return false;
-            }
+        function observer(root) {
+            var _observers = null, _pathObservers = null, _rootNode = null;
         
-            var rootNode = (context.hasOwnProperty('$observeRoot') && context.$observeRoot) ||
-                (context.$observeRoot = new ObservationNode(context));
-        
-            // are we already watching this expression?
-            var observer = context.$autoObservers[expression];
-            if (observer) {
-                observer.on(handler);
-                return true;
-            }
-        
-            // create new watcher for the expression
-            observer = context.$autoObservers[expression] = new ExpressionObserver(function () { // TODO, make it context.$eval?
-                return evaluator(context);
-            });
-            observer.on(handler);
-        
-            for (var j = 0; j < paths.length; j++) {
-                var path = paths[j], parent = rootNode, current;
-                for (var i = 0; i < path.length; i++) {
-                    current = parent.getOrCreateChild(path[i]);
-                    parent = current;
+            function tryObserveExpression(parsedExpression) {
+                var paths = parsedExpression.paths;
+                if (!parsedExpression.isObservable) { // should return merged paths
+                    return false;
                 }
-                current.addObserver(observer);
+        
+                var rootNode = _rootNode || (_rootNode = new ObservationNode(root));
+        
+                // allocate path observers
+                _pathObservers = _pathObservers || {};
+        
+                // are we already watching this expression?
+                var observer = _pathObservers[parsedExpression.text];
+                if (!observer) {
+                    observer = _pathObservers[parsedExpression.text] = new ExpressionObserver(function () { // TODO, make it context.$eval?
+                        // TODO: Wire up to node values if possible to prevent multiple reads?
+                        return parsedExpression(root);
+                    });
+        
+                    for (var j = 0; j < paths.length; j++) {
+                        var path = paths[j], parent = rootNode, current;
+                        for (var i = 0; i < path.length; i++) {
+                            current = parent.getOrCreateChild(path[i]);
+                            parent = current;
+                        }
+                        current.addObserver(observer);
+                    }
+                }
+        
+                return observer;
             }
         
-            return true;
+            return {
+                observe: function (parsedExpression, handler) {
+                    var observer = _observers && _observers[parsedExpression.text];
+                    if (!observer) {
+                        observer = tryObserveExpression(parsedExpression);
+                        if (!observer) {
+                            if (!_observers) {
+                                _observers = {};
+                            }
+                            observer = _observers[parsedExpression.text] = new ExpressionObserver(
+                                function () {
+                                    return parsedExpression(root);
+                                }.bind(this));
+                        }
+                    }
+                    observer.addHandler(handler);
+                },
+                sync: function () {
+                    if (_rootNode) {
+                        _rootNode.update();
+                    }
+                    Object.getOwnPropertyNames(_observers).forEach(function (name) {
+                        var observer = _observers[name];
+                        if (observer) {
+                            observer.sync();
+                        }
+                    });
+                }
+            }
         }
         
         /**
          * Sometimes it seems to be available in chrome, but not working, so we'll test
          */
-        var isObserveSupportedNatively = Object.observe && (function() {
-           var o = {x:0}, changed = false;
-            Object.observe(o, function() {
+        var isObserveSupportedNatively = Object.observe && (function () {
+            var o = {x: 0}, changed = false;
+            Object.observe(o, function () {
                 changed = true;
             });
             o.x = 1;
@@ -3102,7 +3119,7 @@
                         }
                     });
                 },
-                syncObservers : function() {
+                syncObservers: function () {
                     var observers = this._observers;
                     if (observers) {
                         observers.forEach(function (observer) {
@@ -3164,11 +3181,11 @@
                         });
                     }
                 },
-                on: function (handler) {
+                addHandler: function (handler) {
                     this._handlers.add(handler);
                     handler(this._value);
                 },
-                off: function (handler) {
+                removeHandler: function (handler) {
                     this._handlers.remove(handler);
                 }
             })

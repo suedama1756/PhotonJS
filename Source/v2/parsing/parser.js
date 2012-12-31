@@ -403,7 +403,9 @@ function parser() {
             return primary;
         }
 
-        var evaluator = expression();
+        var evaluator = extend(expression(), {
+            text : text.substring(0, tokens[index].index)
+        });
         if (!options || !options.isBindingExpression) {
             return evaluator;
         }
