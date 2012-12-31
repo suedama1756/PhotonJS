@@ -62,11 +62,7 @@ function observer(root) {
         // are we already watching this expression?
         var observer = _pathObservers[parsedExpression.text];
         if (!observer) {
-            observer = _pathObservers[parsedExpression.text] = new ExpressionObserver(function () { // TODO, make it context.$eval?
-                // TODO: Wire up to node values if possible to prevent multiple reads?
-                return parsedExpression(root);
-            });
-
+            observer = _pathObservers[parsedExpression.text] = new ExpressionObserver(root, parsedExpression);
             for (var j = 0; j < paths.length; j++) {
                 var path = paths[j], parent = rootNode, current;
                 for (var i = 0; i < path.length; i++) {
@@ -89,10 +85,7 @@ function observer(root) {
                     if (!_observers) {
                         _observers = {};
                     }
-                    observer = _observers[parsedExpression.text] = new ExpressionObserver(
-                        function () {
-                            return parsedExpression(root);
-                        }.bind(this));
+                    observer = _observers[parsedExpression.text] = new ExpressionObserver(root, parsedExpression);
                 }
             }
             observer.addHandler(handler);
@@ -251,14 +244,15 @@ var ObservationNode = type(
     }).build();
 
 var ExpressionObserver = photon.type(
-    function ExpressionObserver(evaluator) {
+    function ExpressionObserver(context, parsedExpression) {
+        this._context = context;
         this._handlers = new List();
-        this._evaluator = evaluator;
-        this._value = evaluator();
+        this._evaluator = parsedExpression;
+        this._value = parsedExpression(context);
     })
     .defines({
         sync: function () {
-            var oldValue = this._value, newValue = this._value = this._evaluator();
+            var oldValue = this._value, newValue = this._value = this._evaluator(this._context);
             if (oldValue !== newValue) {
                 this._handlers.forEach(function (handler) {
                     handler(newValue, oldValue);
