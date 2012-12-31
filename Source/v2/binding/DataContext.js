@@ -150,7 +150,7 @@ var isObserveSupportedNatively = false;
 Object.observe && (function () {
     var o = {x: 0};
     Object.observe(o, function () {
-        isObserveSupportedNatively = true;
+        isObserveSupportedNatively = observer.isObserveSupportedNatively = true;
     });
     o.x = 1;
 })();
@@ -160,7 +160,7 @@ function observe(obj, callback) {
         obj.observe(callback);
         return true;
     }
-    if (isObserveSupportedNatively) {
+    if (isObserveSupportedNatively && !observer.disableNativeObserve) {
         Object.observe(obj, callback);
         return true;
     }
