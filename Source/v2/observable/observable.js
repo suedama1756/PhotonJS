@@ -2,8 +2,6 @@ function defaultEqualityComparer(x, y) {
     return x === y;
 }
 
-var accessorCounter = 0;
-
 var Observable = type(
     function Observable() {
         this._observers = [];
@@ -14,11 +12,11 @@ var Observable = type(
                 observer(changes);
             });
         },
-        observe: function (callback) {
-            this._observers.push(callback);
+        observe: function (observer) {
+            this._observers.push(observer);
         },
-        unobserve: function (callback) {
-            var index = this._observers.indexOf(callback);
+        unobserve: function (observer) {
+            var index = this._observers.indexOf(observer);
             if (index !== -1) {
                 this._observers.splice(index, 1);
             }
@@ -41,7 +39,7 @@ var Observable = type(
                         }
                         return false;
                     }
-                    console.log('changed ' + name + (accessorCounter++));
+                    // console.log('changed ' + name);
                     return oldValue;
                 },
                 {

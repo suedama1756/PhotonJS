@@ -8,30 +8,30 @@
 <body>
 
 <span mv-attr-style="'color:red;'" mv-text="model.value"></span>
-<!--<input mv-model="model.value,updateOn='change'">-->
-<!--<button mv-action="model.invoke(),on='click'">Click</button>-->
-<!--<span mv-on-mouseover="model.enter(model.value)">Some Text</span>-->
-<!--<button mv-on-click="model.invoke()"></button>-->
-<!--<div mv-each="child in model.items">-->
-<!--&lt;!&ndash;{{model.category}} - {{item.orderNo}} - {{item.description}}&ndash;&gt;-->
-<!--<span mv-text="model.category" style="font-weight: bold"></span> --->
-<!--<span mv-text="child.orderNo"></span> --->
-<!--<span mv-text="child.description"></span>-->
+<input mv-model="model.value,updateOn='change'">
+<button mv-action="model.invoke(),on='click'">Click</button>
+<span mv-on-mouseover="model.enter(model.value)">Some Text</span>
+<button mv-on-click="model.invoke()"></button>
+<div mv-each="child in model.items">
+<!--{{model.category}} - {{item.orderNo}} - {{item.description}}-->
+<span mv-text="model.category" style="font-weight: bold"></span> -
+<span mv-text="child.orderNo"></span> -
+<span mv-text="child.description"></span>
+<div>
+<br>
+<span style="text-decoration: underline;"><span>
+Comments
+</span></span>
 
-<!--<div>-->
-<!--<br>-->
-<!--<span style="text-decoration: underline;"><span>-->
-<!--Comments-->
-<!--</span></span>-->
-
-<!--<div mv-each="comment in child.comments">-->
-<!--<span mv-text="comment"></span>-->
-<!--</div>-->
-<!--</div>-->
-<!--</div>-->
+<div mv-each="comment in child.comments">
+<span mv-text="comment"></span>
+</div>
+</div>
+</div>
 <div mv-controller="TestController">
-    <input mv-model="person.forename, updateOn='change'">
-    <input mv-model="person.surname, updateOn='change'">
+    <input mv-decorator="'Field', label='Forename:'" mv-model="person.forename, updateOn='change'">
+    <input mv-decorator="'Field', label='Surname:'" mv-model="person.surname, updateOn='change'">
+
     <button mv-action="$controller.toggle(), on='click'">Show Message</button>
 </div>
 
@@ -62,14 +62,6 @@
     };
 
     var testControllerFactory = ['$context', function (context) {
-//        var person1 = {
-//            forename: 'Jason',
-//            surname: 'Young'
-//        };
-//        var person2 = {
-//            forename: '',
-//            surname: ''
-//        };
         var person1 = new Person();
         person1.forename('Jason');
 
