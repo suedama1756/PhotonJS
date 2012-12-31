@@ -2961,8 +2961,37 @@
             })
             .build();
         
+        var ObserverScope = type(function Scope() {
+            this._count = 0;
+            this._observers = null;
+        }).defines({
+                begin: function () {
+                    this._count++;
+                },
+                end: function () {
+                    if ((--this._count) === 0) {
+                        var observers = this._observers;
+                        this._observers = null;
+                        if (observers) {
+                            observers.forEach(function (observer) {
+                                observer.sync();
+                            });
+                        }
+                    }
+                },
+                addObserver: function (observer) {
+                    if (this._count === 0) {
+                        observer.sync();
+                    } else if (!this._observers) {
+                        this._observers = [observer];
+                    } else if (this._observers.indexOf(observer) === -1) {
+                        this._observers.push(observer);
+                    }
+                }
+            }).build();
+        
         function observer(root) {
-            var _observers = null, _pathObservers = null, _rootNode = null;
+            var _observers = null, _pathObservers = null, _rootNode = null, _scope = new ObserverScope();
         
             function tryObserveExpression(parsedExpression) {
                 var paths = parsedExpression.paths;
@@ -2970,7 +2999,7 @@
                     return false;
                 }
         
-                var rootNode = _rootNode || (_rootNode = new ObservationNode(root));
+                var rootNode = _rootNode || (_rootNode = new ObservationNode(_scope, root));
         
                 // allocate path observers
                 _pathObservers = _pathObservers || {};
@@ -2978,7 +3007,7 @@
                 // are we already watching this expression?
                 var observer = _pathObservers[parsedExpression.text];
                 if (!observer) {
-                    observer = _pathObservers[parsedExpression.text] = new ExpressionObserver(root, parsedExpression);
+                    observer = _pathObservers[parsedExpression.text] = new ExpressionObserver(result, parsedExpression);
                     for (var j = 0; j < paths.length; j++) {
                         var path = paths[j], parent = rootNode, current;
                         for (var i = 0; i < path.length; i++) {
@@ -2992,7 +3021,7 @@
                 return observer;
             }
         
-            return {
+            var result = {
                 observe: function (parsedExpression, handler) {
                     var observer = _observers && _observers[parsedExpression.text];
                     if (!observer) {
@@ -3001,35 +3030,45 @@
                             if (!_observers) {
                                 _observers = {};
                             }
-                            observer = _observers[parsedExpression.text] = new ExpressionObserver(root, parsedExpression);
+                            observer = _observers[parsedExpression.text] = new ExpressionObserver(result, parsedExpression);
                         }
                     }
                     observer.addHandler(handler);
                 },
+                root: function () {
+                    return root;
+                },
                 sync: function () {
-                    if (_rootNode) {
-                        _rootNode.update();
-                    }
-                    Object.getOwnPropertyNames(_observers).forEach(function (name) {
-                        var observer = _observers[name];
-                        if (observer) {
-                            observer.sync();
+                    _scope.begin();
+                    try {
+                        if (_rootNode) {
+                            _rootNode.update();
                         }
-                    });
+        
+                        if (_observers) {
+                            Object.getOwnPropertyNames(_observers).forEach(function (name) {
+                                _scope.addObserver(_observers[name]);
+                            });
+                        }
+                    }
+                    finally {
+                        _scope.end();
+                    }
                 }
-            }
+            };
+            return result;
         }
         
         /**
-         * Sometimes it seems to be available in chrome, but not working, so we'll test
+         * Sometimes it seems to be available in chrome but not working, so we'll test
          */
-        var isObserveSupportedNatively = Object.observe && (function () {
-            var o = {x: 0}, changed = false;
+        var isObserveSupportedNatively = false;
+        Object.observe && (function () {
+            var o = {x: 0};
             Object.observe(o, function () {
-                changed = true;
+                isObserveSupportedNatively = true;
             });
             o.x = 1;
-            return changed;
         })();
         
         function observe(obj, callback) {
@@ -3067,7 +3106,8 @@
         
         
         var ObservationNode = type(
-            function ObservationNode(value) {
+            function ObservationNode(scope, value) {
+                this._scope = scope;
                 this._children = null;
                 this._observers = null;
                 this._changedHandler = this.changed.bind(this);
@@ -3105,18 +3145,25 @@
                         return;
                     }
         
-                    changes.forEach(function (change) {
-                        var child = children[change.name];
-                        if (child) {
-                            child.setValue(getPropertyValue(change.object, change.name));
-                        }
-                    });
+                    this._scope.begin();
+                    try {
+                        changes.forEach(function (change) {
+                            var child = children[change.name];
+                            if (child) {
+                                child.setValue(getPropertyValue(change.object, change.name));
+                            }
+                        });
+                    }
+                    finally {
+                        this._scope.end();
+                    }
                 },
                 syncObservers: function () {
                     var observers = this._observers;
                     if (observers) {
+                        var scope = this._scope;
                         observers.forEach(function (observer) {
-                            observer.sync();
+                            scope.addObserver(observer);
                         });
                     }
                 },
@@ -3124,7 +3171,7 @@
                     this._children = this._children || {};
         
                     return this._children[name] || (this._children[name] =
-                        new ObservationNode(getPropertyValue(this._value, name)));
+                        new ObservationNode(this._scope, getPropertyValue(this._value, name)));
                 },
                 getValue: function () {
                     return this._value;
@@ -3160,15 +3207,15 @@
             }).build();
         
         var ExpressionObserver = photon.type(
-            function ExpressionObserver(context, parsedExpression) {
-                this._context = context;
+            function ExpressionObserver(observer, expression) {
+                this._observer = observer;
                 this._handlers = new List();
-                this._evaluator = parsedExpression;
-                this._value = parsedExpression(context);
+                this._expression = expression;
+                this._value = expression(observer.root());
             })
             .defines({
                 sync: function () {
-                    var oldValue = this._value, newValue = this._value = this._evaluator(this._context);
+                    var oldValue = this._value, newValue = this._value = this._expression(this._observer.root());
                     if (oldValue !== newValue) {
                         this._handlers.forEach(function (handler) {
                             handler(newValue, oldValue);
@@ -3190,8 +3237,14 @@
         //
         // We also need to be aware that we cannot track the value if the expression has some king of adapter, e.g.
         // -,method(path, etc.)
+        //
+        // Optimizations,
+        //   Create a shadow object, which can be used to perform fast atomic reads of the expressions
+        //   We still want to avoid to many evaluations don't we?
+        //      So we need to pass in scope manager.
         
         
+        photon.observer = observer;
         /**
          * @const
          * @type {number}
