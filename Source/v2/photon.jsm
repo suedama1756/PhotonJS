@@ -25,6 +25,7 @@
             'async/TimeoutError.js',
 
             'dom/nodes.js',
+            'dom/node2.js',
 
             'ioc/lifetimes.js',
             'ioc/registration.js',
@@ -45,6 +46,7 @@
             'directives/text.js',
             'directives/decorate.js',
             'directives/on.js',
+            'directives/name.js',
             'directives/property.js',
             'directives/controller.js',
 

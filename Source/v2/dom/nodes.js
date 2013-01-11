@@ -1,3 +1,4 @@
+
 var isTextContentAvailable = 'textContent' in document.createElement('span');
 
 var getNodeText = isTextContentAvailable ? function (node) {
@@ -50,7 +51,6 @@ function getNodeParent(node) {
 function getNodeNextSibling(node) {
     return nodes(node.nextSibling);
 }
-
 
 var parseHtmlMap = {
     option: [ 1, "<select multiple='multiple'>", "</select>" ],
@@ -188,7 +188,7 @@ var Nodes = type(
             getNodeValue,
             setNodeValue
         ),
-        valueList: valuesFunction(
+        values: valuesFunction(
             getNodeValue,
             setNodeValue
         ),
@@ -196,7 +196,7 @@ var Nodes = type(
             getNodeText,
             setNodeText
         ),
-        textList: valuesFunction(
+        texts: valuesFunction(
             getNodeText,
             setNodeText
         ),
@@ -204,7 +204,7 @@ var Nodes = type(
             getNodeAttribute,
             setNodeAttribute
         ),
-        attributeList: keyValuesFunction(
+        attributes: keyValuesFunction(
             getNodeAttribute,
             setNodeAttribute
         ),

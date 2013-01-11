@@ -32,6 +32,7 @@ var uiModule = module(function(x) {
     x.directive('mv-decorator').factory(decorateDirectiveFactory);
     x.directive('mv-text').factory(textDirectiveFactory);
     x.directive('mv-show').factory(showDirectiveFactory);
+    x.directive('mv-name').factory(nameDirectiveFactory);
 
     x.directive('mv-controller').factory(controllerDirectiveFactory);
 

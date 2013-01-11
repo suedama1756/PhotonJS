@@ -29,10 +29,11 @@ Comments
 </div>
 </div>
 <div mv-controller="TestController">
-    <input mv-decorator="'Field', label='Forename:'" mv-model="person.forename, updateOn='change'">
-    <input mv-decorator="'Field', label='Surname:'" mv-model="person.surname, updateOn='change'">
-
+    <input mv-name="forenameInput" mv-decorator="'Field', label='Forename:'" mv-model="person.forename, updateOn='change'">
+    <input mv-name="surnameInput" mv-decorator="'Field', label='Surname:'" mv-model="person.surname, updateOn='change'">
+    <input value="Hello" class="red">
     <button mv-action="$controller.toggle(), on='click'">Show Message</button>
+    <button mv-action="$controller.show(), on='click'">Has Outlets</button>
 </div>
 
 <script>
@@ -72,8 +73,17 @@ Comments
 
         return {
             toggle: function () {
+
+
                 context.person = context.person === person1 ? person2 : person1;
                 context.$sync();
+            },
+            show : function() {
+               // alert(this.forenameInput.value() + this.surnameInput.value());
+               // what do we really want to work with here?
+               // I think we should be working with nodes here, not jquery objects or any other nonsense,
+
+
             }
         };
     }];
